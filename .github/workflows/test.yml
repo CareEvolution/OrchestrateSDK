@@ -1,0 +1,24 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+        with:
+          node-version: 20
+      - name: Write Env
+        shell: pwsh
+        run: |
+          "ROSETTA_API_KEY=${{ secrets.ROSETTA_API_KEY }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Install dependencies
+        working-directory: ./typescript
+        run: npm ci
+      - name: Run tests
+        working-directory: ./typescript
+        run: npm run test

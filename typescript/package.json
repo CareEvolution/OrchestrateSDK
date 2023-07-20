@@ -1,0 +1,35 @@
+{
+	"name": "@careevolution/orchestrate",
+	"version": "0.0.0",
+	"description": "A TypeScript client for the Orchestrate API",
+	"type": "module",
+	"types": "Orchestrate.d.ts",
+	"main": "Orchestrate.js",
+	"module": "Orchestrate.js",
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"test": "jest"
+	},
+	"author": "CareEvolution",
+	"license": "Apache-2.0",
+	"homepage": "https://rosetta-api.docs.careevolution.com/",
+	"devDependencies": {
+		"@types/jest": "^29.5.3",
+		"@types/node": "^20.4.2",
+		"@typescript-eslint/eslint-plugin": "^6.1.0",
+		"dotenv": "^16.3.1",
+		"rollup": "^3.26.3",
+		"ts-jest": "^29.1.1",
+		"typescript": "~5.1.6"
+	},
+	"keywords": [
+		"Rosetta",
+		"CareEvolution"
+	],
+	"dependencies": {
+		"@types/fhir": "^0.0.37"
+	},
+	"files": [
+		"dist"
+	]
+}

@@ -1,0 +1,72 @@
+name: Deploy
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets:
+      ROSETTA_API_KEY: ${{ secrets.ROSETTA_API_KEY }}
+
+  version:
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      target: ${{ steps.version.outputs.target }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Version
+        id: version
+        working-directory: ./typescript
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $version = "${{ github.ref }}" -replace "refs/tags/(.*)", '$1'
+            $target = "prod"
+          } else {
+            $version = git describe --tags --abbrev=0 | Select-Object -First 1
+            $versionSuffix = "dev" + "${{ github.run_number }}"
+            $version = $version, $versionSuffix -join "-"
+            $target = "dev"
+          }
+
+          "version=$version" >> $Env:GITHUB_OUTPUT
+          "target=$target" >> $Env:GITHUB_OUTPUT
+          "Building version ``$version``" >> $Env:GITHUB_STEP_SUMMARY
+
+  typescript:
+    needs:
+      - test
+      - version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+        with:
+          node-version: 20
+      - name: Install dependencies
+        working-directory: ./typescript
+        run: npm install
+      - name: Build
+        working-directory: ./typescript
+        run: npm run build
+      - name: Set Version
+        working-directory: ./typescript
+        run: npm version ${{ needs.version.outputs.version }}
+
+      - name: Deploy Proget
+        working-directory: ./typescript
+        run: |
+          npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
+          npm config set //proget.careevolution.com/npm/npm/:_authToken ${{ secrets.PROGET_TOKEN }}
+          npm publish
+      - name: Deploy NPM
+        if: needs.version.outputs.target == 'prod'
+        working-directory: ./typescript
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          # npm publish --access public
+          npm publish
