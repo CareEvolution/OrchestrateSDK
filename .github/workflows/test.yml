@@ -3,6 +3,10 @@ name: Test
 on:
   push:
   pull_request:
+  workflow_call:
+    secrets:
+      ROSETTA_API_KEY:
+        required: false
 
 jobs:
   typescript:
