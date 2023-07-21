@@ -8,11 +8,13 @@ on:
 
 jobs:
   test:
+    name: Test
     uses: ./.github/workflows/test.yml
     secrets:
       ROSETTA_API_KEY: ${{ secrets.ROSETTA_API_KEY }}
 
   version:
+    name: Version
     outputs:
       version: ${{ steps.version.outputs.version }}
       target: ${{ steps.version.outputs.target }}
@@ -38,6 +40,7 @@ jobs:
           "Building version ``$version``" >> $Env:GITHUB_STEP_SUMMARY
 
   typescript:
+    name: Typescript
     needs:
       - test
       - version
