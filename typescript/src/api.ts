@@ -225,7 +225,7 @@ export class OrchestrateApi {
   /**
    * Summarizes the total number of codes in a ValueSet
    * @param request A ValueSet identifier
-   * @returns
+   * @returns A ValueSet resource with only the count populated
    */
   summarizeFhirR4ValueSet(request: SummarizeFhirR4ValueSetRequest): Promise<SummarizeFhirR4ValueSetResponse> {
     const parameters = new URLSearchParams({
@@ -383,7 +383,7 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "application/x-ndjson",
     } as { [key: string]: string; };
-    let route = "/convert/v1/combinefhirbundles";
+    let route = "/convert/v1/combinefhirr4bundles";
     if (request.personID) {
       route += `/${encodeURIComponent(request.personID)}`;
     }

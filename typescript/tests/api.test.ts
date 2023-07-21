@@ -500,7 +500,7 @@ describe("convert fhir r4 to omop", () => {
 // });
 
 describe("get fhir r4 code system", () => {
-  it("should return a bundle", async () => {
+  it("should return a code_system", async () => {
     const result = await orchestrate.getFhirR4CodeSystem({
       codeSystem: "SNOMED"
     });
@@ -583,7 +583,7 @@ describe("get fhir r4 value set", () => {
 });
 
 describe("summarize fhir r4 value set", () => {
-  it("should return a bundle", async () => {
+  it("should return a value set", async () => {
     const result = await orchestrate.summarizeFhirR4ValueSet({
       id: "00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2",
     });
@@ -655,7 +655,7 @@ describe("get fhir r4 value set by scope", () => {
 });
 
 describe("summarize fhir r4 code system", () => {
-  it("should return a bundle", async () => {
+  it("should return a code system", async () => {
     const result = await orchestrate.summarizeFhirR4CodeSystem({
       codeSystem: "SNOMED"
     });
@@ -682,5 +682,41 @@ describe("get all fhir r4 value sets for codes", () => {
     });
     expect(result).toBeDefined();
     expect(result.parameter?.length).toBeGreaterThan(0);
+  });
+});
+
+describe("convert combined fhir r4 bundles", () => {
+  it("should combine", async () => {
+    const bundles = (`
+${JSON.stringify(fhir)}
+${JSON.stringify(fhir)}
+`);
+
+    const result = await orchestrate.convertCombinedFhirR4Bundles({
+      fhirBundles: bundles
+    });
+
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+  });
+
+  it("should combine with patient", async () => {
+    const bundles = (`
+${JSON.stringify(fhir)}
+${JSON.stringify(fhir)}
+`);
+
+    const result = await orchestrate.convertCombinedFhirR4Bundles({
+      fhirBundles: bundles,
+      personID: "1234"
+    });
+
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
+    expect(patientResource).toBeDefined();
+    expect(patientResource?.resource?.id).toBe("1234");
   });
 });

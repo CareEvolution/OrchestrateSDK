@@ -29,3 +29,35 @@ jobs:
       - name: Run tests
         working-directory: typescript
         run: npm run test
+
+  python:
+    name: Python
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+    steps:
+      - name: Install Python
+        id: setup-python
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Remove Non-Default Lock File
+        working-directory: python
+        id: remove-lock
+        if: matrix.python-version != '3.9'
+        run: rm ./poetry.lock
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      - name: Install Dependencies
+        working-directory: python
+        run: poetry install --no-interaction --with "main, test"
+      - name: Lint
+        working-directory: python
+        run: poetry run black --check .
+      - name: Test
+        working-directory: python
+        run: poetry run pytest

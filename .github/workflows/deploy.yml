@@ -77,3 +77,52 @@ jobs:
       #   run: |
       #     npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
       #     npm publish ./dist --access public
+
+  python:
+    name: Python
+    needs:
+      - test
+      - version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Python
+        id: setup-python
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
+        with:
+          python-version: "3.9"
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python -
+          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      - name: Install Dependencies
+        working-directory: python
+        run: poetry install --no-interaction --only "main"
+      - name: Configure Poetry for Publication
+        id: configure-poetry-for-publication
+        shell: pwsh
+        run: |
+          if ("${{ needs.version.outputs.target }}" -eq "prod") {
+            $url = "https://upload.pypi.org/legacy/"
+            $repo = "pypi"
+            $token = "${{ secrets.PYPI_TOKEN }}"
+          } else {
+            $url = "https://test.pypi.org/legacy/"
+            $repo = "testpypi"
+            $token = "${{ secrets.TEST_PYPI_TOKEN }}"
+          }
+          poetry config repositories.$repo $url
+          poetry config pypi-token.$repo $token
+
+          "repo=$repo" >> $Env:GITHUB_OUTPUT
+      - name: Assign Version
+        working-directory: python
+        run: poetry version ${{ needs.version.outputs.version }}
+      - name: Publish Package
+        shell: pwsh
+        run: |
+          poetry publish --build --no-interaction -r ${{ steps.configure-poetry-for-publication.outputs.repo }}
+      - name: GitHub Job Summary
+        shell: pwsh
+        run: |
+          $version = poetry version
+          "Published $version to ${{ needs.version.outputs.target }} PyPI." >> $Env:GITHUB_STEP_SUMMARY
