@@ -20,9 +20,12 @@ jobs:
       target: ${{ steps.version.outputs.target }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+        with:
+          fetch-depth: 0
       - name: Get Version
         id: version
-        working-directory: ./typescript
+        working-directory: typescript
         shell: pwsh
         run: |
           if ("${{ github.ref_type }}" -eq "tag") {
@@ -51,24 +54,24 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        working-directory: ./typescript
+        working-directory: typescript
         run: npm install
       - name: Build
-        working-directory: ./typescript
+        working-directory: typescript
         run: npm run build
       - name: Set Version
-        working-directory: ./typescript
+        working-directory: typescript
         run: npm version ${{ needs.version.outputs.version }}
 
       - name: Deploy Proget
-        working-directory: ./typescript
+        working-directory: typescript
         run: |
           npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
           npm config set //proget.careevolution.com/npm/npm/:_authToken ${{ secrets.PROGET_TOKEN }}
           npm publish
       # - name: Deploy NPM
       #   if: needs.version.outputs.target == 'prod'
-      #   working-directory: ./typescript
+      #   working-directory: typescript
       #   run: |
       #     npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
       #     npm publish --access public
