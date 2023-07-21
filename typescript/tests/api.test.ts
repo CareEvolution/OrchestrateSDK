@@ -630,3 +630,23 @@ describe("summarize fhir r4 code system", () => {
     expect(result.count).toBeGreaterThan(0);
   });
 });
+
+describe("get all fhir r4 value sets for codes", () => {
+  it("should return parameters", async () => {
+    const result = await orchestrate.getAllFhirR4ValueSetsForCodes({
+      resourceType: "Parameters",
+      parameter: [
+        {
+          name: "code",
+          valueString: "119981000146107"
+        },
+        {
+          name: "system",
+          valueString: "http://snomed.info/sct"
+        }
+      ]
+    });
+    expect(result).toBeDefined();
+    expect(result.parameter?.length).toBeGreaterThan(0);
+  });
+});

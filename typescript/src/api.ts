@@ -16,8 +16,8 @@ import { InsightRiskProfileRequest, InsightRiskProfileResponse } from "./insight
 import {
   ClassifyConditionRequest,
   ClassifyConditionResponse,
-  ClassifyFhirR4ValueSetMembershipRequest,
-  ClassifyFhirR4ValueSetMembershipResponse,
+  ClassifyFhirR4ValueSetMembershipRequest as GetAllFhirR4ValueSetsForCodesRequest,
+  ClassifyFhirR4ValueSetMembershipResponse as GetAllFhirR4ValueSetsForCodesResponse,
   ClassifyMedicationRequest,
   ClassifyMedicationResponse,
   ClassifyObservationRequest,
@@ -278,7 +278,7 @@ export class OrchestrateApi {
    * @param request A Parameters resource containing codes to classify
    * @returns A Parameters resource containing the classification results
    */
-  classifyFhirR4ValueSet(request: ClassifyFhirR4ValueSetMembershipRequest): Promise<ClassifyFhirR4ValueSetMembershipResponse> {
+  getAllFhirR4ValueSetsForCodes(request: GetAllFhirR4ValueSetsForCodesRequest): Promise<GetAllFhirR4ValueSetsForCodesResponse> {
     const route = "/terminology/v1/fhir/r4/valueset/$classify";
     return this.rosettaApi.post(route, request);
   }
