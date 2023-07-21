@@ -430,7 +430,6 @@ class RosettaApi {
       body: preparedBody,
     });
     if (!response.ok) {
-      console.log(response);
       throw new Error(await response.text());
     }
 
@@ -447,7 +446,6 @@ class RosettaApi {
     const requestHeaders = this.mergeHeaders(headers);
 
     const url = this.baseUrl + path;
-    console.log(url);
     const response = await fetch(url, {
       method: "GET",
       headers: requestHeaders,
