@@ -27,8 +27,8 @@ import {
   GetFhirR4ConceptMapResponse,
   GetFhirR4ValueSetRequest,
   GetFhirR4ValueSetResponse,
-  GetFhirR4ValueSetScopeRequest,
-  GetFhirR4ValueSetScopeResponse,
+  GetFhirR4ValueSetsByScopeRequest,
+  GetFhirR4ValueSetsByScopeResponse,
   GetFhirR4ValueSetScopesResponse,
   StandardizeConditionResponse,
   StandardizeLabResponse,
@@ -246,12 +246,15 @@ export class OrchestrateApi {
   }
 
   /**
-   * Retrieves a paginated list of ValueSets within a scope
-   * @param request A paginated request for ValueSets within a scope
-   * @returns A bundle of ValueSets within the requested scope
+   * Retrieves a paginated list of ValueSets filtered by name or scope
+   * @param request A paginated request for ValueSets
+   * @returns A bundle of ValueSets that match the search criteria
    */
-  getFhirR4ValueSetScope(request: GetFhirR4ValueSetScopeRequest): Promise<GetFhirR4ValueSetScopeResponse> {
+  getFhirR4ValueSetsByScope(request: GetFhirR4ValueSetsByScopeRequest): Promise<GetFhirR4ValueSetsByScopeResponse> {
     const parameters = new URLSearchParams();
+    if (request.name) {
+      parameters.append("name", request.name);
+    }
     if (request.pageNumber) {
       parameters.append("page.num", request.pageNumber.toString());
     }
@@ -451,7 +454,6 @@ class RosettaApi {
       headers: requestHeaders,
     });
     if (!response.ok) {
-      console.log(response);
       throw new Error(await response.text());
     }
 

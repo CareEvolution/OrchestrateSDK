@@ -261,10 +261,11 @@ export type ClassifyFhirR4ValueSetMembershipRequest = Parameters & {
 
 export type ClassifyFhirR4ValueSetMembershipResponse = Parameters;
 
-export type GetFhirR4ValueSetScopeRequest = {
+export type GetFhirR4ValueSetsByScopeRequest = {
+  name?: string;
   scope?: string;
   pageNumber?: number;
   pageSize?: number;
 };
 
-export type GetFhirR4ValueSetScopeResponse = Bundle<ValueSet>;
+export type GetFhirR4ValueSetsByScopeResponse = Bundle<ValueSet>;

@@ -603,14 +603,48 @@ describe("get fhir r4 value set scopes", () => {
 
 describe("get fhir r4 value set by scope", () => {
   it("should throw without pagination", async () => {
-    await expect(orchestrate.getFhirR4ValueSetScope({
+    await expect(orchestrate.getFhirR4ValueSetsByScope({
       scope: "http://loinc.org",
     })).rejects.toThrow();
   });
 
-  it("should return a bundle with page", async () => {
-    const result = await orchestrate.getFhirR4ValueSetScope({
+  it("should return a bundle with page and scope", async () => {
+    const result = await orchestrate.getFhirR4ValueSetsByScope({
       scope: "http://loinc.org",
+      pageNumber: 1,
+      pageSize: 2
+    });
+    console.log(result.entry?.[0].resource);
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.total).toBeGreaterThan(0);
+  });
+
+  it("should return a bundle with page and name", async () => {
+    const result = await orchestrate.getFhirR4ValueSetsByScope({
+      name: "LP7839-6",
+      pageNumber: 1,
+      pageSize: 2
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.total).toBeGreaterThan(0);
+  });
+
+  it("should return a bundle with page, name, and scope", async () => {
+    const result = await orchestrate.getFhirR4ValueSetsByScope({
+      name: "LP7839-6",
+      scope: "http://loinc.org",
+      pageNumber: 1,
+      pageSize: 2
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.total).toBeGreaterThan(0);
+  });
+
+  it("should return a bundle with just page", async () => {
+    const result = await orchestrate.getFhirR4ValueSetsByScope({
       pageNumber: 1,
       pageSize: 2
     });
