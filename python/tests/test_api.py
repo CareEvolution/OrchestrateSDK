@@ -1,13 +1,11 @@
-from io import BytesIO
 import json
 import os
 from pathlib import Path
-from zipfile import ZipFile
 
 import pytest
-from requests import HTTPError
-from orchestrate import OrchestrateApi
 from dotenv import load_dotenv
+from orchestrate import OrchestrateApi
+from requests import HTTPError
 
 
 def setup_test_api():

@@ -1,9 +1,17 @@
 [tool.poetry]
 authors = ["Jeremy Fortune <jeremy@careevolution.com>"]
+classifiers = [
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
 description = "SDK for the Orchestrate API at rosetta.careevolution.com"
-license = "Apache 2.0"
-name = "orchestrate"
-readme = "../README.md"
+homepage = "https://rosetta-api.docs.careevolution.com/"
+keywords = ["careevolution", "rosetta", "orchestrate"]
+license = "Apache-2.0"
+name = "orchestrate-api"
+packages = [
+  {include = "orchestrate"},
+]
+readme = "README.md"
 version = "0.0.0"
 
 [tool.poetry.dependencies]

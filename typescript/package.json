@@ -24,7 +24,8 @@
 	},
 	"keywords": [
 		"Rosetta",
-		"CareEvolution"
+		"CareEvolution",
+		"Orchestrate"
 	],
 	"dependencies": {
 		"@types/fhir": "^0.0.37"

@@ -97,32 +97,32 @@ jobs:
       - name: Install Dependencies
         working-directory: python
         run: poetry install --no-interaction --only "main"
-      - name: Configure Poetry for Publication
-        id: configure-poetry-for-publication
-        shell: pwsh
-        run: |
-          if ("${{ needs.version.outputs.target }}" -eq "prod") {
-            $url = "https://upload.pypi.org/legacy/"
-            $repo = "pypi"
-            $token = "${{ secrets.PYPI_TOKEN }}"
-          } else {
-            $url = "https://test.pypi.org/legacy/"
-            $repo = "testpypi"
-            $token = "${{ secrets.TEST_PYPI_TOKEN }}"
-          }
-          poetry config repositories.$repo $url
-          poetry config pypi-token.$repo $token
-
-          "repo=$repo" >> $Env:GITHUB_OUTPUT
       - name: Assign Version
         working-directory: python
         run: poetry version ${{ needs.version.outputs.version }}
-      - name: Publish Package
-        shell: pwsh
+      - name: Copy README
+        working-directory: python
+        run: cp ../README.md .
+      - name: Publish Proget
+        working-directory: python
         run: |
-          poetry publish --build --no-interaction -r ${{ steps.configure-poetry-for-publication.outputs.repo }}
-      - name: GitHub Job Summary
-        shell: pwsh
-        run: |
+          poetry config repositories.proget https://proget.careevolution.com/pypi/pypi/simple
+          poetry config pypi-token.pypi ${{ secrets.PROGET_TOKEN }}
+          poetry publish --build --no-interaction -r proget
           $version = poetry version
-          "Published $version to ${{ needs.version.outputs.target }} PyPI." >> $Env:GITHUB_STEP_SUMMARY
+          "Published $version to Proget." >> $Env:GITHUB_STEP_SUMMARY
+      - name: Publish Test Pypi
+        working-directory: python
+        run: |
+          poetry config repositories.testpypi https://test.pypi.org/legacy/
+          poetry publish --build --no-interaction -r testpypi
+          $version = poetry version
+          "Published $version to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
+      # - name: Publish Pypi
+      #   if: needs.version.outputs.target == 'prod'
+      #   working-directory: python
+      #   run: |
+      #     poetry config repositories.testpypi https://test.pypi.org/legacy/
+      #     poetry publish --build --no-interaction -r testpypi
+      #       $version = poetry version
+      #       "Published $version to Pypi." >> $Env:GITHUB_STEP_SUMMARY
