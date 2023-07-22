@@ -44,7 +44,7 @@ class _RosettaApi:
         base_url: str,
         default_headers: dict,
     ) -> None:
-        self.__base_url = base_url
+        self._base_url = base_url
         self.__default_headers = default_headers
 
     def __merge_headers(self, headers: Optional[dict]) -> dict:
@@ -66,7 +66,7 @@ class _RosettaApi:
             if request_headers["Content-Type"] == "application/json"
             else body
         )
-        url = f"{self.__base_url}{path}"
+        url = f"{self._base_url}{path}"
 
         response = requests.post(
             url,
@@ -89,7 +89,7 @@ class _RosettaApi:
     ) -> Any:
         request_headers = self.__merge_headers(headers)
 
-        url = f"{self.__base_url}{path}"
+        url = f"{self._base_url}{path}"
         response = requests.get(
             url,
             headers=request_headers,
@@ -149,6 +149,9 @@ class OrchestrateApi(_RosettaApi):
             base_url=base_url or "https://api.rosetta.careevolution.com",
             default_headers=default_headers,
         )
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(base_url={self._base_url!r})"
 
     def classify_condition(
         self,
