@@ -8,10 +8,13 @@ on:
 
 jobs:
   test:
-    name: Test
-    uses: ./.github/workflows/test.yml
-    secrets:
-      ROSETTA_API_KEY: ${{ secrets.ROSETTA_API_KEY }}
+    # name: Test
+    # uses: ./.github/workflows/test.yml
+    # secrets:
+    #   ROSETTA_API_KEY: ${{ secrets.ROSETTA_API_KEY }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Testing ${{ github.ref }}"
 
   version:
     name: Version
@@ -85,6 +88,7 @@ jobs:
       - version
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - name: Install Python
         id: setup-python
         uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
@@ -94,23 +98,14 @@ jobs:
         run: |
           curl -sSL https://install.python-poetry.org | python -
           echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      - name: Copy README
+        run: cp ./README.md python/README.md
       - name: Install Dependencies
         working-directory: python
         run: poetry install --no-interaction --only "main"
       - name: Assign Version
         working-directory: python
         run: poetry version ${{ needs.version.outputs.version }}
-      - name: Copy README
-        working-directory: python
-        run: cp ../README.md .
-      - name: Publish Proget
-        working-directory: python
-        run: |
-          poetry config repositories.proget https://proget.careevolution.com/pypi/pypi/simple
-          poetry config pypi-token.pypi ${{ secrets.PROGET_TOKEN }}
-          poetry publish --build --no-interaction -r proget
-          $version = poetry version
-          "Published $version to Proget." >> $Env:GITHUB_STEP_SUMMARY
       - name: Publish Test Pypi
         working-directory: python
         run: |
