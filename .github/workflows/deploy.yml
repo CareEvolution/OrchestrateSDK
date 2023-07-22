@@ -8,13 +8,10 @@ on:
 
 jobs:
   test:
-    # name: Test
-    # uses: ./.github/workflows/test.yml
-    # secrets:
-    #   ROSETTA_API_KEY: ${{ secrets.ROSETTA_API_KEY }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Testing ${{ github.ref }}"
+    name: Test
+    uses: ./.github/workflows/test.yml
+    secrets:
+      ROSETTA_API_KEY: ${{ secrets.ROSETTA_API_KEY }}
 
   version:
     name: Version
@@ -74,6 +71,7 @@ jobs:
           npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
           npm config set //proget.careevolution.com/npm/npm/:_authToken ${{ secrets.PROGET_TOKEN }}
           npm publish
+
       # - name: Deploy NPM
       #   if: needs.version.outputs.target == 'prod'
       #   working-directory: typescript
@@ -83,6 +81,9 @@ jobs:
 
   python:
     name: Python
+    permissions:
+      id-token: write
+      contents: read
     needs:
       - test
       - version
@@ -106,18 +107,47 @@ jobs:
       - name: Assign Version
         working-directory: python
         run: poetry version ${{ needs.version.outputs.version }}
+      - name: Configure Pypi Tokens
+        shell: pwsh
+        run: |
+          $pypis = @(
+            @{ Name = "testpypi"; Url = "https://test.pypi.org" }
+          )
+          if ("${{ needs.version.outputs.target }}" -eq "prod") {
+            $pypis += @{ Name = "pypi"; Url = "https://pypi.org" }
+          }
+
+          $pypis | ForEach-Object {
+            $pypiName = $_.Name
+            $pypiUrl = $_.Url
+            $githubToken = Invoke-RestMethod `
+              -Uri "${Env:ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$pypiName" `
+              -Headers @{"Authorization" = "Bearer ${Env:ACTIONS_ID_TOKEN_REQUEST_TOKEN}"} |
+              Select-Object -ExpandProperty value
+            Write-Host "::add-mask::$githubToken"
+            $pypiToken = Invoke-RestMethod `
+              -Method Post `
+              -Uri "$pypiUrl/_/oidc/github/mint-token" `
+              -Body (@{ token = $githubToken } | ConvertTo-Json -Compress) |
+              Select-Object -ExpandProperty token
+            Write-Host "::add-mask::$pypiToken"
+
+            poetry config repositories.$pypiName "$pypiUrl/legacy/"
+            poetry config pypi-token.$pypiName $pypiToken
+          }
+
       - name: Publish Test Pypi
+        shell: pwsh
         working-directory: python
         run: |
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
           poetry publish --build --no-interaction -r testpypi
+
           $version = poetry version
           "Published $version to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
       # - name: Publish Pypi
       #   if: needs.version.outputs.target == 'prod'
       #   working-directory: python
       #   run: |
-      #     poetry config repositories.testpypi https://test.pypi.org/legacy/
-      #     poetry publish --build --no-interaction -r testpypi
-      #       $version = poetry version
-      #       "Published $version to Pypi." >> $Env:GITHUB_STEP_SUMMARY
+      #     poetry publish --build --no-interaction -r pypi
+      #     $version = poetry version
+      #     "Published $version to Pypi." >> $Env:GITHUB_STEP_SUMMARY
