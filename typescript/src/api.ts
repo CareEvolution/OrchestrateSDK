@@ -78,7 +78,11 @@ export class OrchestrateApi {
   }
 
   /**
-   * Classifies a condition, problem, or diagnosis
+   * Classifies a condition, problem, or diagnosis. The input must be from one of the following code systems:
+   *
+   * - ICD-10-CM
+   * - ICD-9-CM-Diagnosis
+   * - SNOMED
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html
@@ -88,7 +92,12 @@ export class OrchestrateApi {
   }
 
   /**
-   * Classifies a medication
+   * Classifies a medication. The input must be from one of the following code systems:
+   *
+   * - RxNorm
+   * - NDC
+   * - CVX
+   * - SNOMED
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html
@@ -98,7 +107,10 @@ export class OrchestrateApi {
   }
 
   /**
-   * Classifies an observation, including lab observations and panels, radiology or other reports
+   * Classifies an observation, including lab observations and panels, radiology or other reports. The input must be from one of the following code systems:
+   *
+   * - LOINC
+   * - SNOMED
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html

@@ -170,7 +170,12 @@ class OrchestrateApi(_RosettaApi):
         display: Optional[str] = None,
     ) -> ClassifyConditionResponse:
         """
-        Classifies a condition, problem, or diagnosis
+        Classifies a condition, problem, or diagnosis. The input must be from
+        one of the following code systems:
+
+        - ICD-10-CM
+        - ICD-9-CM-Diagnosis
+        - SNOMED
 
         ### Parameters
 
@@ -196,7 +201,12 @@ class OrchestrateApi(_RosettaApi):
         display: Optional[str] = None,
     ) -> ClassifyMedicationResponse:
         """
-        Classifies a medication
+        Classifies a medication. The input must be from one of the following code systems:
+
+        - RxNorm
+        - NDC
+        - CVX
+        - SNOMED
 
         ### Parameters
 
@@ -222,7 +232,12 @@ class OrchestrateApi(_RosettaApi):
         display: Optional[str] = None,
     ) -> ClassifyObservationResponse:
         """
-        Classifies an observation
+        Classifies an observation, including lab observations and panels,
+        radiology or other reports. The input must be from one of the following
+        code systems:
+
+        - LOINC
+        - SNOMED
 
         ### Parameters
 
