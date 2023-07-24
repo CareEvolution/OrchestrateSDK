@@ -48,3 +48,10 @@ export function generateConvertCombinedFhirBundlesRequestFromBundles(fhirBundles
 }
 
 export type ConvertCombineFhirR4BundlesResponse = Bundle;
+
+export type ConvertX12ToFhirR4Request = {
+  x12Document: string;
+  patientID?: string;
+};
+
+export type ConvertX12ToFhirR4Response = Bundle;

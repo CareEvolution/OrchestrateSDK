@@ -11,6 +11,8 @@ import {
   ConvertFhirR4ToOmopResponse,
   ConvertHl7ToFhirR4Request,
   ConvertHl7ToFhirR4Response,
+  ConvertX12ToFhirR4Request,
+  ConvertX12ToFhirR4Response,
 } from "./convert";
 import { InsightRiskProfileRequest, InsightRiskProfileResponse } from "./insight";
 import {
@@ -314,10 +316,7 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "text/plain",
     } as { [key: string]: string; };
-    let route = "/convert/v1/hl7tofhirr4";
-    if (request.patientID) {
-      route += `/${encodeURIComponent(request.patientID)}`;
-    }
+    const route = this.getIDDependentRoute("/convert/v1/hl7tofhirr4", request.patientID);
     return this.rosettaApi.post(route, request.hl7Message, headers);
   }
 
@@ -330,10 +329,7 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "application/xml",
     } as { [key: string]: string; };
-    let route = "/convert/v1/cdatofhirr4";
-    if (request.patientID) {
-      route += `/${encodeURIComponent(request.patientID)}`;
-    }
+    const route = this.getIDDependentRoute("/convert/v1/cdatofhirr4", request.patientID);
     return this.rosettaApi.post(route, request.cda, headers);
   }
 
@@ -383,11 +379,28 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "application/x-ndjson",
     } as { [key: string]: string; };
-    let route = "/convert/v1/combinefhirr4bundles";
-    if (request.personID) {
-      route += `/${encodeURIComponent(request.personID)}`;
-    }
+    const route = this.getIDDependentRoute("/convert/v1/combinefhirr4bundles", request.personID);
     return this.rosettaApi.post(route, request.fhirBundles, headers);
+  }
+
+  /**
+   * Converts an X12 document into a FHIR R4 bundle.
+   * @param request A standard version 5010 X12 document
+   * @returns A FHIR R4 Bundle containing the clinical data parsed out of the X12 messages
+   */
+  convertX12ToFhirR4(request: ConvertX12ToFhirR4Request): Promise<ConvertX12ToFhirR4Response> {
+    const headers = {
+      "Content-Type": "text/plain",
+    } as { [key: string]: string; };
+    const route = this.getIDDependentRoute("/convert/v1/x12tofhirr4", request.patientID);
+    return this.rosettaApi.post(route, request.x12Document, headers);
+  }
+
+  private getIDDependentRoute(route: string, id?: string): string {
+    if (id) {
+      return `${route}/${encodeURIComponent(id)}`;
+    }
+    return route;
   }
 
   /**
@@ -399,6 +412,7 @@ export class OrchestrateApi {
     const route = `/terminology/v1/fhir/r4/codesystem/${encodeURIComponent(request.codeSystem)}?_summary=true`;
     return this.rosettaApi.get(route);
   }
+
 }
 
 class RosettaApi {
