@@ -9,3 +9,5 @@ ConvertCdaToPdfResponse = bytes
 ConvertFhirR4ToCdaResponse = str
 
 ConvertFhirR4ToOmopResponse = bytes
+
+ConvertX12ToFhirR4Response = Bundle

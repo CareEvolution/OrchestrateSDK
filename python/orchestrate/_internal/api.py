@@ -9,6 +9,7 @@ from orchestrate.convert import (
     ConvertFhirR4ToCdaResponse,
     ConvertFhirR4ToOmopResponse,
     ConvertHl7ToFhirR4Response,
+    ConvertX12ToFhirR4Response,
 )
 from orchestrate._internal.fhir import Bundle, Parameters
 from orchestrate.insight import InsightRiskProfileResponse
@@ -128,6 +129,15 @@ def _get_pagination_parameters(
         "_count": str(page_size) if page_size is not None else None,
     }
     return parameters
+
+
+def _get_id_dependent_route(
+    route: str,
+    id_: Optional[str] = None,
+) -> str:
+    if id_ is not None:
+        route += f"/{quote(id_)}"
+    return route
 
 
 class OrchestrateApi(_RosettaApi):
@@ -369,9 +379,7 @@ class OrchestrateApi(_RosettaApi):
         A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
         """
         headers = {"Content-Type": "text/plain"}
-        route = "/convert/v1/hl7tofhirr4"
-        if patient_id is not None:
-            route += f"/{quote(patient_id)}"
+        route = _get_id_dependent_route("/convert/v1/hl7tofhirr4", patient_id)
         return self._post(
             path=route,
             body=hl7_message,
@@ -396,9 +404,7 @@ class OrchestrateApi(_RosettaApi):
         A FHIR R4 Bundle containing the clinical data parsed out of the CDA
         """
         headers = {"Content-Type": "application/xml"}
-        route = "/convert/v1/cdatofhirr4"
-        if patient_id is not None:
-            route += f"/{quote(patient_id)}"
+        route = _get_id_dependent_route("/convert/v1/cdatofhirr4", patient_id)
         return self._post(
             path=route,
             body=cda,
@@ -465,6 +471,31 @@ class OrchestrateApi(_RosettaApi):
             headers=headers,
         )
         return response.encode("utf-8")
+
+    def convert_x12_to_fhir_r4(
+        self,
+        x12_document: str,
+        patient_id: Optional[str] = None,
+    ) -> ConvertX12ToFhirR4Response:
+        """
+        Converts an X12 document into a FHIR R4 bundle
+
+        ### Parameters
+
+        - `x12_document`: The X12 document to convert
+        - `patient_id`: The patient ID to use for the FHIR bundle
+
+        ### Returns
+
+        A FHIR R4 Bundle containing the clinical data parsed out of the X12
+        """
+        headers = {"Content-Type": "text/plain"}
+        route = _get_id_dependent_route("/convert/v1/x12tofhirr4", patient_id)
+        return self._post(
+            path=route,
+            body=x12_document,
+            headers=headers,
+        )
 
     def insight_risk_profile(
         self,
@@ -744,9 +775,7 @@ class OrchestrateApi(_RosettaApi):
         A single FHIR R4 Bundle containing the merged data from the input.
         """
         headers = {"Content-Type": "application/x-ndjson"}
-        route = "/convert/v1/combinefhirr4bundles"
-        if person_id is not None:
-            route += f"/{quote(person_id)}"
+        route = _get_id_dependent_route("/convert/v1/combinefhirr4bundles", person_id)
         return self._post(
             path=route,
             body=fhir_bundles,
