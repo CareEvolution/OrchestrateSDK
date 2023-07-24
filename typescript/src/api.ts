@@ -81,6 +81,7 @@ export class OrchestrateApi {
    * Classifies a condition, problem, or diagnosis
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
+   * @link https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html
    */
   classifyCondition(request: ClassifyConditionRequest): Promise<ClassifyConditionResponse> {
     return this.rosettaApi.post("/terminology/v1/classify/condition", request);
@@ -90,6 +91,7 @@ export class OrchestrateApi {
    * Classifies a medication
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
+   * @link https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html
    */
   classifyMedication(request: ClassifyMedicationRequest): Promise<ClassifyMedicationResponse> {
     return this.rosettaApi.post("/terminology/v1/classify/medication", request);
@@ -99,6 +101,7 @@ export class OrchestrateApi {
    * Classifies an observation, including lab observations and panels, radiology or other reports
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
+   * @link https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html
    */
   classifyObservation(request: ClassifyObservationRequest): Promise<ClassifyObservationResponse> {
     return this.rosettaApi.post("/terminology/v1/classify/observation", request);
@@ -108,6 +111,7 @@ export class OrchestrateApi {
    * Standardize a condition, problem, or diagnosis
    * @param request A FHIR Coding
    * @returns A collection of standardized codes
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html
    */
   standardizeCondition(request: StandardizeRequest): Promise<StandardizeConditionResponse> {
     return this.rosettaApi.post("/terminology/v1/standardize/condition", request);
@@ -117,6 +121,7 @@ export class OrchestrateApi {
    * Standardize a medication code
    * @param request A FHIR Coding
    * @returns A collection of standardized codes
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/medication.html
    */
   standardizeMedication(request: StandardizeRequest): Promise<StandardizeMedicationResponse> {
     return this.rosettaApi.post("/terminology/v1/standardize/medication", request);
@@ -126,6 +131,7 @@ export class OrchestrateApi {
    * Standardize an observation code
    * @param request A FHIR Coding
    * @returns A collection of standardized codes
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html
    */
   standardizeObservation(request: StandardizeRequest): Promise<StandardizeObservationResponse> {
     return this.rosettaApi.post("/terminology/v1/standardize/observation", request);
@@ -135,6 +141,7 @@ export class OrchestrateApi {
    * Standardize a procedure
    * @param request A FHIR Coding
    * @returns A collection of standardized codes
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html
    */
   standardizeProcedure(request: StandardizeRequest): Promise<StandardizeObservationResponse> {
     return this.rosettaApi.post("/terminology/v1/standardize/procedure", request);
@@ -144,6 +151,7 @@ export class OrchestrateApi {
    * Standardize a lab observation or report code
    * @param request A FHIR Coding
    * @returns A collection of standardized codes
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html
    */
   standardizeLab(request: StandardizeRequest): Promise<StandardizeLabResponse> {
     return this.rosettaApi.post("/terminology/v1/standardize/lab", request);
@@ -153,6 +161,7 @@ export class OrchestrateApi {
    * Standardize a radiology or other report code
    * @param request A FHIR Coding
    * @returns A collection of standardized codes
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html
    */
   standardizeRadiology(request: StandardizeRequest): Promise<StandardizeRadiologyResponse> {
     return this.rosettaApi.post("/terminology/v1/standardize/radiology", request);
@@ -162,6 +171,7 @@ export class OrchestrateApi {
    * Describes a code system
    * @param request A code system name
    * @returns A populated CodeSystem
+   * @link https://rosetta-api.docs.careevolution.com/fhir/codesystem.html
    */
   getFhirR4CodeSystem(request: GetFhirR4CodeSystemRequest): Promise<GetFhirR4CodeSystemResponse> {
     const urlParameters = new URLSearchParams();
@@ -182,6 +192,7 @@ export class OrchestrateApi {
   /**
    * Describes available code systems
    * @returns A bundle of known CodeSystems
+   * @link https://rosetta-api.docs.careevolution.com/fhir/codesystem.html
    */
   summarizeFhirR4CodeSystems(): Promise<SummarizeFhirR4CodeSystemsResponse> {
     return this.rosettaApi.get("/terminology/v1/fhir/r4/codesystem?_summary=true");
@@ -190,6 +201,7 @@ export class OrchestrateApi {
   /**
    * Describes available concept maps
    * @returns A bundle of known ConceptMaps
+   * @link https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html
    */
   getFhirR4ConceptMaps(): Promise<GetFhirR4ConceptMapResponse> {
     return this.rosettaApi.get("/terminology/v1/fhir/r4/conceptmap");
@@ -199,6 +211,7 @@ export class OrchestrateApi {
    * Standardizes source codings to a reference code
    * @param request The best source description of the concept
    * @returns A Parameters object with the `"result"` parameter of `"valueBoolean": true` indicating if the service was able to standardize the code
+   * @link https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html
    */
   translateFhirR4ConceptMap(request: TranslateFhirR4ConceptMapRequest): Promise<TranslateFhirR4ConceptMapResponse> {
     let route = "/terminology/v1/fhir/r4/conceptmap/$translate";
@@ -214,6 +227,7 @@ export class OrchestrateApi {
    * Retrieves the set of ValueSets described in a scope
    * @param request A scope identifier
    * @returns A bundle of ValueSets within the requested scope
+   * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
   summarizeFhirR4ValueSetScope(request: SummarizeFhirR4ValueSetScopeRequest): Promise<SummarizeFhirR4ValueSetScopeResponse> {
     const params = new URLSearchParams({
@@ -228,6 +242,7 @@ export class OrchestrateApi {
    * Summarizes the total number of codes in a ValueSet
    * @param request A ValueSet identifier
    * @returns A ValueSet resource with only the count populated
+   * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
   summarizeFhirR4ValueSet(request: SummarizeFhirR4ValueSetRequest): Promise<SummarizeFhirR4ValueSetResponse> {
     const parameters = new URLSearchParams({
@@ -241,6 +256,7 @@ export class OrchestrateApi {
    * Retrieves a ValueSet by identifier
    * @param request A ValueSet identifier
    * @returns A ValueSet resource
+   * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
   getFhirR4ValueSet(request: GetFhirR4ValueSetRequest): Promise<GetFhirR4ValueSetResponse> {
     const route = `/terminology/v1/fhir/r4/valueset/${encodeURIComponent(request.id)}`;
@@ -251,6 +267,7 @@ export class OrchestrateApi {
    * Retrieves a paginated list of ValueSets filtered by name or scope
    * @param request A paginated request for ValueSets
    * @returns A bundle of ValueSets that match the search criteria
+   * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
   getFhirR4ValueSetsByScope(request: GetFhirR4ValueSetsByScopeRequest): Promise<GetFhirR4ValueSetsByScopeResponse> {
     const parameters = new URLSearchParams();
@@ -273,15 +290,21 @@ export class OrchestrateApi {
   /**
    * Requests the available ValueSet scopes
    * @returns A unique ValueSet that contains a list of all scopes available on the server
+   * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
   getFhirR4ValueSetScopes(): Promise<GetFhirR4ValueSetScopesResponse> {
     return this.rosettaApi.get("/terminology/v1/fhir/r4/valueset/Rosetta.ValueSetScopes");
   }
 
   /**
-   * Determines which value sets contain the provided codes
+   * In some situations it is useful to get the ValueSet(s) that a list of codes are members of. This can be used to categorize or group codes by ValueSet membership. For example, you may wish to:
+   *
+   *  - Categorize a collection of NDC drug codes by their active ingredient.
+   *  - Categorize a collection of LOINC lab tests by the component they are measuring.
+   *  - Categorize a collection of ICD-10-CM Diagnoses into a broad set of disease groupings.
    * @param request A Parameters resource containing codes to classify
    * @returns A Parameters resource containing the classification results
+   * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
   getAllFhirR4ValueSetsForCodes(request: GetAllFhirR4ValueSetsForCodesRequest): Promise<GetAllFhirR4ValueSetsForCodesResponse> {
     const route = "/terminology/v1/fhir/r4/valueset/$classify";
@@ -292,6 +315,7 @@ export class OrchestrateApi {
    * Computes an HCC Risk Adjustment Profile for the provided patient
    * @param request A FHIR R4 Bundle containing data for a single patient
    * @returns A new FHIR R4 Bundle containing measure and assessment resources
+   * @link https://rosetta-api.docs.careevolution.com/insight/risk_profile.html
    */
   insightRiskProfile(request: InsightRiskProfileRequest): Promise<InsightRiskProfileResponse> {
     const parameters = new URLSearchParams();
@@ -311,6 +335,7 @@ export class OrchestrateApi {
    * Converts one or more HL7v2 messages into a FHIR R4 bundle
    * @param request A single or newline-delimited set of HL7v2.7 messages
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
+   * @link https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html
    */
   convertHl7ToFhirR4(request: ConvertHl7ToFhirR4Request): Promise<ConvertHl7ToFhirR4Response> {
     const headers = {
@@ -324,6 +349,7 @@ export class OrchestrateApi {
    * Converts a CDA document into a FHIR R4 bundle
    * @param request A single CDA document
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the CDA
+   * @link https://rosetta-api.docs.careevolution.com/convert/cda_to_fhir.html
    */
   convertCdaToFhirR4(request: ConvertCdaToFhirR4Request): Promise<ConvertCdaToFhirR4Response> {
     const headers = {
@@ -337,6 +363,7 @@ export class OrchestrateApi {
    * Converts a CDA document into a PDF document
    * @param request A single CDA document
    * @returns A formatted PDF document suitable for human review
+   * @link https://rosetta-api.docs.careevolution.com/convert/cda_to_pdf.html
    */
   convertCdaToPdf(request: ConvertCdaToPdfRequest): Promise<ConvertCdaToPdfResponse> {
     const headers = {
@@ -350,6 +377,7 @@ export class OrchestrateApi {
    * Converts a FHIR R4 bundle into an aggregated CDA document.
    * @param request A FHIR R4 bundle for a single patient
    * @returns An aggregated C-CDA R2.1 document in XML format
+   * @link https://rosetta-api.docs.careevolution.com/convert/fhir_to_cda.html
    */
   convertFhirR4ToCda(request: ConvertFhirR4ToCdaRequest): Promise<ConvertFhirR4ToCdaResponse> {
     const headers = {
@@ -374,6 +402,7 @@ export class OrchestrateApi {
    * This operation aggregates information retrieved from prior Convert API requests into a single entry.
    * @param request A newline-delimited JSON list of FHIR R4 Bundles
    * @returns A single FHIR R4 Bundle containing the merged data from the input.
+   * @link https://rosetta-api.docs.careevolution.com/convert/fhir_to_omop.html
    */
   convertCombinedFhirR4Bundles(request: ConvertCombineFhirR4BundlesRequest): Promise<ConvertCombineFhirR4BundlesResponse> {
     const headers = {
@@ -407,6 +436,7 @@ export class OrchestrateApi {
    * Summarizes a code system, typically used to determine number of codes
    * @param request A code system name
    * @returns An unpopulated CodeSystem
+   * @link https://rosetta-api.docs.careevolution.com/fhir/codesystem.html
    */
   summarizeFhirR4CodeSystem(request: SummarizeFhirR4CodeSystemRequest): Promise<SummarizeFhirR4CodeSystemResponse> {
     const route = `/terminology/v1/fhir/r4/codesystem/${encodeURIComponent(request.codeSystem)}?_summary=true`;
