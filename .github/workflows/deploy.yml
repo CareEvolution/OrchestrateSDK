@@ -67,17 +67,17 @@ jobs:
 
       - name: Deploy Proget
         working-directory: typescript/dist
+        if: needs.version.outputs.target == 'dev'
         run: |
           npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
           npm config set //proget.careevolution.com/npm/npm/:_authToken ${{ secrets.PROGET_TOKEN }}
           npm publish
-
-      # - name: Deploy NPM
-      #   if: needs.version.outputs.target == 'prod'
-      #   working-directory: typescript
-      #   run: |
-      #     npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-      #     npm publish ./dist --access public
+      - name: Deploy NPM
+        if: needs.version.outputs.target == 'prod'
+        working-directory: typescript
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          npm publish ./dist --access public
 
   python:
     name: Python
@@ -139,15 +139,16 @@ jobs:
       - name: Publish Test Pypi
         shell: pwsh
         working-directory: python
+        if: needs.version.outputs.target == 'dev'
         run: |
           poetry publish --build --no-interaction -r testpypi
 
           $version = poetry version
           "Published $version to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
-      # - name: Publish Pypi
-      #   if: needs.version.outputs.target == 'prod'
-      #   working-directory: python
-      #   run: |
-      #     poetry publish --build --no-interaction -r pypi
-      #     $version = poetry version
-      #     "Published $version to Pypi." >> $Env:GITHUB_STEP_SUMMARY
+      - name: Publish Pypi
+        if: needs.version.outputs.target == 'prod'
+        working-directory: python
+        run: |
+          poetry publish --build --no-interaction -r pypi
+          $version = poetry version
+          "Published $version to Pypi." >> $Env:GITHUB_STEP_SUMMARY
