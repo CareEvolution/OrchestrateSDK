@@ -340,7 +340,11 @@ export class OrchestrateApi {
     if (request.raSegment) {
       parameters.append("ra_segment", request.raSegment);
     }
-    return this.rosettaApi.post(`/insight/v1/riskprofile?${parameters.toString()}`, request);
+    let route = "/insight/v1/riskprofile";
+    if (parameters.toString()) {
+      route += `?${parameters.toString()}`;
+    }
+    return this.rosettaApi.post(route, request.fhirBundle);
   }
 
   /**

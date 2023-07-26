@@ -381,18 +381,355 @@ def test_convert_fhir_r4_to_omop_should_convert():
     assert "PROCESSING_LOG.csv" in result.decode("utf-8")
 
 
-# TODO: Need minimal bundle
-# def test_insight_risk_profile_should_return_bundle():
-#     result = TEST_API.insight_risk_profile(
-#         fhir_bundle=_BUNDLE,
-#         measure_id="measure-1",
-#         period_start="2020-01-01",
-#         period_end="2020-12-31",
-#     )
+_RISK_PROFILE_BUNDLE = {
+    "resourceType": "Bundle",
+    "type": "searchset",
+    "entry": [
+        {
+            "resource": {
+                "resourceType": "Patient",
+                "id": "9cee689b-6501-4349-af32-e6849e179a2f",
+                "meta": {
+                    "lastUpdated": "2023-02-22T11:27:29.9499804+00:00",
+                    "profile": [
+                        "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
+                        "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient",
+                    ],
+                },
+                "extension": [
+                    {
+                        "url": "http://hl7.org/fhir/StructureDefinition/patient-religion",
+                        "valueCodeableConcept": {
+                            "coding": [
+                                {
+                                    "system": "urn:oid:1.2.3.4.5.1.1",
+                                    "code": "Example",
+                                    "display": "Example",
+                                    "userSelected": True,
+                                }
+                            ]
+                        },
+                    },
+                    {
+                        "extension": [{"url": "text", "valueString": "N"}],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+                    },
+                    {
+                        "extension": [
+                            {"url": "text", "valueString": "Black"},
+                            {
+                                "url": "detailed",
+                                "valueCoding": {
+                                    "system": "urn:oid:2.16.840.1.113883.6.238",
+                                    "code": "2056-0",
+                                    "display": "BLACK",
+                                    "userSelected": False,
+                                },
+                            },
+                        ],
+                        "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+                    },
+                ],
+                "identifier": [
+                    {
+                        "use": "usual",
+                        "type": {
+                            "coding": [
+                                {
+                                    "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                                    "code": "MR",
+                                }
+                            ]
+                        },
+                        "system": "http://test.careevolution.com/identifiers/CareEvolution/MRN/1.2.3.4.5.1.7_1.2.3.4.5.1.7",
+                        "value": "0i56756845575l8yw6u886k4",
+                    },
+                    {
+                        "system": "http://test.careevolution.com/identifiers/1.2.3.4.5.1.7/1.2.3.4.5.1.7",
+                        "value": "0i56756845575l8yw6u886k4",
+                    },
+                    {
+                        "system": "http://test.careevolution.com/identifiers/1.2.3.4.5.1.7/1.3.6.1.4.1.5641",
+                        "value": "46274464",
+                    },
+                ],
+                "name": [
+                    {
+                        "use": "official",
+                        "_use": {
+                            "extension": [
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "http://careevolution.com/fhircodes#NameType",
+                                                "code": "LegalName",
+                                                "display": "Legal Name",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                }
+                            ]
+                        },
+                        "family": "Tester",
+                        "given": ["Brittany"],
+                    },
+                    {
+                        "_use": {
+                            "extension": [
+                                {
+                                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                                    "valueCode": "unsupported",
+                                },
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "http://careevolution.com/fhircodes#NameType",
+                                                "code": "P",
+                                                "display": "Pseudonym",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                },
+                            ]
+                        },
+                        "family": "Tester",
+                        "given": ["Brittany"],
+                    },
+                ],
+                "telecom": [
+                    {
+                        "system": "phone",
+                        "_system": {
+                            "extension": [
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "http://careevolution.com/fhircodes#ContactInfoType",
+                                                "code": "HomePhone",
+                                                "display": "Home Phone",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                }
+                            ]
+                        },
+                        "value": "tel:(680)555-1234",
+                        "use": "home",
+                        "_use": {
+                            "extension": [
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "urn:oid:1.2.3.4.5.1.7",
+                                                "code": "HP",
+                                                "display": "primary home",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                }
+                            ]
+                        },
+                    },
+                    {
+                        "system": "phone",
+                        "_system": {
+                            "extension": [
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "http://careevolution.com/fhircodes#ContactInfoType",
+                                                "code": "OfficePhone",
+                                                "display": "Office Phone",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                }
+                            ]
+                        },
+                        "value": "tel:(548)555-8765",
+                        "use": "work",
+                        "_use": {
+                            "extension": [
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "urn:oid:1.2.3.4.5.1.7",
+                                                "code": "WP",
+                                                "display": "work place",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                }
+                            ]
+                        },
+                    },
+                    {
+                        "_system": {
+                            "extension": [
+                                {
+                                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                                    "valueCode": "unsupported",
+                                },
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "urn:oid:1.2.3.4.5.1.7",
+                                                "code": "MC",
+                                                "display": "mobile contact",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                },
+                            ]
+                        },
+                        "value": "tel:(574)555-3737",
+                    },
+                    {
+                        "_system": {
+                            "extension": [
+                                {
+                                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                                    "valueCode": "unsupported",
+                                },
+                                {
+                                    "url": "http://careevolution.com/fhirextensions#term",
+                                    "valueCodeableConcept": {
+                                        "coding": [
+                                            {
+                                                "system": "urn:oid:1.2.3.4.5.1.7",
+                                                "code": "Other",
+                                                "display": "Other",
+                                                "userSelected": True,
+                                            }
+                                        ]
+                                    },
+                                },
+                            ]
+                        },
+                        "value": "tel:(189)555-333",
+                    },
+                ],
+                "gender": "male",
+                "_gender": {
+                    "extension": [
+                        {
+                            "url": "http://careevolution.com/fhirextensions#term",
+                            "valueCodeableConcept": {
+                                "coding": [
+                                    {
+                                        "system": "urn:oid:2.16.840.1.113883.5.1",
+                                        "code": "M",
+                                        "display": "Male",
+                                        "userSelected": True,
+                                    },
+                                    {
+                                        "system": "http://careevolution.com",
+                                        "code": "M",
+                                        "display": "Male",
+                                        "userSelected": False,
+                                    },
+                                    {
+                                        "system": "http://test.careevolution.com/codes/FhirCodesAlternate1/Gender",
+                                        "code": "M",
+                                        "display": "M",
+                                        "userSelected": False,
+                                    },
+                                    {
+                                        "system": "http://hl7.org/fhir/v3/AdministrativeGender",
+                                        "code": "M",
+                                        "display": "Male",
+                                        "userSelected": False,
+                                    },
+                                    {
+                                        "system": "http://hl7.org/fhir/administrative-gender",
+                                        "code": "male",
+                                        "display": "male",
+                                        "userSelected": False,
+                                    },
+                                    {
+                                        "system": "http://test.careevolution.com/codes/FhirCodes/Gender",
+                                        "code": "male",
+                                        "userSelected": False,
+                                    },
+                                ]
+                            },
+                        }
+                    ]
+                },
+                "birthDate": "1948-12-17",
+                "deceasedBoolean": False,
+                "address": [
+                    {
+                        "use": "home",
+                        "line": ["2608 Main Street"],
+                        "city": "Anytown",
+                        "state": "MI",
+                        "postalCode": "48761",
+                    }
+                ],
+                "maritalStatus": {
+                    "coding": [
+                        {
+                            "system": "urn:oid:1.2.3.4.5.1.1",
+                            "code": "M",
+                            "display": "M",
+                            "userSelected": True,
+                        }
+                    ]
+                },
+                "communication": [
+                    {
+                        "language": {
+                            "coding": [
+                                {
+                                    "system": "urn:oid:1.2.3.4.5.1.7",
+                                    "code": "ENGLISH",
+                                    "display": "ENGLISH",
+                                    "userSelected": True,
+                                }
+                            ]
+                        },
+                        "preferred": True,
+                    }
+                ],
+            }
+        }
+    ],
+}
 
-#     assert result is not None
-#     assert result["resourceType"] == "Bundle"
-#     assert len(result["entry"]) > 0
+
+def test_insight_risk_profile_should_return_bundle():
+    result = TEST_API.insight_risk_profile(
+        fhir_bundle=_RISK_PROFILE_BUNDLE,
+        hcc_version="22",
+        period_end_date="2020-12-31",
+        ra_segment="community nondual aged",
+    )
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) > 0
 
 
 def test_convert_combined_fhir_r4_bundles_should_combine():
