@@ -528,6 +528,19 @@ def test_get_fhir_r4_code_system_with_page_should_return_a_code_system():
     assert len(result["concept"]) > 0
 
 
+def test_get_fhir_r4_code_system_with_search_should_return_a_code_system():
+    result = TEST_API.get_fhir_r4_code_system(
+        code_system="SNOMED",
+        concept_contains="myocardial infarction",
+        page_number=0,
+        page_size=2,
+    )
+
+    assert result is not None
+    assert result["resourceType"] == "CodeSystem"
+    assert len(result["concept"]) > 0
+
+
 def test_summarize_fhir_r4_code_systems_should_return_bundle():
     result = TEST_API.summarize_fhir_r4_code_systems()
 

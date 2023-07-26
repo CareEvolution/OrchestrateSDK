@@ -579,7 +579,7 @@ describe("get fhir r4 code system", () => {
     expect(result.concept?.length).toBeGreaterThan(0);
   }, 10000);
 
-  it("should return a bundle with page", async () => {
+  it("should return a code system with page", async () => {
     const result = await orchestrate.getFhirR4CodeSystem({
       codeSystem: "SNOMED",
       pageNumber: 1,
@@ -588,6 +588,18 @@ describe("get fhir r4 code system", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("CodeSystem");
     expect(result.concept?.length).toBe(2);
+  });
+
+  it("should return a code system with search", async () => {
+    const result = await orchestrate.getFhirR4CodeSystem({
+      codeSystem: "ICD-10-CM",
+      conceptContains: "myocardial infarction",
+      pageNumber: 0,
+      pageSize: 2
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("CodeSystem");
+    expect(result.concept?.length).toBeGreaterThan(0);
   });
 });
 
