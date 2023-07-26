@@ -499,6 +499,10 @@ class RosettaApi {
       throw new Error(await response.text());
     }
 
+    if (requestHeaders["Accept"] === "application/zip" || requestHeaders["Accept"] === "application/pdf") {
+      return await response.arrayBuffer();
+    }
+
     if (requestHeaders["Accept"] === "application/json") {
       return await response.json();
     }

@@ -20,7 +20,7 @@ export type ConvertCdaToPdfRequest = {
   cda: string;
 };
 
-export type ConvertCdaToPdfResponse = string;
+export type ConvertCdaToPdfResponse = Buffer;
 
 export type ConvertFhirR4ToCdaRequest = {
   fhirBundle: Bundle;
@@ -32,7 +32,7 @@ export type ConvertFhirR4ToOmopRequest = {
   fhirBundle: Bundle;
 };
 
-export type ConvertFhirR4ToOmopResponse = string;
+export type ConvertFhirR4ToOmopResponse = Buffer;
 
 export type ConvertCombineFhirR4BundlesRequest = {
   personID?: string;
