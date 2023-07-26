@@ -507,6 +507,7 @@ describe("convert cda to pdf", () => {
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
+    // Check for PDF magic number
     expect(resultIntegers.slice(0, 4)).toStrictEqual(new Int8Array([37, 80, 68, 70]));
   });
 });
@@ -528,7 +529,8 @@ describe("convert fhir r4 to omop", () => {
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
-    expect(resultIntegers.slice(0, 5)).toStrictEqual(new Int8Array([80, 75, 3, 4, 20]));
+    // Check for PKZip magic number
+    expect(resultIntegers.slice(0, 4)).toStrictEqual(new Int8Array([80, 75, 3, 4]));
   });
 });
 

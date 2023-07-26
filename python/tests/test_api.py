@@ -312,6 +312,7 @@ def test_convert_cda_to_pdf_should_convert():
 
     assert result is not None
     assert isinstance(result, bytes)
+    #  Check for PDF magic number
     assert [int(byte) for byte in result[0:5]] == [37, 80, 68, 70, 45]
 
 
