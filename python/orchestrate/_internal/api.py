@@ -170,7 +170,12 @@ class OrchestrateApi(_RosettaApi):
         display: Optional[str] = None,
     ) -> ClassifyConditionResponse:
         """
-        Classifies a condition, problem, or diagnosis
+        Classifies a condition, problem, or diagnosis. The input must be from
+        one of the following code systems:
+
+        - ICD-10-CM
+        - ICD-9-CM-Diagnosis
+        - SNOMED
 
         ### Parameters
 
@@ -181,6 +186,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A set of key/value pairs representing different classification of the supplied coding
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/classify/condition", body)
@@ -192,7 +201,12 @@ class OrchestrateApi(_RosettaApi):
         display: Optional[str] = None,
     ) -> ClassifyMedicationResponse:
         """
-        Classifies a medication
+        Classifies a medication. The input must be from one of the following code systems:
+
+        - RxNorm
+        - NDC
+        - CVX
+        - SNOMED
 
         ### Parameters
 
@@ -203,6 +217,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A set of key/value pairs representing different classification of the supplied coding
+
+        ### Documenation
+
+        <
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/classify/medication", body)
@@ -214,7 +232,12 @@ class OrchestrateApi(_RosettaApi):
         display: Optional[str] = None,
     ) -> ClassifyObservationResponse:
         """
-        Classifies an observation
+        Classifies an observation, including lab observations and panels,
+        radiology or other reports. The input must be from one of the following
+        code systems:
+
+        - LOINC
+        - SNOMED
 
         ### Parameters
 
@@ -225,6 +248,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A set of key/value pairs representing different classification of the supplied coding
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/classify/observation", body)
@@ -247,6 +274,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A collection of standardized codes
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/standardize/condition", body)
@@ -269,6 +300,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A collection of standardized codes
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/standardize/medication", body)
@@ -291,6 +326,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A collection of standardized codes
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/standardize/observation", body)
@@ -313,6 +352,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A collection of standardized codes
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/standardize/procedure", body)
@@ -335,6 +378,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A collection of standardized codes
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/standardize/lab", body)
@@ -357,6 +404,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A collection of standardized codes
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html>
         """
         body = _get_coding_body(code, system, display)
         return self._post("/terminology/v1/standardize/radiology", body)
@@ -377,6 +428,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html>
         """
         headers = {"Content-Type": "text/plain"}
         route = _get_id_dependent_route("/convert/v1/hl7tofhirr4", patient_id)
@@ -402,6 +457,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A FHIR R4 Bundle containing the clinical data parsed out of the CDA
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/convert/cda_to_fhir.html>
         """
         headers = {"Content-Type": "application/xml"}
         route = _get_id_dependent_route("/convert/v1/cdatofhirr4", patient_id)
@@ -422,6 +481,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A formatted PDF document suitable for human review
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/convert/cda_to_pdf.html>
         """
         headers = {"Content-Type": "application/xml", "Accept": "application/pdf"}
         response = self._post(
@@ -442,6 +505,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         An aggregated C-CDA R2.1 document in XML format
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/convert/fhir_to_cda.html>
         """
         headers = {"Accept": "application/xml"}
         return self._post(
@@ -463,6 +530,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A ZIP archive containing multiple CSV files, one for each supported OMOP data table.
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/convert/fhir_to_omop.html>
         """
         headers = {"Accept": "application/zip"}
         response = self._post(
@@ -525,6 +596,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A new FHIR R4 Bundle containing measure and assessment resources
+
+        ### Documenation
+
+        <
         """
         parameters = {
             "hccVersion": hcc_version,
@@ -555,6 +630,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A FHIR R4 CodeSystem resource
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
         parameters = _get_pagination_parameters(page_number, page_size)
         return self._get(
@@ -569,6 +648,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A bundle of known CodeSystems
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
         return self._get(
             path="/terminology/v1/fhir/r4/codesystem", parameters={"_summary": "true"}
@@ -585,6 +668,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A bundle of known ConceptMaps
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html>
         """
         return self._get(path=f"/terminology/v1/fhir/r4/conceptmap")
 
@@ -604,6 +691,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A Parameters object with the `"result"` parameter of `"valueBoolean": true` indicating if the service was able to standardize the code
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html>
         """
         parameters = {
             "code": code,
@@ -627,6 +718,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A bundle of ValueSets within the requested scope
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         parameters = {
             "scope": scope,
@@ -651,6 +746,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A ValueSet
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         return self._get(
             path=f"/terminology/v1/fhir/r4/valueset/{quote(value_set_id)}",
@@ -670,6 +769,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A ValueSet resource with only the count populated
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         return self._get(
             path=f"/terminology/v1/fhir/r4/valueset/{quote(value_set_id)}",
@@ -683,6 +786,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A unique ValueSet that contains a list of all scopes available on the server
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         return self._get(
             path="/terminology/v1/fhir/r4/valueset/Rosetta.ValueSetScopes",
@@ -708,6 +815,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A bundle of ValueSets that match the search criteria
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         parameters = {
             **_get_pagination_parameters(page_number, page_size),
@@ -732,6 +843,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         An unpopulated CodeSystem
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
         return self._get(
             path=f"/terminology/v1/fhir/r4/codesystem/{code_system}",
@@ -742,15 +857,28 @@ class OrchestrateApi(_RosettaApi):
         self, parameters: Parameters
     ) -> GetAllFhirR4ValueSetsForCodesResponse:
         """
-        Determines which value sets contain the provided codes
+        In some situations it is useful to get the ValueSet(s) that a list of
+        codes are members of. This can be used to categorize or group codes by
+        ValueSet membership. For example, you may wish to:
+
+        - Categorize a collection of NDC drug codes by their active ingredient.
+        - Categorize a collection of LOINC lab tests by the component they are
+          measuring.
+        - Categorize a collection of ICD-10-CM Diagnoses into a broad set of
+          disease groupings.
 
         ### Parameters
 
-        - `parameters`: A Parameters resource containing at least one code, a system, and optionally a scope
+        - `parameters`: A Parameters resource containing at least one code, a system,
+            and optionally a scope
 
         ### Returns
 
         A Parameters resource containing the classification results
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         return self._post(
             path="/terminology/v1/fhir/r4/valueset/$classify",
@@ -773,6 +901,10 @@ class OrchestrateApi(_RosettaApi):
         ### Returns
 
         A single FHIR R4 Bundle containing the merged data from the input.
+
+        ### Documenation
+
+        <https://rosetta-api.docs.careevolution.com/convert/combine_bundles.html>
         """
         headers = {"Content-Type": "application/x-ndjson"}
         route = _get_id_dependent_route("/convert/v1/combinefhirr4bundles", person_id)
