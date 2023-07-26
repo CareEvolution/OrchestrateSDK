@@ -193,6 +193,9 @@ export class OrchestrateApi {
     if (request.pageSize) {
       urlParameters.append("_count", request.pageSize.toString());
     }
+    if (request.conceptContains) {
+      urlParameters.append("concept:contains", request.conceptContains);
+    }
     let route = `/terminology/v1/fhir/r4/codesystem/${request.codeSystem}`;
     const urlParametersString = urlParameters.toString();
     if (urlParametersString) {

@@ -615,6 +615,7 @@ class OrchestrateApi(_RosettaApi):
     def get_fhir_r4_code_system(
         self,
         code_system: CodeSystems,
+        concept_contains: Optional[str] = None,
         page_number: Optional[int] = None,
         page_size: Optional[int] = None,
     ) -> GetFhirR4CodeSystemResponse:
@@ -636,6 +637,9 @@ class OrchestrateApi(_RosettaApi):
         <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
         parameters = _get_pagination_parameters(page_number, page_size)
+        if concept_contains is not None:
+            parameters["concept:contains"] = concept_contains
+
         return self._get(
             path=f"/terminology/v1/fhir/r4/codesystem/{code_system}",
             parameters=parameters,
