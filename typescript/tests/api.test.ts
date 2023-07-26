@@ -506,7 +506,8 @@ describe("convert cda to pdf", () => {
       cda: cda
     });
     expect(result).toBeDefined();
-    expect(result).toContain("%PDF");
+    const resultIntegers = new Int8Array(result);
+    expect(resultIntegers.slice(0, 4)).toStrictEqual(new Int8Array([37, 80, 68, 70]));
   });
 });
 
@@ -526,7 +527,8 @@ describe("convert fhir r4 to omop", () => {
       fhirBundle: fhir
     });
     expect(result).toBeDefined();
-    expect(result).toContain("PROCESSING_LOG.csv");
+    const resultIntegers = new Int8Array(result);
+    expect(resultIntegers.slice(0, 5)).toStrictEqual(new Int8Array([80, 75, 3, 4, 20]));
   });
 });
 

@@ -77,6 +77,11 @@ class _RosettaApi:
         )
         response.raise_for_status()
 
+        if (
+            request_headers["Accept"] in ["application/zip", "application/pdf"]
+        ) and response.content:
+            return response.content
+
         if (request_headers["Accept"] == "application/json") and response.text:
             return response.json()
 
@@ -492,7 +497,7 @@ class OrchestrateApi(_RosettaApi):
             body=cda,
             headers=headers,
         )
-        return response.encode("utf-8")
+        return response
 
     def convert_fhir_r4_to_cda(self, fhir_bundle: Bundle) -> ConvertFhirR4ToCdaResponse:
         """
@@ -535,13 +540,15 @@ class OrchestrateApi(_RosettaApi):
 
         <https://rosetta-api.docs.careevolution.com/convert/fhir_to_omop.html>
         """
-        headers = {"Accept": "application/zip"}
+        headers = {
+            "Accept": "application/zip",
+        }
         response = self._post(
             path="/convert/v1/fhirr4toomop",
             body=fhir_bundle,
             headers=headers,
         )
-        return response.encode("utf-8")
+        return response
 
     def convert_x12_to_fhir_r4(
         self,

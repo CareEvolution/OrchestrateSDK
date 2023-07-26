@@ -1,6 +1,8 @@
+from io import BytesIO
 import json
 import os
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
 from dotenv import load_dotenv
@@ -310,7 +312,7 @@ def test_convert_cda_to_pdf_should_convert():
 
     assert result is not None
     assert isinstance(result, bytes)
-    assert result.decode("utf-8").startswith("%PDF")
+    assert [int(byte) for byte in result[0:5]] == [37, 80, 68, 70, 45]
 
 
 _BUNDLE = {
@@ -378,7 +380,8 @@ def test_convert_fhir_r4_to_omop_should_convert():
 
     assert result is not None
     assert isinstance(result, bytes)
-    assert "PROCESSING_LOG.csv" in result.decode("utf-8")
+    with ZipFile(BytesIO(result)) as zip_file:
+        assert len(zip_file.infolist()) > 0
 
 
 # TODO: Need minimal bundle
