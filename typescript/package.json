@@ -2,11 +2,10 @@
 	"name": "@careevolution/orchestrate",
 	"version": "0.0.0",
 	"description": "A TypeScript client for the Orchestrate API",
-	"type": "module",
-	"types": "index.d.ts",
-	"main": "index.ts",
+	"main": "dist/cjs/index.js",
+	"module": "dist/esm/index.js",
 	"scripts": {
-		"build": "tsc -p tsconfig.build.json",
+		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
 		"test": "jest"
 	},
 	"author": "CareEvolution",
@@ -30,6 +29,6 @@
 		"@types/fhir": "^0.0.37"
 	},
 	"files": [
-		"*.{js,ts}"
+		"dist"
 	]
 }

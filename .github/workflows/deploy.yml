@@ -58,9 +58,7 @@ jobs:
         run: npm install
       - name: Build
         working-directory: typescript
-        run: |
-          npm run build
-          cp package.json dist/
+        run: npm run build
       - name: Set Version
         working-directory: typescript/dist
         run: npm version ${{ needs.version.outputs.version }}
