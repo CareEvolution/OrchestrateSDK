@@ -13,8 +13,8 @@ import {
   ConvertHl7ToFhirR4Response,
   ConvertX12ToFhirR4Request,
   ConvertX12ToFhirR4Response,
-} from "./convert";
-import { InsightRiskProfileRequest, InsightRiskProfileResponse } from "./insight";
+} from "./convert.js";
+import { InsightRiskProfileRequest, InsightRiskProfileResponse } from "./insight.js";
 import {
   ClassifyConditionRequest,
   ClassifyConditionResponse,
@@ -47,7 +47,7 @@ import {
   SummarizeFhirR4ValueSetScopeResponse,
   TranslateFhirR4ConceptMapRequest,
   TranslateFhirR4ConceptMapResponse,
-} from "./terminology";
+} from "./terminology.js";
 
 export interface Configuration {
   apiKey?: string;
