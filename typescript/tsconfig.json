@@ -7,16 +7,15 @@
 			"ES6"
 		],
 		"target": "ES6",
-		"module": "ES6",
+		"module": "node16",
 		"types": [
-			"jest",
 			"node"
 		],
 		"esModuleInterop": true,
 		"rootDir": "src"
 	},
 	"include": [
-		"src",
+		"src"
 	],
 	"exclude": [
 		"dist",

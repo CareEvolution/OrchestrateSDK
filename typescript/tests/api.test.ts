@@ -1,5 +1,7 @@
 import { Bundle } from 'fhir/r4';
 import { OrchestrateApi } from '../src/api';
+import { describe, it, expect } from '@jest/globals';
+import 'dotenv/config'
 
 const apiKey = process.env.ROSETTA_API_KEY || "";
 const rosettaUrl = process.env.ROSETTA_BASE_URL || undefined;
