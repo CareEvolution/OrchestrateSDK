@@ -1,9 +1,7 @@
 import { Bundle } from 'fhir/r4';
 import { OrchestrateApi } from '../src/api';
-import { config } from 'dotenv';
 import { describe, expect, it } from '@jest/globals'
 
-config({ path: '../.env' });
 const apiKey = process.env.ROSETTA_API_KEY || "";
 const rosettaUrl = process.env.ROSETTA_BASE_URL || undefined;
 const additonalHeaders = process.env.ROSETTA_ADDITIONAL_HEADERS ? JSON.parse(process.env.ROSETTA_ADDITIONAL_HEADERS) : undefined;

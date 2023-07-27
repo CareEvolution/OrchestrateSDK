@@ -19,16 +19,15 @@ jobs:
       - uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: 20
-      - name: Write Env
-        shell: pwsh
-        run: |
-          "ROSETTA_API_KEY=${{ secrets.ROSETTA_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
       - name: Install dependencies
         working-directory: typescript
         run: npm ci
       - name: Run tests
         working-directory: typescript
-        run: npm run test
+        shell: pwsh
+        run: |
+          $env:ROSETTA_API_KEY="${{ secrets.ROSETTA_API_KEY }}"
+          npm run test
 
   python:
     name: Python
