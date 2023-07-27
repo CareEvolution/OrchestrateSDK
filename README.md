@@ -25,10 +25,10 @@ TypeScript:
 ```typescript
 import { OrchestrateApi } from '@careevolution/orchestrate';
 
-orchestrate = new OrchestrateApi({apiKey: "your-api-key"});
+const orchestrate = new OrchestrateApi({apiKey: "your-api-key"});
 await orchestrate.classifyCondition({
-  code="119981000146107",
-  system="SNOMED",
+  code: "119981000146107",
+  system: "SNOMED",
 });
 ```
 
