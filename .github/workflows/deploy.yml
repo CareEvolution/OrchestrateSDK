@@ -75,7 +75,7 @@ jobs:
         working-directory: typescript
         run: |
           npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          npm publish ./dist --access public
+          npm publish --access public
 
   python:
     name: Python
@@ -130,7 +130,7 @@ jobs:
               Select-Object -ExpandProperty token
             Write-Host "::add-mask::$pypiToken"
 
-            poetry config repositories.$pypiName "$pypiUrl/legacy/"
+            poetry config repositories.$pypiName "$pypiUrl/simple/"
             poetry config pypi-token.$pypiName $pypiToken
           }
 
