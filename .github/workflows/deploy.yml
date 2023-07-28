@@ -146,6 +146,7 @@ jobs:
           $version = poetry version
           Write-Host "Published ``$version`` to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
       - name: Publish Pypi
+        shell: pwsh
         if: needs.version.outputs.target == 'prod'
         working-directory: python
         run: |
