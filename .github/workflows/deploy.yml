@@ -70,14 +70,14 @@ jobs:
           npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
           npm config set //proget.careevolution.com/npm/npm/:_authToken ${{ secrets.PROGET_TOKEN }}
           npm publish
-          "Published ``$version`` to internal NPM." >> $Env:GITHUB_STEP_SUMMARY
+          echo "Published ``$version`` to internal NPM." >> $GITHUB_STEP_SUMMARY
       - name: Deploy NPM
         if: needs.version.outputs.target == 'prod'
         working-directory: typescript
         run: |
           npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
           npm publish --access public
-          "Published ``$version`` to NPM." >> $Env:GITHUB_STEP_SUMMARY
+          echo "Published ``$version`` to NPM." >> $GITHUB_STEP_SUMMARY
 
   python:
     name: Python
@@ -114,7 +114,7 @@ jobs:
             @{ Name = "testpypi"; Url = "https://test.pypi.org" }
           )
           if ("${{ needs.version.outputs.target }}" -eq "prod") {
-            $pypis += @{ Name = "pypi"; Url = "https://pypi.org" }
+            $pypis += @{ Name = "pypi"; Url = "https://upload.pypi.org" }
           }
 
           $pypis | ForEach-Object {
@@ -132,11 +132,11 @@ jobs:
               Select-Object -ExpandProperty token
             Write-Host "::add-mask::$pypiToken"
 
-            poetry config repositories.$pypiName "$pypiUrl/simple/"
+            poetry config repositories.$pypiName "$pypiUrl/legacy/"
             poetry config pypi-token.$pypiName $pypiToken
           }
 
-      - name: Publish Test Pypi
+      - name: Publish Test Pypigit
         shell: pwsh
         working-directory: python
         if: needs.version.outputs.target == 'dev'
