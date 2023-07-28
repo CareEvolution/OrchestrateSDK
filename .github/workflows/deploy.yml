@@ -70,12 +70,14 @@ jobs:
           npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
           npm config set //proget.careevolution.com/npm/npm/:_authToken ${{ secrets.PROGET_TOKEN }}
           npm publish
+          "Published ``$version`` to internal NPM." >> $Env:GITHUB_STEP_SUMMARY
       - name: Deploy NPM
         if: needs.version.outputs.target == 'prod'
         working-directory: typescript
         run: |
           npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          npm publish ./dist --access public
+          npm publish --access public
+          "Published ``$version`` to NPM." >> $Env:GITHUB_STEP_SUMMARY
 
   python:
     name: Python
@@ -130,7 +132,7 @@ jobs:
               Select-Object -ExpandProperty token
             Write-Host "::add-mask::$pypiToken"
 
-            poetry config repositories.$pypiName "$pypiUrl/legacy/"
+            poetry config repositories.$pypiName "$pypiUrl/simple/"
             poetry config pypi-token.$pypiName $pypiToken
           }
 
@@ -142,11 +144,11 @@ jobs:
           poetry publish --build --no-interaction -r testpypi
 
           $version = poetry version
-          "Published $version to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
+          "Published ``$version`` to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
       - name: Publish Pypi
         if: needs.version.outputs.target == 'prod'
         working-directory: python
         run: |
           poetry publish --build --no-interaction -r pypi
           $version = poetry version
-          "Published $version to Pypi." >> $Env:GITHUB_STEP_SUMMARY
+          "Published ``$version`` to Pypi." >> $Env:GITHUB_STEP_SUMMARY
