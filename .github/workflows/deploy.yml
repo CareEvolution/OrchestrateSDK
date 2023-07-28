@@ -58,15 +58,13 @@ jobs:
         run: npm install
       - name: Build
         working-directory: typescript
-        run: |
-          npm run build
-          cp package.json dist/
+        run: npm run build
       - name: Set Version
-        working-directory: typescript/dist
+        working-directory: typescript
         run: npm version ${{ needs.version.outputs.version }}
 
       - name: Deploy Proget
-        working-directory: typescript/dist
+        working-directory: typescript
         if: needs.version.outputs.target == 'dev'
         run: |
           npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
