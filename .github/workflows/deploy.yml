@@ -136,7 +136,7 @@ jobs:
             poetry config pypi-token.$pypiName $pypiToken
           }
 
-      - name: Publish Test Pypigit
+      - name: Publish Test Pypi
         shell: pwsh
         working-directory: python
         if: needs.version.outputs.target == 'dev'
@@ -144,11 +144,11 @@ jobs:
           poetry publish --build --no-interaction -r testpypi
 
           $version = poetry version
-          "Published ``$version`` to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
+          Write-Host "Published ``$version`` to test PyPI." >> $Env:GITHUB_STEP_SUMMARY
       - name: Publish Pypi
         if: needs.version.outputs.target == 'prod'
         working-directory: python
         run: |
           poetry publish --build --no-interaction -r pypi
           $version = poetry version
-          "Published ``$version`` to Pypi." >> $Env:GITHUB_STEP_SUMMARY
+          Write-Host "Published ``$version`` to Pypi." >> $Env:GITHUB_STEP_SUMMARY
