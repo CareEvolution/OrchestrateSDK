@@ -1,11 +1,13 @@
 import { Bundle } from 'fhir/r4';
 import { OrchestrateApi } from '../src/api';
 import { describe, it, expect } from '@jest/globals';
-import 'dotenv/config'
+import dotenv from 'dotenv';
 
+dotenv.config({ path: "../.env" });
 const apiKey = process.env.ROSETTA_API_KEY || "";
 const rosettaUrl = process.env.ROSETTA_BASE_URL || undefined;
 const additonalHeaders = process.env.ROSETTA_ADDITIONAL_HEADERS ? JSON.parse(process.env.ROSETTA_ADDITIONAL_HEADERS) : undefined;
+
 
 const orchestrate = new OrchestrateApi({
   apiKey: apiKey,
@@ -804,7 +806,7 @@ describe("standardize radiology", () => {
 describe("convert hl7 to fhir r4", () => {
   it("should convert hl7", async () => {
     const result = await orchestrate.convertHl7ToFhirR4({
-      hl7Message: hl7
+      content: hl7
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -813,7 +815,7 @@ describe("convert hl7 to fhir r4", () => {
 
   it("should convert hl7 with patient", async () => {
     const result = await orchestrate.convertHl7ToFhirR4({
-      hl7Message: hl7,
+      content: hl7,
       patientID: "1234"
     });
     expect(result).toBeDefined();
@@ -829,7 +831,7 @@ describe("convert hl7 to fhir r4", () => {
 describe("convert cda to fhir r4", () => {
   it("should convert cda", async () => {
     const result = await orchestrate.convertCdaToFhirR4({
-      cda: cda
+      content: cda
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -838,7 +840,7 @@ describe("convert cda to fhir r4", () => {
 
   it("should convert cda with patient", async () => {
     const result = await orchestrate.convertCdaToFhirR4({
-      cda: cda,
+      content: cda,
       patientID: "1234"
     });
     expect(result).toBeDefined();
@@ -854,7 +856,7 @@ describe("convert cda to fhir r4", () => {
 describe("convert cda to pdf", () => {
   it("should convert cda", async () => {
     const result = await orchestrate.convertCdaToPdf({
-      cda: cda
+      content: cda
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
@@ -866,7 +868,7 @@ describe("convert cda to pdf", () => {
 describe("convert fhir r4 to cda", () => {
   it("should convert fhir", async () => {
     const result = await orchestrate.convertFhirR4ToCda({
-      fhirBundle: fhir
+      content: fhir
     });
     expect(result).toBeDefined();
     expect(result).toContain("<?xml");
@@ -876,7 +878,7 @@ describe("convert fhir r4 to cda", () => {
 describe("convert fhir r4 to omop", () => {
   it("should convert fhir", async () => {
     const result = await orchestrate.convertFhirR4ToOmop({
-      fhirBundle: fhir
+      content: fhir
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
@@ -888,7 +890,7 @@ describe("convert fhir r4 to omop", () => {
 describe("convert x12 to fhir r4", () => {
   it("should convert x12", async () => {
     const result = await orchestrate.convertX12ToFhirR4({
-      x12Document: x12Document
+      content: x12Document
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -897,7 +899,7 @@ describe("convert x12 to fhir r4", () => {
 
   it("should convert x12 with patient", async () => {
     const result = await orchestrate.convertX12ToFhirR4({
-      x12Document: x12Document,
+      content: x12Document,
       patientID: "1234"
     });
     expect(result).toBeDefined();
@@ -915,7 +917,7 @@ describe("insight risk profile", () => {
       hccVersion: "22",
       periodEndDate: "2020-12-31",
       raSegment: "community nondual aged",
-      fhirBundle: riskProfileBundle,
+      content: riskProfileBundle,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -1050,7 +1052,6 @@ describe("get fhir r4 value set by scope", () => {
       pageNumber: 1,
       pageSize: 2
     });
-    console.log(result.entry?.[0].resource);
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.total).toBeGreaterThan(0);
@@ -1129,7 +1130,7 @@ ${JSON.stringify(fhir)}
 `);
 
     const result = await orchestrate.convertCombinedFhirR4Bundles({
-      fhirBundles: bundles
+      content: bundles
     });
 
     expect(result).toBeDefined();
@@ -1144,7 +1145,7 @@ ${JSON.stringify(fhir)}
 `);
 
     const result = await orchestrate.convertCombinedFhirR4Bundles({
-      fhirBundles: bundles,
+      content: bundles,
       personID: "1234"
     });
 

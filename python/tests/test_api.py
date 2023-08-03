@@ -186,7 +186,7 @@ ZPR||
 
 
 def test_api_convert_hl7_to_fhir_r4_without_patient_should_convert():
-    result = TEST_API.convert_hl7_to_fhir_r4(hl7_message=_HL7)
+    result = TEST_API.convert_hl7_to_fhir_r4(content=_HL7)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -194,7 +194,7 @@ def test_api_convert_hl7_to_fhir_r4_without_patient_should_convert():
 
 
 def test_api_convert_hl7_to_fhir_r4_with_patient_should_convert():
-    result = TEST_API.convert_hl7_to_fhir_r4(hl7_message=_HL7, patient_id="1234")
+    result = TEST_API.convert_hl7_to_fhir_r4(content=_HL7, patient_id="1234")
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -284,7 +284,7 @@ _CDA = """
 
 
 def test_convert_cda_to_fhir_r4_without_patient_should_convert():
-    result = TEST_API.convert_cda_to_fhir_r4(cda=_CDA)
+    result = TEST_API.convert_cda_to_fhir_r4(content=_CDA)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -292,7 +292,7 @@ def test_convert_cda_to_fhir_r4_without_patient_should_convert():
 
 
 def test_convert_cda_to_fhir_r4_with_patient_should_convert():
-    result = TEST_API.convert_cda_to_fhir_r4(cda=_CDA, patient_id="1234")
+    result = TEST_API.convert_cda_to_fhir_r4(content=_CDA, patient_id="1234")
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -308,7 +308,7 @@ def test_convert_cda_to_fhir_r4_with_patient_should_convert():
 
 
 def test_convert_cda_to_pdf_should_convert():
-    result = TEST_API.convert_cda_to_pdf(cda=_CDA)
+    result = TEST_API.convert_cda_to_pdf(content=_CDA)
 
     assert result is not None
     assert isinstance(result, bytes)
@@ -370,14 +370,14 @@ _BUNDLE = {
 
 
 def test_convert_fhir_r4_to_cda_should_convert():
-    result = TEST_API.convert_fhir_r4_to_cda(fhir_bundle=_BUNDLE)
+    result = TEST_API.convert_fhir_r4_to_cda(content=_BUNDLE)
 
     assert result is not None
     assert result.startswith("<?xml")
 
 
 def test_convert_fhir_r4_to_omop_should_convert():
-    result = TEST_API.convert_fhir_r4_to_omop(fhir_bundle=_BUNDLE)
+    result = TEST_API.convert_fhir_r4_to_omop(content=_BUNDLE)
 
     assert result is not None
     assert isinstance(result, bytes)
@@ -725,7 +725,7 @@ _RISK_PROFILE_BUNDLE = {
 
 def test_insight_risk_profile_should_return_bundle():
     result = TEST_API.insight_risk_profile(
-        fhir_bundle=_RISK_PROFILE_BUNDLE,
+        content=_RISK_PROFILE_BUNDLE,
         hcc_version="22",
         period_end_date="2020-12-31",
         ra_segment="community nondual aged",
@@ -744,7 +744,7 @@ def test_convert_combined_fhir_r4_bundles_should_combine():
         ]
     )
 
-    result = TEST_API.convert_combined_fhir_r4_bundles(fhir_bundles=bundles)
+    result = TEST_API.convert_combined_fhir_r4_bundles(content=bundles)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -760,7 +760,7 @@ def test_convert_combined_fhir_r4_bundles_with_person_should_combine():
     )
 
     result = TEST_API.convert_combined_fhir_r4_bundles(
-        fhir_bundles=bundles, person_id="1234"
+        content=bundles, person_id="1234"
     )
 
     assert result is not None
@@ -824,7 +824,7 @@ IEA*1*000000031~
 
 
 def test_convert_x12_to_fhir_r4_should_return_a_bundle():
-    result = TEST_API.convert_x12_to_fhir_r4(x12_document=_X12_DOCUMENT)
+    result = TEST_API.convert_x12_to_fhir_r4(content=_X12_DOCUMENT)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -832,9 +832,7 @@ def test_convert_x12_to_fhir_r4_should_return_a_bundle():
 
 
 def test_convert_x12_to_fhir_r4_with_patient_should_return_a_bundle():
-    result = TEST_API.convert_x12_to_fhir_r4(
-        x12_document=_X12_DOCUMENT, patient_id="1234"
-    )
+    result = TEST_API.convert_x12_to_fhir_r4(content=_X12_DOCUMENT, patient_id="1234")
 
     assert result is not None
     assert result["resourceType"] == "Bundle"

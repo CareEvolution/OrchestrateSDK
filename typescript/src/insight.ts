@@ -15,7 +15,7 @@ const hccVersions = [
 ] as const;
 
 export type InsightRiskProfileRequest = {
-  fhirBundle: Bundle;
+  content: Bundle;
   hccVersion?: typeof hccVersions[number];
   periodEndDate?: string;
   raSegment?: typeof raSegments[number];

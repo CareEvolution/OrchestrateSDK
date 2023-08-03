@@ -1,15 +1,15 @@
 import { Bundle } from "fhir/r4";
 
 export type ConvertHl7ToFhirR4Request = {
+  content: string;
   patientID?: string;
-  hl7Message: string;
 };
 
 export type ConvertHl7ToFhirR4Response = Bundle;
 
 export type ConvertCdaToFhirR4Request = {
+  content: string;
   patientID?: string;
-  cda: string;
 };
 
 export type ConvertCdaToFhirR4Response = Bundle;
@@ -17,40 +17,40 @@ export type ConvertCdaToFhirR4Response = Bundle;
 export type ConvertCdaToFhirResponse = Bundle;
 
 export type ConvertCdaToPdfRequest = {
-  cda: string;
+  content: string;
 };
 
 export type ConvertCdaToPdfResponse = Buffer;
 
 export type ConvertFhirR4ToCdaRequest = {
-  fhirBundle: Bundle;
+  content: Bundle;
 };
 
 export type ConvertFhirR4ToCdaResponse = string;
 
 export type ConvertFhirR4ToOmopRequest = {
-  fhirBundle: Bundle;
+  content: Bundle;
 };
 
 export type ConvertFhirR4ToOmopResponse = Buffer;
 
 export type ConvertCombineFhirR4BundlesRequest = {
+  content: string;
   personID?: string;
-  fhirBundles: string;
 };
 
 export function generateConvertCombinedFhirBundlesRequestFromBundles(fhirBundles: Bundle[], personID?: string) {
   const bundles = fhirBundles.map((bundle) => JSON.stringify(bundle)).join("\n");
   return {
     personID: personID,
-    fhirBundles: bundles,
+    content: bundles,
   } as ConvertCombineFhirR4BundlesRequest;
 }
 
 export type ConvertCombineFhirR4BundlesResponse = Bundle;
 
 export type ConvertX12ToFhirR4Request = {
-  x12Document: string;
+  content: string;
   patientID?: string;
 };
 

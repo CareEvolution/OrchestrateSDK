@@ -347,7 +347,7 @@ export class OrchestrateApi {
     if (parameters.toString()) {
       route += `?${parameters.toString()}`;
     }
-    return this.rosettaApi.post(route, request.fhirBundle);
+    return this.rosettaApi.post(route, request.content);
   }
 
   /**
@@ -361,7 +361,7 @@ export class OrchestrateApi {
       "Content-Type": "text/plain",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/hl7tofhirr4", request.patientID);
-    return this.rosettaApi.post(route, request.hl7Message, headers);
+    return this.rosettaApi.post(route, request.content, headers);
   }
 
   /**
@@ -375,7 +375,7 @@ export class OrchestrateApi {
       "Content-Type": "application/xml",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/cdatofhirr4", request.patientID);
-    return this.rosettaApi.post(route, request.cda, headers);
+    return this.rosettaApi.post(route, request.content, headers);
   }
 
   /**
@@ -389,7 +389,7 @@ export class OrchestrateApi {
       "Content-Type": "application/xml",
       "Accept": "application/pdf",
     } as { [key: string]: string; };
-    return this.rosettaApi.post("/convert/v1/cdatopdf", request.cda, headers);
+    return this.rosettaApi.post("/convert/v1/cdatopdf", request.content, headers);
   }
 
   /**
@@ -402,7 +402,7 @@ export class OrchestrateApi {
     const headers = {
       "Accept": "application/xml",
     } as { [key: string]: string; };
-    return this.rosettaApi.post("/convert/v1/fhirr4tocda", request.fhirBundle, headers);
+    return this.rosettaApi.post("/convert/v1/fhirr4tocda", request.content, headers);
   }
 
   /**
@@ -414,7 +414,7 @@ export class OrchestrateApi {
     const headers = {
       "Accept": "application/zip",
     } as { [key: string]: string; };
-    return this.rosettaApi.post("/convert/v1/fhirr4toomop", request.fhirBundle, headers);
+    return this.rosettaApi.post("/convert/v1/fhirr4toomop", request.content, headers);
   }
 
   /**
@@ -428,7 +428,7 @@ export class OrchestrateApi {
       "Content-Type": "application/x-ndjson",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/combinefhirr4bundles", request.personID);
-    return this.rosettaApi.post(route, request.fhirBundles, headers);
+    return this.rosettaApi.post(route, request.content, headers);
   }
 
   /**
@@ -441,7 +441,7 @@ export class OrchestrateApi {
       "Content-Type": "text/plain",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/x12tofhirr4", request.patientID);
-    return this.rosettaApi.post(route, request.x12Document, headers);
+    return this.rosettaApi.post(route, request.content, headers);
   }
 
   private getIDDependentRoute(route: string, id?: string): string {
