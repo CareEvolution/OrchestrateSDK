@@ -24,7 +24,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Write Env
-        working-directory: typescript
         shell: pwsh
         run: |
           "ROSETTA_API_KEY=${{ secrets.ROSETTA_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
