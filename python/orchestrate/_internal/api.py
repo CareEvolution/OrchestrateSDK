@@ -419,7 +419,7 @@ class OrchestrateApi(_RosettaApi):
 
     def convert_hl7_to_fhir_r4(
         self,
-        hl7_message: str,
+        content: str,
         patient_id: Optional[str] = None,
     ) -> ConvertHl7ToFhirR4Response:
         """
@@ -442,13 +442,13 @@ class OrchestrateApi(_RosettaApi):
         route = _get_id_dependent_route("/convert/v1/hl7tofhirr4", patient_id)
         return self._post(
             path=route,
-            body=hl7_message,
+            body=content,
             headers=headers,
         )
 
     def convert_cda_to_fhir_r4(
         self,
-        cda: str,
+        content: str,
         patient_id: Optional[str] = None,
     ) -> ConvertCdaToFhirR4Response:
         """
@@ -471,11 +471,11 @@ class OrchestrateApi(_RosettaApi):
         route = _get_id_dependent_route("/convert/v1/cdatofhirr4", patient_id)
         return self._post(
             path=route,
-            body=cda,
+            body=content,
             headers=headers,
         )
 
-    def convert_cda_to_pdf(self, cda: str) -> ConvertCdaToPdfResponse:
+    def convert_cda_to_pdf(self, content: str) -> ConvertCdaToPdfResponse:
         """
         Converts a CDA document into a PDF document
 
@@ -494,12 +494,12 @@ class OrchestrateApi(_RosettaApi):
         headers = {"Content-Type": "application/xml", "Accept": "application/pdf"}
         response = self._post(
             path="/convert/v1/cdatopdf",
-            body=cda,
+            body=content,
             headers=headers,
         )
         return response
 
-    def convert_fhir_r4_to_cda(self, fhir_bundle: Bundle) -> ConvertFhirR4ToCdaResponse:
+    def convert_fhir_r4_to_cda(self, content: Bundle) -> ConvertFhirR4ToCdaResponse:
         """
         Converts a FHIR R4 bundle into an aggregated CDA document.
 
@@ -518,13 +518,11 @@ class OrchestrateApi(_RosettaApi):
         headers = {"Accept": "application/xml"}
         return self._post(
             path="/convert/v1/fhirr4tocda",
-            body=fhir_bundle,
+            body=content,
             headers=headers,
         )
 
-    def convert_fhir_r4_to_omop(
-        self, fhir_bundle: Bundle
-    ) -> ConvertFhirR4ToOmopResponse:
+    def convert_fhir_r4_to_omop(self, content: Bundle) -> ConvertFhirR4ToOmopResponse:
         """
         Converts a FHIR R4 bundle into the OMOP Common Data Model v5.4 format.
 
@@ -545,14 +543,14 @@ class OrchestrateApi(_RosettaApi):
         }
         response = self._post(
             path="/convert/v1/fhirr4toomop",
-            body=fhir_bundle,
+            body=content,
             headers=headers,
         )
         return response
 
     def convert_x12_to_fhir_r4(
         self,
-        x12_document: str,
+        content: str,
         patient_id: Optional[str] = None,
     ) -> ConvertX12ToFhirR4Response:
         """
@@ -571,13 +569,13 @@ class OrchestrateApi(_RosettaApi):
         route = _get_id_dependent_route("/convert/v1/x12tofhirr4", patient_id)
         return self._post(
             path=route,
-            body=x12_document,
+            body=content,
             headers=headers,
         )
 
     def insight_risk_profile(
         self,
-        fhir_bundle: Bundle,
+        content: Bundle,
         hcc_version: Optional[Literal["22", "23", "24"]] = None,
         period_end_date: Optional[str] = None,
         ra_segment: Optional[
@@ -615,7 +613,7 @@ class OrchestrateApi(_RosettaApi):
         }
         return self._post(
             path="/insight/v1/riskprofile",
-            body=fhir_bundle,
+            body=content,
             parameters=parameters,
         )
 
@@ -898,7 +896,7 @@ class OrchestrateApi(_RosettaApi):
 
     def convert_combined_fhir_r4_bundles(
         self,
-        fhir_bundles: str,
+        content: str,
         person_id: Optional[str] = None,
     ) -> ConvertCombinedFhirR4BundlesResponse:
         """
@@ -921,6 +919,6 @@ class OrchestrateApi(_RosettaApi):
         route = _get_id_dependent_route("/convert/v1/combinefhirr4bundles", person_id)
         return self._post(
             path=route,
-            body=fhir_bundles,
+            body=content,
             headers=headers,
         )
