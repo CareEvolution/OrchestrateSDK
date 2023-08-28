@@ -26,6 +26,9 @@ jobs:
       - name: Write Env
         shell: pwsh
         run: |
+          if ("${{ secrets.ROSETTA_API_KEY }}" -eq "") {
+            throw "ROSETTA_API_KEY secret is required for this workflow."
+          }
           "ROSETTA_API_KEY=${{ secrets.ROSETTA_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
       - name: Install dependencies
         working-directory: typescript
@@ -61,6 +64,9 @@ jobs:
       - name: Write Env
         shell: pwsh
         run: |
+          if ("${{ secrets.ROSETTA_API_KEY }}" -eq "") {
+            throw "ROSETTA_API_KEY secret is required for this workflow."
+          }
           "ROSETTA_API_KEY=${{ secrets.ROSETTA_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
       - name: Copy Local README
         run: cp ./README.md python/README.md
