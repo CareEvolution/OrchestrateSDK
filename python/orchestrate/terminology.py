@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from orchestrate._internal.fhir import (
     Bundle,
@@ -27,6 +27,12 @@ Covid19Condition = Literal[
     "SignsAndSymptoms",
     "NonspecificRespiratoryViralInfection",
 ]
+
+
+class ClassifyConditionRequest(TypedDict):
+    code: str
+    system: ClassifyConditionSystems
+    display: Optional[str]
 
 
 class ClassifyConditionResponse(TypedDict):
@@ -60,6 +66,12 @@ Covid19Rx = Literal[
 ]
 
 
+class ClassifyMedicationRequest(TypedDict):
+    code: str
+    system: ClassifyMedicationSystems
+    display: Optional[str]
+
+
 class ClassifyMedicationResponse(TypedDict):
     medRtTherapeuticClass: list[str]
     rxNormIngredient: list[str]
@@ -74,6 +86,12 @@ ClassifyObservationSystems = Literal[
     "http://snomed.info/sct",
     "SNOMED",
 ]
+
+
+class ClassifyObservationRequest(TypedDict):
+    code: str
+    system: ClassifyObservationSystems
+    display: Optional[str]
 
 
 class ClassifyObservationResponse(TypedDict):
@@ -120,6 +138,13 @@ StandardizeTargetSystems = Literal[
     "http://hl7.org/fhir/sid/ndc",
     "http://hl7.org/fhir/sid/cvx",
 ]
+
+
+class StandardizeRequest(TypedDict):
+    code: Optional[str]
+    system: Optional[StandardizeTargetSystems]
+    display: Optional[str]
+
 
 StandardizeResponseSystems = Literal[
     "http://hl7.org/fhir/sid/icd-10",
