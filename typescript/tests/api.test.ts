@@ -1005,6 +1005,7 @@ describe("summarize fhir r4 value set scope", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
+    expect(result.entry?.length).toBeLessThan(10000);
   }, 10000);
 });
 

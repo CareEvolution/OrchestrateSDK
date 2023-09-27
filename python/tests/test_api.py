@@ -920,6 +920,7 @@ def test_summarize_fhir_r4_value_set_scope_should_return_bundle():
     assert result is not None
     assert result["resourceType"] == "Bundle"
     assert len(result["entry"]) > 0
+    assert len(result["entry"]) < 10000
 
 
 def test_get_fhir_r4_value_set_should_return_a_value_set():
