@@ -1,4 +1,9 @@
-from typing import Literal, Optional, TypedDict
+import sys
+
+if sys.version_info < (3, 11):
+    from typing_extensions import Literal, TypedDict, NotRequired
+else:
+    from typing import Literal, TypedDict, NotRequired
 
 from orchestrate._internal.fhir import (
     Bundle,
@@ -32,7 +37,7 @@ Covid19Condition = Literal[
 class ClassifyConditionRequest(TypedDict):
     code: str
     system: ClassifyConditionSystems
-    display: Optional[str]
+    display: NotRequired[str]
 
 
 class ClassifyConditionResponse(TypedDict):
@@ -69,7 +74,7 @@ Covid19Rx = Literal[
 class ClassifyMedicationRequest(TypedDict):
     code: str
     system: ClassifyMedicationSystems
-    display: Optional[str]
+    display: NotRequired[str]
 
 
 class ClassifyMedicationResponse(TypedDict):
@@ -91,7 +96,7 @@ ClassifyObservationSystems = Literal[
 class ClassifyObservationRequest(TypedDict):
     code: str
     system: ClassifyObservationSystems
-    display: Optional[str]
+    display: NotRequired[str]
 
 
 class ClassifyObservationResponse(TypedDict):
@@ -141,9 +146,9 @@ StandardizeTargetSystems = Literal[
 
 
 class StandardizeRequest(TypedDict):
-    code: Optional[str]
-    system: Optional[StandardizeTargetSystems]
-    display: Optional[str]
+    code: NotRequired[str]
+    system: NotRequired[StandardizeTargetSystems]
+    display: NotRequired[str]
 
 
 StandardizeResponseSystems = Literal[

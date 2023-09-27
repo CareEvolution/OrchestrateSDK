@@ -9,6 +9,12 @@ from dotenv import load_dotenv
 from orchestrate import OrchestrateApi
 from requests import HTTPError
 
+from orchestrate.terminology import (
+    ClassifyMedicationRequest,
+    ClassifyObservationRequest,
+    StandardizeRequest,
+)
+
 
 def setup_test_api():
     load_dotenv(Path(__file__).parent.parent.parent / ".env", override=True)
@@ -103,18 +109,6 @@ def test_api_classify_condition_should_classify(condition):
             {"request": {"code": "2468231", "system": "RxNorm"}},
             id="request-name",
         ),
-        pytest.param(
-            {
-                "request": [
-                    {
-                        "code": "2468231",
-                        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-                    },
-                    {"code": "2468231", "system": "RxNorm"},
-                ]
-            },
-            id="batch",
-        ),
     ],
 )
 def test_api_classify_medication_should_classify(medication):
@@ -126,11 +120,25 @@ def test_api_classify_medication_should_classify(medication):
     response = kwarg_response
     assert kwarg_response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 2
-        assert [item["rxNormGeneric"] for item in response]
-    else:
-        assert response["rxNormGeneric"]
+    assert response["rxNormGeneric"]
+
+
+def test_api_classify_medication_should_classify_batch() -> None:
+    request: list[ClassifyMedicationRequest] = [
+        {
+            "code": "2468231",
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        },
+        {"code": "2468231", "system": "RxNorm"},
+    ]
+
+    response = TEST_API.classify_medication(request=request)
+    positional_response = TEST_API.classify_medication(request)
+
+    assert response == positional_response
+    assert response is not None
+    assert len(response) == 2
+    assert [item["rxNormGeneric"] for item in response]
 
 
 @pytest.mark.parametrize(
@@ -157,18 +165,6 @@ def test_api_classify_medication_should_classify(medication):
             {"request": {"code": "94558-4", "system": "LOINC"}},
             id="request-name",
         ),
-        pytest.param(
-            {
-                "request": [
-                    {
-                        "code": "94558-4",
-                        "system": "http://loinc.org",
-                    },
-                    {"code": "94558-4", "system": "LOINC"},
-                ]
-            },
-            id="batch",
-        ),
     ],
 )
 def test_api_classify_observation_should_classify(observation):
@@ -180,11 +176,26 @@ def test_api_classify_observation_should_classify(observation):
     response = kwarg_response
     assert kwarg_response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 2
-        assert [item["loincClass"] == "MICRO" for item in response]
-    else:
-        assert response["loincClass"] == "MICRO"
+    assert response["loincClass"] == "MICRO"
+
+
+def test_api_classify_observation_should_classify_batch() -> None:
+    requests: list[ClassifyObservationRequest] = [
+        {
+            "code": "94558-4",
+            "system": "http://loinc.org",
+        },
+        {"code": "94558-4", "system": "LOINC"},
+    ]
+
+    kwarg_response = TEST_API.classify_observation(request=requests)
+    positional_response = TEST_API.classify_observation(requests)
+
+    response = kwarg_response
+    assert kwarg_response == positional_response
+    assert response is not None
+    assert len(response) == 2
+    assert [item["loincClass"] == "MICRO" for item in response]
 
 
 _STANDARDIZE_CONDITION_PAYLOADS = [
@@ -194,17 +205,6 @@ _STANDARDIZE_CONDITION_PAYLOADS = [
     pytest.param({"request": {"code": "J45.50"}}, "J45.50", id="icd-request"),
     pytest.param({"display": "dm2"}, "44054006", id="display"),
     pytest.param({"request": {"display": "dm2"}}, "44054006", id="display-request"),
-    pytest.param(
-        {
-            "request": [
-                {"code": "370221004"},
-                {"code": "J45.50"},
-                {"display": "dm2"},
-            ]
-        },
-        ["370221004", "J45.50", "44054006"],
-        id="batch",
-    ),
 ]
 
 
@@ -217,13 +217,25 @@ def test_api_standardize_condition_should_standardize(payload, expected):
 
     assert response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 3
-        assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
-        assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
-        assert any(coding["code"] == expected[2] for coding in response[2]["coding"])
-    else:
-        assert any(coding["code"] == expected for coding in response["coding"])
+    assert any(coding["code"] == expected for coding in response["coding"])
+
+
+def test_api_standardize_condition_should_standardize_batch() -> None:
+    requests: list[StandardizeRequest] = [
+        {"code": "370221004"},
+        {"code": "J45.50"},
+        {"display": "dm2"},
+    ]
+    expected = ["370221004", "J45.50", "44054006"]
+    response = TEST_API.standardize_condition(request=requests)
+    positional_response = TEST_API.standardize_condition(requests)
+
+    assert response == positional_response
+    assert response is not None
+    assert len(response) == 3
+    assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
+    assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
+    assert any(coding["code"] == expected[2] for coding in response[2]["coding"])
 
 
 _STANDARDIZE_LAB_PAYLOADS = [
@@ -237,16 +249,6 @@ _STANDARDIZE_LAB_PAYLOADS = [
         "43396009",
         id="display-request",
     ),
-    pytest.param(
-        {
-            "request": [
-                {"code": "4548-4"},
-                {"display": "hba1c 1/15/22 from outside lab"},
-            ]
-        },
-        ["4548-4", "43396009"],
-        id="batch",
-    ),
 ]
 
 
@@ -257,12 +259,24 @@ def test_api_standardize_lab_should_standardize(payload, expected):
 
     assert response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 2
-        assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
-        assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
-    else:
-        assert any(coding["code"] == expected for coding in response["coding"])
+    assert any(coding["code"] == expected for coding in response["coding"])
+
+
+def test_api_standardize_lab_should_standardize_batch() -> None:
+    requests: list[StandardizeRequest] = [
+        {"code": "4548-4"},
+        {"display": "hba1c 1/15/22 from outside lab"},
+    ]
+    expected = ["4548-4", "43396009"]
+
+    response = TEST_API.standardize_lab(request=requests)
+    positional_response = TEST_API.standardize_lab(requests)
+
+    assert response == positional_response
+    assert response is not None
+    assert len(response) == 2
+    assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
+    assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
 
 
 _STANDARDIZE_MEDICATION_PAYOADS = [
@@ -290,19 +304,6 @@ _STANDARDIZE_MEDICATION_PAYOADS = [
         "1796093",
         id="display-request",
     ),
-    pytest.param(
-        {
-            "request": [
-                {"code": "861004", "system": "RxNorm"},
-                {"code": "59267-1000-02"},
-                {
-                    "display": "Jentadueto extended (linagliptin 2.5 / metFORMIN  1000mg)"
-                },
-            ]
-        },
-        ["861004", "59267100002", "1796093"],
-        id="batch",
-    ),
 ]
 
 
@@ -315,13 +316,26 @@ def test_api_standardize_medication_should_standardize(payload, expected):
 
     assert response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 3
-        assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
-        assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
-        assert any(coding["code"] == expected[2] for coding in response[2]["coding"])
-    else:
-        assert any(coding["code"] == expected for coding in response["coding"])
+    assert any(coding["code"] == expected for coding in response["coding"])
+
+
+def test_api_standardize_medication_should_standardize_batch() -> None:
+    requests: list[StandardizeRequest] = [
+        {"code": "861004", "system": "RxNorm"},
+        {"code": "59267-1000-02"},
+        {"display": "Jentadueto extended (linagliptin 2.5 / metFORMIN  1000mg)"},
+    ]
+    expected = ["861004", "59267100002", "1796093"]
+
+    response = TEST_API.standardize_medication(request=requests)
+    positional_response = TEST_API.standardize_medication(requests)
+
+    assert response == positional_response
+    assert response is not None
+    assert len(response) == 3
+    assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
+    assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
+    assert any(coding["code"] == expected[2] for coding in response[2]["coding"])
 
 
 _STANDARDIZE_OBSERVATION_PAYLOADS = [
@@ -329,12 +343,6 @@ _STANDARDIZE_OBSERVATION_PAYLOADS = [
     pytest.param({"request": {"code": "8480-6"}}, "8480-6", id="loinc-request"),
     pytest.param({"display": "BMI"}, "39156-5", id="display"),
     pytest.param({"request": {"display": "BMI"}}, "39156-5", id="display-request"),
-    pytest.param(
-        {"request": [{"code": "8480-6"}, {"display": "BMI"}]},
-        ["8480-6", "39156-5"],
-        id="batch",
-        marks=pytest.mark.xfail(reason="Batch requests not supported"),
-    ),
 ]
 
 
@@ -347,12 +355,21 @@ def test_api_standardize_observation_should_standardize(payload, expected):
 
     assert response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 2
-        assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
-        assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
-    else:
-        assert any(coding["code"] == expected for coding in response["coding"])
+    assert any(coding["code"] == expected for coding in response["coding"])
+
+
+def test_api_standardize_observation_should_standardize_batch() -> None:
+    requests: list[StandardizeRequest] = [{"code": "8480-6"}, {"display": "BMI"}]
+    expected = ["8480-6", "39156-5"]
+
+    response = TEST_API.standardize_observation(request=requests)
+    positional_response = TEST_API.standardize_observation(requests)
+
+    assert response == positional_response
+    assert response is not None
+    assert len(response) == 2
+    assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
+    assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
 
 
 _STANDARDIZE_PROCEDURE_PAYLOADS = [
@@ -360,12 +377,6 @@ _STANDARDIZE_PROCEDURE_PAYLOADS = [
     pytest.param({"request": {"code": "80146002"}}, "80146002", id="snomed-request"),
     pytest.param({"display": "ct head&neck"}, "429858000", id="display"),
     pytest.param({"request": {"display": "ct head&neck"}}, "429858000", id="display"),
-    pytest.param(
-        {"request": [{"code": "80146002"}, {"display": "ct head&neck"}]},
-        ["80146002", "429858000"],
-        id="batch",
-        marks=pytest.mark.xfail(reason="Batch requests not supported"),
-    ),
 ]
 
 
@@ -378,12 +389,24 @@ def test_api_standardize_procedure_should_standardize(payload, expected):
 
     assert response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 2
-        assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
-        assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
-    else:
-        assert any(coding["code"] == expected for coding in response["coding"])
+    assert any(coding["code"] == expected for coding in response["coding"])
+
+
+def test_api_standardize_procedure_should_standardize_batch() -> None:
+    requests: list[StandardizeRequest] = [
+        {"code": "80146002"},
+        {"display": "ct head&neck"},
+    ]
+    expected = ["80146002", "429858000"]
+
+    response = TEST_API.standardize_procedure(request=requests)
+    positional_response = TEST_API.standardize_procedure(requests)
+
+    assert response == positional_response
+    assert response is not None
+    assert len(response) == 2
+    assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
+    assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
 
 
 _STANDARDIZE_RADIOLOGY_PAYLOADS = [
@@ -403,16 +426,6 @@ _STANDARDIZE_RADIOLOGY_PAYLOADS = [
         "30799-1",
         id="display-request",
     ),
-    pytest.param(
-        {
-            "request": [
-                {"code": "711232001", "system": "SNOMED"},
-                {"display": "CT scan of head w/o iv contrast 3d ago@StJoes"},
-            ]
-        },
-        ["711232001", "30799-1"],
-        id="batch",
-    ),
 ]
 
 
@@ -425,12 +438,24 @@ def test_api_standardize_radiology_should_standardize(payload, expected):
 
     assert response == positional_response
     assert response is not None
-    if isinstance(response, list):
-        assert len(response) == 2
-        assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
-        assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
-    else:
-        assert any(coding["code"] == expected for coding in response["coding"])
+    assert any(coding["code"] == expected for coding in response["coding"])
+
+
+def test_api_standardize_radiology_should_standardize_batch() -> None:
+    requests: list[StandardizeRequest] = [
+        {"code": "711232001", "system": "SNOMED"},
+        {"display": "CT scan of head w/o iv contrast 3d ago@StJoes"},
+    ]
+    expected = ["711232001", "30799-1"]
+
+    response = TEST_API.standardize_radiology(request=requests)
+    positional_response = TEST_API.standardize_radiology(requests)
+
+    assert response == positional_response
+    assert response is not None
+    assert len(response) == 2
+    assert any(coding["code"] == expected[0] for coding in response[0]["coding"])
+    assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
 
 
 _HL7 = """
