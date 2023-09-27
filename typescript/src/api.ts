@@ -55,6 +55,10 @@ export interface Configuration {
   additionalHeaders?: { [key: string]: string; };
 }
 
+type BatchResponse<T> = {
+  items: T;
+};
+
 export class OrchestrateApi {
   rosettaApi: RosettaApi;
 
@@ -77,6 +81,14 @@ export class OrchestrateApi {
     );
   }
 
+  async handleBatchOverload<TIn, TOut>(url: string, request: TIn): Promise<TOut> {
+    if (Array.isArray(request)) {
+      const batchResponse = await this.rosettaApi.post(`${url}/batch`, { items: request });
+      return (batchResponse as BatchResponse<TOut>).items;
+    }
+    return this.rosettaApi.post(url, request);
+  }
+
   /**
    * Classifies a condition, problem, or diagnosis. The input must be from one of the following code systems:
    *
@@ -86,9 +98,20 @@ export class OrchestrateApi {
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html
+  */
+  classifyCondition(request: ClassifyConditionRequest): Promise<ClassifyConditionResponse>;
+  /**
+   * Classifies conditions, problems, or diagnoses. The input must be from one of the following code systems:
+   * - ICD-10-CM
+   * - ICD-9-CM-Diagnosis
+   * - SNOMED
+   * @param request An array of FHIR Codings
+   * @returns An array of sets of key/value pairs representing different classification of the supplied coding in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html
    */
-  classifyCondition(request: ClassifyConditionRequest): Promise<ClassifyConditionResponse> {
-    return this.rosettaApi.post("/terminology/v1/classify/condition", request);
+  classifyCondition(request: ClassifyConditionRequest[]): Promise<ClassifyConditionResponse[]>;
+  classifyCondition(request: ClassifyConditionRequest | ClassifyConditionRequest[]): Promise<ClassifyConditionResponse | ClassifyConditionResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/classify/condition", request);
   }
 
   /**
@@ -102,8 +125,21 @@ export class OrchestrateApi {
    * @returns A set of key/value pairs representing different classification of the supplied coding
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html
    */
-  classifyMedication(request: ClassifyMedicationRequest): Promise<ClassifyMedicationResponse> {
-    return this.rosettaApi.post("/terminology/v1/classify/medication", request);
+  classifyMedication(request: ClassifyMedicationRequest): Promise<ClassifyMedicationResponse>;
+  /**
+   * Classifies medications. The input must be from one of the following code systems:
+   *
+   * - RxNorm
+   * - NDC
+   * - CVX
+   * - SNOMED
+   * @param request An array of FHIR Codings
+   * @returns An array of sets of key/value pairs representing different classification of the supplied coding in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html
+   */
+  classifyMedication(request: ClassifyMedicationRequest[]): Promise<ClassifyMedicationResponse[]>;
+  classifyMedication(request: ClassifyMedicationRequest | ClassifyMedicationRequest[]): Promise<ClassifyMedicationResponse | ClassifyMedicationResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/classify/medication", request);
   }
 
   /**
@@ -115,8 +151,19 @@ export class OrchestrateApi {
    * @returns A set of key/value pairs representing different classification of the supplied coding
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html
    */
-  classifyObservation(request: ClassifyObservationRequest): Promise<ClassifyObservationResponse> {
-    return this.rosettaApi.post("/terminology/v1/classify/observation", request);
+  classifyObservation(request: ClassifyObservationRequest): Promise<ClassifyObservationResponse>;
+  /**
+   * Classifies observations, including lab observations and panels, radiology or other reports. The input must be from one of the following code systems:
+   *
+   * - LOINC
+   * - SNOMED
+   * @param request An array of FHIR Codings
+   * @returns An array of sets of key/value pairs representing different classification of the supplied coding in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html
+   */
+  classifyObservation(request: ClassifyObservationRequest[]): Promise<ClassifyObservationResponse[]>;
+  classifyObservation(request: ClassifyObservationRequest | ClassifyObservationRequest[]): Promise<ClassifyObservationResponse | ClassifyObservationResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/classify/observation", request);
   }
 
   /**
@@ -125,8 +172,16 @@ export class OrchestrateApi {
    * @returns A collection of standardized codes
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html
    */
-  standardizeCondition(request: StandardizeRequest): Promise<StandardizeConditionResponse> {
-    return this.rosettaApi.post("/terminology/v1/standardize/condition", request);
+  standardizeCondition(request: StandardizeRequest): Promise<StandardizeConditionResponse>;
+  /**
+   * Standardize conditions, problems, or diagnoses
+   * @param request An array of FHIR Codings
+   * @returns An array of collections of standardized codes in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html
+   */
+  standardizeCondition(request: StandardizeRequest[]): Promise<StandardizeConditionResponse[]>;
+  standardizeCondition(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeConditionResponse | StandardizeConditionResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/standardize/condition", request);
   }
 
   /**
@@ -135,8 +190,16 @@ export class OrchestrateApi {
    * @returns A collection of standardized codes
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/medication.html
    */
-  standardizeMedication(request: StandardizeRequest): Promise<StandardizeMedicationResponse> {
-    return this.rosettaApi.post("/terminology/v1/standardize/medication", request);
+  standardizeMedication(request: StandardizeRequest): Promise<StandardizeMedicationResponse>;
+  /**
+   * Standardize medication codes
+   * @param request An array of FHIR Codings
+   * @returns An array of collections of standardized codes in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/medication.html
+   */
+  standardizeMedication(request: StandardizeRequest[]): Promise<StandardizeMedicationResponse[]>;
+  standardizeMedication(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeMedicationResponse | StandardizeMedicationResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/standardize/medication", request);
   }
 
   /**
@@ -145,8 +208,16 @@ export class OrchestrateApi {
    * @returns A collection of standardized codes
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html
    */
-  standardizeObservation(request: StandardizeRequest): Promise<StandardizeObservationResponse> {
-    return this.rosettaApi.post("/terminology/v1/standardize/observation", request);
+  standardizeObservation(request: StandardizeRequest): Promise<StandardizeObservationResponse>;
+  /**
+   * Standardize observation codes
+   * @param request An array of FHIR Codings
+   * @returns An array of collections of standardized codes in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html
+   */
+  standardizeObservation(request: StandardizeRequest[]): Promise<StandardizeObservationResponse[]>;
+  standardizeObservation(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeObservationResponse | StandardizeObservationResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/standardize/observation", request);
   }
 
   /**
@@ -155,8 +226,16 @@ export class OrchestrateApi {
    * @returns A collection of standardized codes
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html
    */
-  standardizeProcedure(request: StandardizeRequest): Promise<StandardizeObservationResponse> {
-    return this.rosettaApi.post("/terminology/v1/standardize/procedure", request);
+  standardizeProcedure(request: StandardizeRequest): Promise<StandardizeObservationResponse>;
+  /**
+   * Standardize procedures
+   * @param request An array of FHIR Codings
+   * @returns An array of collections of standardized codes in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html
+   */
+  standardizeProcedure(request: StandardizeRequest[]): Promise<StandardizeObservationResponse[]>;
+  standardizeProcedure(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeObservationResponse | StandardizeObservationResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/standardize/procedure", request);
   }
 
   /**
@@ -165,8 +244,16 @@ export class OrchestrateApi {
    * @returns A collection of standardized codes
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html
    */
-  standardizeLab(request: StandardizeRequest): Promise<StandardizeLabResponse> {
-    return this.rosettaApi.post("/terminology/v1/standardize/lab", request);
+  standardizeLab(request: StandardizeRequest): Promise<StandardizeLabResponse>;
+  /**
+   * Standardize lab observations or report codes
+   * @param request An array of FHIR Codings
+   * @returns An array of collections of standardized codes in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html
+   */
+  standardizeLab(request: StandardizeRequest[]): Promise<StandardizeLabResponse[]>;
+  standardizeLab(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeLabResponse | StandardizeLabResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/standardize/lab", request);
   }
 
   /**
@@ -175,8 +262,16 @@ export class OrchestrateApi {
    * @returns A collection of standardized codes
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html
    */
-  standardizeRadiology(request: StandardizeRequest): Promise<StandardizeRadiologyResponse> {
-    return this.rosettaApi.post("/terminology/v1/standardize/radiology", request);
+  standardizeRadiology(request: StandardizeRequest): Promise<StandardizeRadiologyResponse>;
+  /**
+   * Standardize radiology or other report codes
+   * @param request An array of FHIR Codings
+   * @returns An array of collections of standardized codes in the same order as the input
+   * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html
+   */
+  standardizeRadiology(request: StandardizeRequest[]): Promise<StandardizeRadiologyResponse[]>;
+  standardizeRadiology(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeRadiologyResponse | StandardizeRadiologyResponse[]> {
+    return this.handleBatchOverload("/terminology/v1/standardize/radiology", request);
   }
 
   /**
