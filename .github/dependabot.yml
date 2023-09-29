@@ -8,8 +8,9 @@ updates:
       - "jeremytwfortune"
     groups:
       minor-patch:
-        patterns: "*"
-        update_types:
+        patterns:
+          - "*"
+        update-types:
           - "minor"
           - "patch"
   - package-ecosystem: "npm"
@@ -20,8 +21,9 @@ updates:
       - "jeremytwfortune"
     groups:
       minor-patch:
-        patterns: "*"
-        update_types:
+        patterns:
+          - "*"
+        update-types:
           - "minor"
           - "patch"
   - package-ecosystem: "github-actions"
@@ -32,7 +34,8 @@ updates:
       - "jeremytwfortune"
     groups:
       minor-patch:
-        patterns: "*"
-        update_types:
+        patterns:
+          - "*"
+        update-types:
           - "minor"
           - "patch"
