@@ -1,6 +1,7 @@
 import { Bundle } from 'fhir/r4';
 import { OrchestrateApi } from '../src/api';
-import { describe, it, expect } from '@jest/globals';
+import { ClassifyConditionRequest, ClassifyMedicationRequest, ClassifyObservationRequest, StandardizeRequest } from '../src/terminology';
+import { describe, it, expect, test } from '@jest/globals';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: "../.env" });
@@ -576,229 +577,291 @@ const riskProfileBundle = {
 } as Bundle;
 
 describe("classify condition", () => {
-  it("should classify with URL", async () => {
-    const result = await orchestrate.classifyCondition({
+  const requests: ClassifyConditionRequest[] = [
+    {
       code: "119981000146107",
       system: "http://snomed.info/sct",
-    });
+    },
+    {
+      code: "119981000146107",
+      system: "SNOMED",
+    },
+  ];
+  const cases = requests.map((input) => ({ input }));
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyConditionRequest; }) => {
+    const result = await orchestrate.classifyCondition(input);
     expect(result).toBeDefined();
     expect(result.cciAcute).toBeTruthy();
   });
 
-  it("should classify with name", async () => {
-    const result = await orchestrate.classifyCondition({
-      code: "119981000146107",
-      system: "SNOMED",
+  it("should classify batch", async () => {
+    const results = await orchestrate.classifyCondition(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(2);
+    results.forEach((result) => {
+      expect(result.cciAcute).toBeTruthy();
     });
-    expect(result).toBeDefined();
-    expect(result.cciAcute).toBeTruthy();
   });
 });
 
 describe("classify medication", () => {
-  it("should classify with URL", async () => {
-    const result = await orchestrate.classifyMedication({
-      "code": "2468231",
-      "system": "http://www.nlm.nih.gov/research/umls/rxnorm"
-    });
+  const requests: ClassifyMedicationRequest[] = [
+    {
+      code: "2468231",
+      system: "http://www.nlm.nih.gov/research/umls/rxnorm",
+    },
+    {
+      code: "2468231",
+      system: "RxNorm",
+    },
+  ];
+  const cases = requests.map((input) => ({ input }));
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyMedicationRequest; }) => {
+    const result = await orchestrate.classifyMedication(input);
     expect(result).toBeDefined();
     expect(result.rxNormGeneric).toBeTruthy();
   });
 
-  it("should classify with name", async () => {
-    const result = await orchestrate.classifyMedication({
-      "code": "2468231",
-      "system": "RxNorm"
+  it("should classify batch", async () => {
+    const results = await orchestrate.classifyMedication(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(2);
+    results.forEach((result) => {
+      expect(result.rxNormGeneric).toBeTruthy();
     });
-    expect(result).toBeDefined();
-    expect(result.rxNormGeneric).toBeTruthy();
   });
 });
 
 describe("classify observation", () => {
-  it("should classify with URL", async () => {
-    const result = await orchestrate.classifyObservation({
-      "code": "94558-4",
-      "system": "http://loinc.org"
-    });
+  const requests: ClassifyObservationRequest[] = [
+    {
+      code: "94558-4",
+      system: "http://loinc.org",
+    },
+    {
+      code: "94558-4",
+      system: "LOINC",
+    },
+  ];
+  const cases = requests.map((input) => ({ input }));
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyObservationRequest; }) => {
+    const result = await orchestrate.classifyObservation(input);
     expect(result).toBeDefined();
     expect(result.loincClass).toBe("MICRO");
   });
 
   it("should classify with name", async () => {
-    const result = await orchestrate.classifyObservation({
-      "code": "94558-4",
-      "system": "LOINC"
+    const results = await orchestrate.classifyObservation(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(2);
+    results.forEach((result) => {
+      expect(result.loincClass).toBe("MICRO");
     });
-    expect(result).toBeDefined();
-    expect(result.loincClass).toBe("MICRO");
   });
 });
 
 describe("standardize condition", () => {
-  it("should standardize snomed", async () => {
-    const result = await orchestrate.standardizeCondition({
-      "code": "370221004"
-    });
+  const requests: StandardizeRequest[] = [
+    {
+      code: "370221004",
+    },
+    {
+      code: "J45.50",
+    },
+    {
+      display: "dm2",
+    },
+  ];
+  const expected = [
+    "370221004",
+    "J45.50",
+    "44054006",
+  ];
+  const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
+  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    const result = await orchestrate.standardizeCondition(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe("370221004");
+    expect(result.coding[0].code).toBe(expected);
   });
 
-  it("should standardize icd", async () => {
-    const result = await orchestrate.standardizeCondition({
-      "code": "J45.50"
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe("J45.50");
-  });
-
-  it("should standardize free text", async () => {
-    const result = await orchestrate.standardizeCondition({
-      "display": "dm2"
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding).toContainEqual({
-      "code": "44054006",
-      "display": "Diabetes mellitus type 2 (disorder)",
-      "system": "http://snomed.info/sct"
+  it("should standardize batch", async () => {
+    const results = await orchestrate.standardizeCondition(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(3);
+    results.forEach((result, index) => {
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected[index]);
     });
   });
 });
 
 describe("standardize lab", () => {
-  it("should standardize loinc", async () => {
-    const result = await orchestrate.standardizeLab({
-      "code": "4548-4"
-    });
+  const requests: StandardizeRequest[] = [
+    {
+      code: "4548-4",
+    },
+    {
+      display: "hba1c 1/15/22 from outside lab"
+    },
+  ];
+  const expected = [
+    "4548-4",
+    "43396009",
+  ];
+  const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
+  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    const result = await orchestrate.standardizeLab(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe("4548-4");
+    expect(result.coding[0].code).toBe(expected);
   });
 
-  it("should standardize free text", async () => {
-    const result = await orchestrate.standardizeLab({
-      "display": "hba1c 1/15/22 from outside lab"
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding).toContainEqual({
-      "system": "http://snomed.info/sct",
-      "code": "43396009",
-      "display": "Hemoglobin A1c measurement (procedure)"
+  it("should standardize batch", async () => {
+    const results = await orchestrate.standardizeLab(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(2);
+    results.forEach((result, index) => {
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected[index]);
     });
   });
 });
 
 describe("standardize medication", () => {
-  it("should standardize rxnorm with system", async () => {
-    const result = await orchestrate.standardizeMedication({
-      "code": "861004",
-      "system": "RxNorm"
-    });
+  const requests: StandardizeRequest[] = [
+    {
+      code: "861004",
+      system: "RxNorm"
+    },
+    {
+      code: "59267-1000-02",
+    },
+    {
+      display: "Jentadueto extended (linagliptin 2.5 / metFORMIN  1000mg)"
+    },
+  ];
+  const expected = [
+    "861004",
+    "59267100002",
+    "1796093",
+  ];
+  const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
+
+  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    const result = await orchestrate.standardizeMedication(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe("861004");
+    expect(result.coding[0].code).toBe(expected);
   });
 
-  it("should standardize ndc", async () => {
-    const result = await orchestrate.standardizeMedication({
-      "code": "59267-1000-02",
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding).toContainEqual({
-      "system": "http://hl7.org/fhir/sid/ndc",
-      "code": "59267100002",
-      "display": "SARS-CoV-2 (COVID-19) vaccine, mRNA-BNT162b2 0.1 MG/ML Injectable Suspension"
-    });
-  });
-
-  it("should standardize free text", async () => {
-    const result = await orchestrate.standardizeMedication({
-      "display": "Jentadueto extended (linagliptin 2.5 / metFORMIN  1000mg)"
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding).toContainEqual({
-      "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
-      "code": "1796093",
-      "display": "linagliptin 2.5 MG / metformin hydrochloride 1000 MG Extended Release Oral Tablet [Jentadueto]"
+  it("should standardize batch", async () => {
+    const results = await orchestrate.standardizeMedication(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(3);
+    results.forEach((result, index) => {
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected[index]);
     });
   });
 });
 
 describe("standardize observation", () => {
-  it("should standardize loinc", async () => {
-    const result = await orchestrate.standardizeObservation({
-      "code": "8480-6"
-    });
+  const requests: StandardizeRequest[] = [
+    {
+      code: "8480-6",
+    },
+    {
+      display: "BMI"
+    },
+  ];
+  const expected = [
+    "8480-6",
+    "39156-5",
+  ];
+  const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
+
+  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    const result = await orchestrate.standardizeObservation(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe("8480-6");
+    expect(result.coding[0].code).toBe(expected);
   });
 
-  it("should standardize free text", async () => {
-    const result = await orchestrate.standardizeObservation({
-      "display": "BMI"
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding).toContainEqual({
-      "system": "http://loinc.org",
-      "code": "39156-5",
-      "display": "BMI"
+  it("should standardize batch", async () => {
+    const results = await orchestrate.standardizeObservation(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(2);
+    results.forEach((result, index) => {
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected[index]);
     });
   });
 });
 
 describe("standardize procedure", () => {
-  it("should standardize snomed", async () => {
-    const result = await orchestrate.standardizeProcedure({
-      "code": "80146002"
-    });
+  const requests: StandardizeRequest[] = [
+    {
+      code: "80146002",
+    },
+    {
+      display: "ct head&neck"
+    },
+  ];
+  const expected = [
+    "80146002",
+    "429858000",
+  ];
+  const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
+
+  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    const result = await orchestrate.standardizeProcedure(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe("80146002");
+    expect(result.coding[0].code).toBe(expected);
   });
 
-  it("should standardize free text", async () => {
-    const result = await orchestrate.standardizeProcedure({
-      "display": "ct head&neck"
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding).toContainEqual({
-      "system": "http://snomed.info/sct",
-      "code": "429858000",
-      "display": "Computed tomography of head and neck (procedure)"
+  it("should standardize batch", async () => {
+    const results = await orchestrate.standardizeProcedure(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(2);
+    results.forEach((result, index) => {
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected[index]);
     });
   });
 });
 
 describe("standardize radiology", () => {
-  it("should standardize snomed", async () => {
-    const result = await orchestrate.standardizeRadiology({
-      "code": "711232001",
-      "system": "SNOMED"
-    });
+  const requests: StandardizeRequest[] = [
+    {
+      code: "711232001",
+      system: "SNOMED"
+    },
+    {
+      display: "CT scan of head w/o iv contrast 3d ago@StJoes"
+    },
+  ];
+  const expected = [
+    "711232001",
+    "30799-1",
+  ];
+  const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
+
+  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    const result = await orchestrate.standardizeRadiology(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe("711232001");
+    expect(result.coding[0].code).toBe(expected);
   });
 
-  it("should standardize free text", async () => {
-    const result = await orchestrate.standardizeRadiology({
-      "display": "CT scan of head w/o iv contrast 3d ago@StJoes"
-    });
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding).toContainEqual({
-      "system": "http://loinc.org",
-      "code": "30799-1",
-      "display": "CT Head WO contr"
+  it("should standardize batch", async () => {
+    const results = await orchestrate.standardizeRadiology(requests);
+    expect(results).toBeDefined();
+    expect(results.length).toBe(2);
+    results.forEach((result, index) => {
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected[index]);
     });
   });
 });

@@ -1,5 +1,5 @@
 import json
-from typing import Any, Literal, Mapping, Optional
+from typing import Any, Callable, Literal, Mapping, Optional, Union, overload
 from urllib.parse import quote
 
 import requests
@@ -14,10 +14,13 @@ from orchestrate.convert import (
 from orchestrate._internal.fhir import Bundle, Parameters
 from orchestrate.insight import InsightRiskProfileResponse
 from orchestrate.terminology import (
+    ClassifyConditionRequest,
     ClassifyConditionResponse,
     ClassifyConditionSystems,
+    ClassifyMedicationRequest,
     ClassifyMedicationResponse,
     ClassifyMedicationSystems,
+    ClassifyObservationRequest,
     ClassifyObservationResponse,
     ClassifyObservationSystems,
     CodeSystems,
@@ -28,7 +31,12 @@ from orchestrate.terminology import (
     GetFhirR4ValueSetScopesResponse,
     GetFhirR4ValueSetsByScopeResponse,
     StandardizeConditionResponse,
+    StandardizeLabResponse,
     StandardizeMedicationResponse,
+    StandardizeObservationResponse,
+    StandardizeProcedureResponse,
+    StandardizeRadiologyResponse,
+    StandardizeRequest,
     StandardizeTargetSystems,
     SummarizeFhirR4CodeSystemResponse,
     SummarizeFhirR4CodeSystemsResponse,
@@ -168,6 +176,25 @@ class OrchestrateApi(_RosettaApi):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(base_url={self._base_url!r})"
 
+    def _handle_batch_overloaded_request(self, *args, **kwargs) -> Callable[[str], Any]:
+        body: dict[str, Any] = {}
+        request = kwargs.get("request")
+        if request is None and len(args) > 0:
+            request = args[0]
+        if isinstance(request, list):
+            body = {"items": [_get_coding_body(**item) for item in request]}
+            return lambda url: self._post(f"{url}/batch", body).get("items")
+        if isinstance(request, dict):
+            body = _get_coding_body(**request)
+            return lambda url: self._post(url, body)
+
+        code = kwargs.get("code") or (args[0] if len(args) > 0 else None)
+        system = kwargs.get("system") or (args[1] if len(args) > 1 else None)
+        display = kwargs.get("display") or (args[2] if len(args) > 2 else None)
+        body = _get_coding_body(code, system, display)
+        return lambda url: self._post(url, body)
+
+    @overload
     def classify_condition(
         self,
         code: str,
@@ -192,13 +219,73 @@ class OrchestrateApi(_RosettaApi):
 
         A set of key/value pairs representing different classification of the supplied coding
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/classify/condition", body)
+        ...
 
+    @overload
+    def classify_condition(
+        self, request: ClassifyConditionRequest
+    ) -> ClassifyConditionResponse:
+        """
+        Classifies a condition, problem, or diagnosis. The input must be from
+        one of the following code systems:
+
+        - ICD-10-CM
+        - ICD-9-CM-Diagnosis
+        - SNOMED
+
+        ### Parameters
+
+        - `request`: The `ClassifyConditionRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A set of key/value pairs representing different classification of the supplied coding
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html>
+        """
+        ...
+
+    @overload
+    def classify_condition(
+        self, request: list[ClassifyConditionRequest]
+    ) -> list[ClassifyConditionResponse]:
+        """
+        Classifies conditions, problems, or diagnoses. The input must be from
+        one of the following code systems:
+
+        - ICD-10-CM
+        - ICD-9-CM-Diagnosis
+        - SNOMED
+
+        ### Parameters
+
+        - `request`: A list of `ClassifyConditionRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of sets of key/value pairs representing different classification of the supplied coding
+        in the same order as the input list.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html>
+        """
+        ...
+
+    def classify_condition(
+        self, *args, **kwargs
+    ) -> Union[ClassifyConditionResponse, list[ClassifyConditionResponse]]:
+        url = "/terminology/v1/classify/condition"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def classify_medication(
         self,
         code: str,
@@ -223,13 +310,73 @@ class OrchestrateApi(_RosettaApi):
 
         A set of key/value pairs representing different classification of the supplied coding
 
-        ### Documenation
+        ### Documentation
 
-        <
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/classify/medication", body)
+        ...
 
+    @overload
+    def classify_medication(
+        self, request: ClassifyMedicationRequest
+    ) -> ClassifyMedicationResponse:
+        """
+        Classifies a medication. The input must be from one of the following code systems:
+
+        - RxNorm
+        - NDC
+        - CVX
+        - SNOMED
+
+        ### Parameters
+
+        - `request`: The `ClassifyMedicationRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A set of key/value pairs representing different classification of the supplied coding
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html>
+        """
+        ...
+
+    @overload
+    def classify_medication(
+        self, request: list[ClassifyMedicationRequest]
+    ) -> list[ClassifyMedicationResponse]:
+        """
+        Classifies medications. The input must be from one of the following code systems:
+
+        - RxNorm
+        - NDC
+        - CVX
+        - SNOMED
+
+        ### Parameters
+
+        - `request`: A list of `ClassifyMedicationRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of sets of key/value pairs representing different classification of the supplied coding
+        in the same order as the input list.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html>
+        """
+        ...
+
+    def classify_medication(
+        self, *args, **kwargs
+    ) -> Union[ClassifyMedicationResponse, list[ClassifyMedicationResponse]]:
+        url = "/terminology/v1/classify/medication"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def classify_observation(
         self,
         code: str,
@@ -254,13 +401,72 @@ class OrchestrateApi(_RosettaApi):
 
         A set of key/value pairs representing different classification of the supplied coding
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/classify/observation", body)
+        ...
 
+    @overload
+    def classify_observation(
+        self, request: ClassifyObservationRequest
+    ) -> ClassifyObservationResponse:
+        """
+        Classifies an observation, including lab observations and panels,
+        radiology or other reports. The input must be from one of the following
+        code systems:
+
+        - LOINC
+        - SNOMED
+
+        ### Parameters
+
+        - `request`: The `ClassifyObservationRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A set of key/value pairs representing different classification of the supplied coding
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html>
+        """
+        ...
+
+    @overload
+    def classify_observation(
+        self, request: list[ClassifyObservationRequest]
+    ) -> list[ClassifyObservationResponse]:
+        """
+        Classifies observations, including lab observations and panels,
+        radiology or other reports. The input must be from one of the following
+        code systems:
+
+        - LOINC
+        - SNOMED
+
+        ### Parameters
+
+        - `request`: A list of `ClassifyObservationRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of sets of key/value pairs representing different classification of the supplied coding
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html>
+        """
+        ...
+
+    def classify_observation(
+        self, *args, **kwargs
+    ) -> Union[ClassifyObservationResponse, list[ClassifyObservationResponse]]:
+        url = "/terminology/v1/classify/observation"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def standardize_condition(
         self,
         code: Optional[str] = None,
@@ -280,13 +486,62 @@ class OrchestrateApi(_RosettaApi):
 
         A collection of standardized codes
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/standardize/condition", body)
+        ...
 
+    @overload
+    def standardize_condition(
+        self, request: StandardizeRequest
+    ) -> StandardizeConditionResponse:
+        """
+        Standardize a condition, problem, or diagnosis
+
+        ### Parameters
+
+        - `request`: The `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A collection of standardized codes
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html>
+        """
+        ...
+
+    @overload
+    def standardize_condition(
+        self, request: list[StandardizeRequest]
+    ) -> list[StandardizeConditionResponse]:
+        """
+        Standardize conditions, problems, or diagnoses
+
+        ### Parameters
+
+        - `request`: A list of `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A collection of standardized codes
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html>
+        """
+        ...
+
+    def standardize_condition(
+        self, *args, **kwargs
+    ) -> Union[StandardizeConditionResponse, list[StandardizeConditionResponse]]:
+        url = "/terminology/v1/standardize/condition"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def standardize_medication(
         self,
         code: Optional[str] = None,
@@ -306,19 +561,68 @@ class OrchestrateApi(_RosettaApi):
 
         A collection of standardized codes
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/standardize/medication", body)
+        ...
 
+    @overload
+    def standardize_medication(
+        self, request: StandardizeRequest
+    ) -> StandardizeMedicationResponse:
+        """
+        Standardize a medication code
+
+        ### Parameters
+
+        - `request`: The `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A collection of standardized codes
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html>
+        """
+        ...
+
+    @overload
+    def standardize_medication(
+        self, request: list[StandardizeRequest]
+    ) -> list[StandardizeMedicationResponse]:
+        """
+        Standardize medication codes
+
+        ### Parameters
+
+        - `request`: A list of `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of collections of standardized codes in the same order as the input list.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html>
+        """
+        ...
+
+    def standardize_medication(
+        self, *args, **kwargs
+    ) -> Union[StandardizeMedicationResponse, list[StandardizeMedicationResponse]]:
+        url = "/terminology/v1/standardize/medication"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def standardize_observation(
         self,
         code: Optional[str] = None,
         system: Optional[StandardizeTargetSystems] = None,
         display: Optional[str] = None,
-    ) -> StandardizeMedicationResponse:
+    ) -> StandardizeObservationResponse:
         """
         Standardize an observation code
 
@@ -332,19 +636,70 @@ class OrchestrateApi(_RosettaApi):
 
         A collection of standardized codes
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/standardize/observation", body)
+        ...
 
+    @overload
+    def standardize_observation(
+        self,
+        request: StandardizeRequest,
+    ) -> StandardizeObservationResponse:
+        """
+        Standardize an observation code
+
+        ### Parameters
+
+        - `request`: The `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A collection of standardized codes
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html>
+        """
+        ...
+
+    @overload
+    def standardize_observation(
+        self,
+        request: list[StandardizeRequest],
+    ) -> list[StandardizeObservationResponse]:
+        """
+        Standardize observation codes
+
+        ### Parameters
+
+        - `request`: A list of `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of collections of standardized codes in the same order as the input list.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html>
+        """
+        ...
+
+    def standardize_observation(
+        self, *args, **kwargs
+    ) -> Union[StandardizeObservationResponse, list[StandardizeObservationResponse]]:
+        url = "/terminology/v1/standardize/observation"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def standardize_procedure(
         self,
         code: Optional[str] = None,
         system: Optional[StandardizeTargetSystems] = None,
         display: Optional[str] = None,
-    ) -> StandardizeMedicationResponse:
+    ) -> StandardizeProcedureResponse:
         """
         Standardize a procedure code
 
@@ -358,19 +713,70 @@ class OrchestrateApi(_RosettaApi):
 
         A collection of standardized codes
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/standardize/procedure", body)
+        ...
 
+    @overload
+    def standardize_procedure(
+        self,
+        request: StandardizeRequest,
+    ) -> StandardizeProcedureResponse:
+        """
+        Standardize a procedure code
+
+        ### Parameters
+
+        - `request`: The `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A collection of standardized codes
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html>
+        """
+        ...
+
+    @overload
+    def standardize_procedure(
+        self,
+        request: list[StandardizeRequest],
+    ) -> list[StandardizeProcedureResponse]:
+        """
+        Standardize procedure codes
+
+        ### Parameters
+
+        - `request`: A list of `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of collections of standardized codes in the same order as the input list.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html>
+        """
+        ...
+
+    def standardize_procedure(
+        self, *args, **kwargs
+    ) -> Union[StandardizeProcedureResponse, list[StandardizeProcedureResponse]]:
+        url = "/terminology/v1/standardize/procedure"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def standardize_lab(
         self,
         code: Optional[str] = None,
         system: Optional[StandardizeTargetSystems] = None,
         display: Optional[str] = None,
-    ) -> StandardizeMedicationResponse:
+    ) -> StandardizeLabResponse:
         """
         Standardize a lab code
 
@@ -384,19 +790,70 @@ class OrchestrateApi(_RosettaApi):
 
         A collection of standardized codes
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/standardize/lab", body)
+        ...
 
+    @overload
+    def standardize_lab(
+        self,
+        request: StandardizeRequest,
+    ) -> StandardizeLabResponse:
+        """
+        Standardize a lab code
+
+        ### Parameters
+
+        - `request`: The `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A collection of standardized codes
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html>
+        """
+        ...
+
+    @overload
+    def standardize_lab(
+        self,
+        request: list[StandardizeRequest],
+    ) -> list[StandardizeLabResponse]:
+        """
+        Standardize lab codes
+
+        ### Parameters
+
+        - `request`: A list of `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of collections of standardized codes in the same order as the input list.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html>
+        """
+        ...
+
+    def standardize_lab(
+        self, *args, **kwargs
+    ) -> Union[StandardizeLabResponse, list[StandardizeLabResponse]]:
+        url = "/terminology/v1/standardize/lab"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
+
+    @overload
     def standardize_radiology(
         self,
         code: Optional[str] = None,
         system: Optional[StandardizeTargetSystems] = None,
         display: Optional[str] = None,
-    ) -> StandardizeMedicationResponse:
+    ) -> StandardizeRadiologyResponse:
         """
         Standardize a radiology code
 
@@ -410,12 +867,62 @@ class OrchestrateApi(_RosettaApi):
 
         A collection of standardized codes
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html>
         """
-        body = _get_coding_body(code, system, display)
-        return self._post("/terminology/v1/standardize/radiology", body)
+        ...
+
+    @overload
+    def standardize_radiology(
+        self,
+        request: StandardizeRequest,
+    ) -> StandardizeRadiologyResponse:
+        """
+        Standardize a radiology code
+
+        ### Parameters
+
+        - `request`: The `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A collection of standardized codes
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html>
+        """
+        ...
+
+    @overload
+    def standardize_radiology(
+        self,
+        request: list[StandardizeRequest],
+    ) -> list[StandardizeRadiologyResponse]:
+        """
+        Standardize radiology codes
+
+        ### Parameters
+
+        - `request`: A list of `StandardizeRequest`, containing the code, system, and display
+
+        ### Returns
+
+        A list of collections of standardized codes in the same order as the input list.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html>
+        """
+        ...
+
+    def standardize_radiology(
+        self, *args, **kwargs
+    ) -> Union[StandardizeRadiologyResponse, list[StandardizeRadiologyResponse]]:
+        url = "/terminology/v1/standardize/radiology"
+        overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
+        return overload_handler(url)
 
     def convert_hl7_to_fhir_r4(
         self,
@@ -434,7 +941,7 @@ class OrchestrateApi(_RosettaApi):
 
         A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html>
         """
@@ -463,7 +970,7 @@ class OrchestrateApi(_RosettaApi):
 
         A FHIR R4 Bundle containing the clinical data parsed out of the CDA
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/convert/cda_to_fhir.html>
         """
@@ -487,7 +994,7 @@ class OrchestrateApi(_RosettaApi):
 
         A formatted PDF document suitable for human review
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/convert/cda_to_pdf.html>
         """
@@ -511,7 +1018,7 @@ class OrchestrateApi(_RosettaApi):
 
         An aggregated C-CDA R2.1 document in XML format
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/convert/fhir_to_cda.html>
         """
@@ -534,7 +1041,7 @@ class OrchestrateApi(_RosettaApi):
 
         A ZIP archive containing multiple CSV files, one for each supported OMOP data table.
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/convert/fhir_to_omop.html>
         """
@@ -602,7 +1109,7 @@ class OrchestrateApi(_RosettaApi):
 
         A new FHIR R4 Bundle containing measure and assessment resources
 
-        ### Documenation
+        ### Documentation
 
         <
         """
@@ -637,7 +1144,7 @@ class OrchestrateApi(_RosettaApi):
 
         A FHIR R4 CodeSystem resource
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
@@ -658,7 +1165,7 @@ class OrchestrateApi(_RosettaApi):
 
         A bundle of known CodeSystems
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
@@ -678,7 +1185,7 @@ class OrchestrateApi(_RosettaApi):
 
         A bundle of known ConceptMaps
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html>
         """
@@ -701,7 +1208,7 @@ class OrchestrateApi(_RosettaApi):
 
         A Parameters object with the `"result"` parameter of `"valueBoolean": true` indicating if the service was able to standardize the code
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html>
         """
@@ -728,7 +1235,7 @@ class OrchestrateApi(_RosettaApi):
 
         A bundle of ValueSets within the requested scope
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
@@ -756,7 +1263,7 @@ class OrchestrateApi(_RosettaApi):
 
         A ValueSet
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
@@ -779,7 +1286,7 @@ class OrchestrateApi(_RosettaApi):
 
         A ValueSet resource with only the count populated
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
@@ -796,7 +1303,7 @@ class OrchestrateApi(_RosettaApi):
 
         A unique ValueSet that contains a list of all scopes available on the server
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
@@ -825,7 +1332,7 @@ class OrchestrateApi(_RosettaApi):
 
         A bundle of ValueSets that match the search criteria
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
@@ -853,7 +1360,7 @@ class OrchestrateApi(_RosettaApi):
 
         An unpopulated CodeSystem
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
@@ -885,7 +1392,7 @@ class OrchestrateApi(_RosettaApi):
 
         A Parameters resource containing the classification results
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
@@ -911,7 +1418,7 @@ class OrchestrateApi(_RosettaApi):
 
         A single FHIR R4 Bundle containing the merged data from the input.
 
-        ### Documenation
+        ### Documentation
 
         <https://rosetta-api.docs.careevolution.com/convert/combine_bundles.html>
         """
