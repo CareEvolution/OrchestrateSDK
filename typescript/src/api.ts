@@ -341,7 +341,7 @@ export class OrchestrateApi {
    */
   summarizeFhirR4ValueSetScope(request: SummarizeFhirR4ValueSetScopeRequest): Promise<SummarizeFhirR4ValueSetScopeResponse> {
     const params = new URLSearchParams({
-      scope: request.scope,
+      "extension.scope": request.scope,
       _summary: "true"
     });
     const route = `/terminology/v1/fhir/r4/valueset?${params.toString()}`;

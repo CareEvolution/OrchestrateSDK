@@ -1240,7 +1240,7 @@ class OrchestrateApi(_RosettaApi):
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         parameters = {
-            "scope": scope,
+            "extension.scope": scope,
             "_summary": "true",
         }
         return self._get(
@@ -1339,7 +1339,7 @@ class OrchestrateApi(_RosettaApi):
         parameters = {
             **_get_pagination_parameters(page_number, page_size),
             "name": name,
-            "scope": scope,
+            "extension.scope": scope,
         }
         return self._get(
             path=f"/terminology/v1/fhir/r4/valueset",
