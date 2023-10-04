@@ -1,6 +1,6 @@
 # Orchestrate SDK
 
-The Orchestrate SDK is a TypeScript and JavaScript library for interacting with the Orchestrate API at <https://api.rosetta.careevolution.com>.
+The Orchestrate SDK is a TypeScript and JavaScript library for interacting with the Orchestrate API at <https://api.careevolutionapi.com>.
 
 Full documentation of the API is available at <https://rosetta-api.docs.careevolution.com/>.
 

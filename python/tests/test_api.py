@@ -619,7 +619,7 @@ _BUNDLE = {
     "type": "batch-response",
     "entry": [
         {
-            "fullUrl": "https://api.rosetta.careevolution.com/Patient/35b77437-425d-419c-90b5-af4bc433ebe9",
+            "fullUrl": "https://api.careevolutionapi.com/Patient/35b77437-425d-419c-90b5-af4bc433ebe9",
             "resource": {
                 "resourceType": "Patient",
                 "id": "35b77437-425d-419c-90b5-af4bc433ebe9",

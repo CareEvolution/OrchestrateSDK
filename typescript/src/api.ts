@@ -76,7 +76,7 @@ export class OrchestrateApi {
     }
 
     this.rosettaApi = new RosettaApi(
-      configuration.baseUrl ?? "https://api.rosetta.careevolution.com",
+      configuration.baseUrl ?? "https://api.careevolutionapi.com",
       defaultHeaders,
     );
   }

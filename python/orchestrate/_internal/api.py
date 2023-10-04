@@ -169,7 +169,7 @@ class OrchestrateApi(_RosettaApi):
             default_headers["x-api-key"] = api_key
 
         super().__init__(
-            base_url=base_url or "https://api.rosetta.careevolution.com",
+            base_url=base_url or "https://api.careevolutionapi.com",
             default_headers=default_headers,
         )
 
