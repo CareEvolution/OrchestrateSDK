@@ -60,7 +60,7 @@ type BatchResponse<T> = {
 };
 
 export class OrchestrateApi {
-  rosettaApi: RosettaApi;
+  httpHandler: HttpHandler;
 
   constructor(configuration: Configuration) {
     const defaultHeaders = {
@@ -75,7 +75,7 @@ export class OrchestrateApi {
       defaultHeaders["x-api-key"] = configuration.apiKey;
     }
 
-    this.rosettaApi = new RosettaApi(
+    this.httpHandler = new HttpHandler(
       configuration.baseUrl ?? "https://api.careevolutionapi.com",
       defaultHeaders,
     );
@@ -83,10 +83,10 @@ export class OrchestrateApi {
 
   async handleBatchOverload<TIn, TOut>(url: string, request: TIn): Promise<TOut> {
     if (Array.isArray(request)) {
-      const batchResponse = await this.rosettaApi.post(`${url}/batch`, { items: request });
+      const batchResponse = await this.httpHandler.post(`${url}/batch`, { items: request });
       return (batchResponse as BatchResponse<TOut>).items;
     }
-    return this.rosettaApi.post(url, request);
+    return this.httpHandler.post(url, request);
   }
 
   /**
@@ -296,7 +296,7 @@ export class OrchestrateApi {
     if (urlParametersString) {
       route += `?${urlParametersString}`;
     }
-    return this.rosettaApi.get(route);
+    return this.httpHandler.get(route);
   }
 
   /**
@@ -305,7 +305,7 @@ export class OrchestrateApi {
    * @link https://rosetta-api.docs.careevolution.com/fhir/codesystem.html
    */
   summarizeFhirR4CodeSystems(): Promise<SummarizeFhirR4CodeSystemsResponse> {
-    return this.rosettaApi.get("/terminology/v1/fhir/r4/codesystem?_summary=true");
+    return this.httpHandler.get("/terminology/v1/fhir/r4/codesystem?_summary=true");
   }
 
   /**
@@ -314,7 +314,7 @@ export class OrchestrateApi {
    * @link https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html
    */
   getFhirR4ConceptMaps(): Promise<GetFhirR4ConceptMapResponse> {
-    return this.rosettaApi.get("/terminology/v1/fhir/r4/conceptmap");
+    return this.httpHandler.get("/terminology/v1/fhir/r4/conceptmap");
   }
 
   /**
@@ -330,7 +330,7 @@ export class OrchestrateApi {
       urlParameters.append("domain", request.domain);
     }
     route += `?${urlParameters.toString()}`;
-    return this.rosettaApi.get(route);
+    return this.httpHandler.get(route);
   }
 
   /**
@@ -345,7 +345,7 @@ export class OrchestrateApi {
       _summary: "true"
     });
     const route = `/terminology/v1/fhir/r4/valueset?${params.toString()}`;
-    return this.rosettaApi.get(route);
+    return this.httpHandler.get(route);
   }
 
   /**
@@ -359,7 +359,7 @@ export class OrchestrateApi {
       _summary: "true"
     });
     const route = `/terminology/v1/fhir/r4/valueset/${encodeURIComponent(request.id)}?${parameters.toString()}`;
-    return this.rosettaApi.get(route);
+    return this.httpHandler.get(route);
   }
 
   /**
@@ -370,7 +370,7 @@ export class OrchestrateApi {
    */
   getFhirR4ValueSet(request: GetFhirR4ValueSetRequest): Promise<GetFhirR4ValueSetResponse> {
     const route = `/terminology/v1/fhir/r4/valueset/${encodeURIComponent(request.id)}`;
-    return this.rosettaApi.get(route);
+    return this.httpHandler.get(route);
   }
 
   /**
@@ -394,7 +394,7 @@ export class OrchestrateApi {
       parameters.append("extension.scope", request.scope);
     }
     const route = `/terminology/v1/fhir/r4/valueset?${parameters.toString()}`;
-    return this.rosettaApi.get(route);
+    return this.httpHandler.get(route);
   }
 
   /**
@@ -403,7 +403,7 @@ export class OrchestrateApi {
    * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
   getFhirR4ValueSetScopes(): Promise<GetFhirR4ValueSetScopesResponse> {
-    return this.rosettaApi.get("/terminology/v1/fhir/r4/valueset/Rosetta.ValueSetScopes");
+    return this.httpHandler.get("/terminology/v1/fhir/r4/valueset/Rosetta.ValueSetScopes");
   }
 
   /**
@@ -418,7 +418,7 @@ export class OrchestrateApi {
    */
   getAllFhirR4ValueSetsForCodes(request: GetAllFhirR4ValueSetsForCodesRequest): Promise<GetAllFhirR4ValueSetsForCodesResponse> {
     const route = "/terminology/v1/fhir/r4/valueset/$classify";
-    return this.rosettaApi.post(route, request);
+    return this.httpHandler.post(route, request);
   }
 
   /**
@@ -442,7 +442,7 @@ export class OrchestrateApi {
     if (parameters.toString()) {
       route += `?${parameters.toString()}`;
     }
-    return this.rosettaApi.post(route, request.content);
+    return this.httpHandler.post(route, request.content);
   }
 
   /**
@@ -456,7 +456,7 @@ export class OrchestrateApi {
       "Content-Type": "text/plain",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/hl7tofhirr4", request.patientID);
-    return this.rosettaApi.post(route, request.content, headers);
+    return this.httpHandler.post(route, request.content, headers);
   }
 
   /**
@@ -470,7 +470,7 @@ export class OrchestrateApi {
       "Content-Type": "application/xml",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/cdatofhirr4", request.patientID);
-    return this.rosettaApi.post(route, request.content, headers);
+    return this.httpHandler.post(route, request.content, headers);
   }
 
   /**
@@ -484,7 +484,7 @@ export class OrchestrateApi {
       "Content-Type": "application/xml",
       "Accept": "application/pdf",
     } as { [key: string]: string; };
-    return this.rosettaApi.post("/convert/v1/cdatopdf", request.content, headers);
+    return this.httpHandler.post("/convert/v1/cdatopdf", request.content, headers);
   }
 
   /**
@@ -497,7 +497,7 @@ export class OrchestrateApi {
     const headers = {
       "Accept": "application/xml",
     } as { [key: string]: string; };
-    return this.rosettaApi.post("/convert/v1/fhirr4tocda", request.content, headers);
+    return this.httpHandler.post("/convert/v1/fhirr4tocda", request.content, headers);
   }
 
   /**
@@ -509,7 +509,7 @@ export class OrchestrateApi {
     const headers = {
       "Accept": "application/zip",
     } as { [key: string]: string; };
-    return this.rosettaApi.post("/convert/v1/fhirr4toomop", request.content, headers);
+    return this.httpHandler.post("/convert/v1/fhirr4toomop", request.content, headers);
   }
 
   /**
@@ -523,7 +523,7 @@ export class OrchestrateApi {
       "Content-Type": "application/x-ndjson",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/combinefhirr4bundles", request.personID);
-    return this.rosettaApi.post(route, request.content, headers);
+    return this.httpHandler.post(route, request.content, headers);
   }
 
   /**
@@ -536,7 +536,7 @@ export class OrchestrateApi {
       "Content-Type": "text/plain",
     } as { [key: string]: string; };
     const route = this.getIDDependentRoute("/convert/v1/x12tofhirr4", request.patientID);
-    return this.rosettaApi.post(route, request.content, headers);
+    return this.httpHandler.post(route, request.content, headers);
   }
 
   private getIDDependentRoute(route: string, id?: string): string {
@@ -554,12 +554,12 @@ export class OrchestrateApi {
    */
   summarizeFhirR4CodeSystem(request: SummarizeFhirR4CodeSystemRequest): Promise<SummarizeFhirR4CodeSystemResponse> {
     const route = `/terminology/v1/fhir/r4/codesystem/${encodeURIComponent(request.codeSystem)}?_summary=true`;
-    return this.rosettaApi.get(route);
+    return this.httpHandler.get(route);
   }
 
 }
 
-class RosettaApi {
+class HttpHandler {
   baseUrl: string;
   defaultHeaders: { [key: string]: string; };
 

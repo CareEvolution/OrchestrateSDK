@@ -47,7 +47,7 @@ from orchestrate.terminology import (
 )
 
 
-class _RosettaApi:
+class _HttpHandler:
     def __init__(
         self,
         base_url: str,
@@ -153,7 +153,7 @@ def _get_id_dependent_route(
     return route
 
 
-class OrchestrateApi(_RosettaApi):
+class OrchestrateApi(_HttpHandler):
     def __init__(
         self,
         api_key: Optional[str] = None,
