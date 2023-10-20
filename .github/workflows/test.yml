@@ -7,7 +7,7 @@ on:
   pull_request:
   workflow_call:
     secrets:
-      ROSETTA_API_KEY:
+      ORCHESTRATE_API_KEY:
         required: false
 
 jobs:
@@ -26,10 +26,10 @@ jobs:
       - name: Write Env
         shell: pwsh
         run: |
-          if ("${{ secrets.ROSETTA_API_KEY }}" -eq "") {
-            throw "ROSETTA_API_KEY secret is required for this workflow."
+          if ("${{ secrets.ORCHESTRATE_API_KEY }}" -eq "") {
+            throw "ORCHESTRATE_API_KEY secret is required for this workflow."
           }
-          "ROSETTA_API_KEY=${{ secrets.ROSETTA_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
+          "ORCHESTRATE_API_KEY=${{ secrets.ORCHESTRATE_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
       - name: Install dependencies
         working-directory: typescript
         run: npm ci
@@ -64,10 +64,10 @@ jobs:
       - name: Write Env
         shell: pwsh
         run: |
-          if ("${{ secrets.ROSETTA_API_KEY }}" -eq "") {
-            throw "ROSETTA_API_KEY secret is required for this workflow."
+          if ("${{ secrets.ORCHESTRATE_API_KEY }}" -eq "") {
+            throw "ORCHESTRATE_API_KEY secret is required for this workflow."
           }
-          "ROSETTA_API_KEY=${{ secrets.ROSETTA_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
+          "ORCHESTRATE_API_KEY=${{ secrets.ORCHESTRATE_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
       - name: Copy Local README
         run: cp ./README.md python/README.md
       - name: Install Dependencies
