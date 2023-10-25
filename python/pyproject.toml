@@ -3,7 +3,7 @@ authors = ["Jeremy Fortune <jeremy@careevolution.com>"]
 classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-description = "SDK for the Orchestrate API at rosetta.careevolution.com"
+description = "SDK for the Orchestrate API at api.careevolutionapi.com"
 homepage = "https://rosetta-api.docs.careevolution.com/"
 keywords = ["careevolution", "rosetta", "orchestrate"]
 license = "Apache-2.0"

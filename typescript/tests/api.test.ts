@@ -5,14 +5,14 @@ import { describe, it, expect, test } from '@jest/globals';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: "../.env" });
-const apiKey = process.env.ROSETTA_API_KEY || "";
-const rosettaUrl = process.env.ROSETTA_BASE_URL || undefined;
-const additonalHeaders = process.env.ROSETTA_ADDITIONAL_HEADERS ? JSON.parse(process.env.ROSETTA_ADDITIONAL_HEADERS) : undefined;
+const apiKey = process.env.ORCHESTRATE_API_KEY || "";
+const orchestrateUrl = process.env.ORCHESTRATE_BASE_URL || undefined;
+const additonalHeaders = process.env.ORCHESTRATE_ADDITIONAL_HEADERS ? JSON.parse(process.env.ORCHESTRATE_ADDITIONAL_HEADERS) : undefined;
 
 
 const orchestrate = new OrchestrateApi({
   apiKey: apiKey,
-  baseUrl: rosettaUrl,
+  baseUrl: orchestrateUrl,
   additionalHeaders: additonalHeaders,
 });
 
@@ -118,7 +118,7 @@ const fhir = {
   "type": "batch-response",
   "entry": [
     {
-      "fullUrl": "https://api.rosetta.careevolution.com/Patient/35b77437-425d-419c-90b5-af4bc433ebe9",
+      "fullUrl": "https://api.careevolutionapi.com/Patient/35b77437-425d-419c-90b5-af4bc433ebe9",
       "resource": {
         "resourceType": "Patient",
         "id": "35b77437-425d-419c-90b5-af4bc433ebe9",
