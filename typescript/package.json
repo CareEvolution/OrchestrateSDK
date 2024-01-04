@@ -18,7 +18,7 @@
 		"jest": "29.7.0",
 		"rollup": "^4.0.2",
 		"ts-jest": "~29.1.1",
-		"typescript": "~5.2.2"
+		"typescript": "~5.3.2"
 	},
 	"keywords": [
 		"Rosetta",
@@ -26,7 +26,7 @@
 		"Orchestrate"
 	],
 	"dependencies": {
-		"@types/fhir": "^0.0.38"
+		"@types/fhir": "^0.0.40"
 	},
 	"files": [
 		"dist"
