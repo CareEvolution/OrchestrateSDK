@@ -26,7 +26,7 @@
 		"Orchestrate"
 	],
 	"dependencies": {
-		"@types/fhir": "^0.0.40"
+		"@types/fhir": "^0.0.41"
 	},
 	"files": [
 		"dist"
