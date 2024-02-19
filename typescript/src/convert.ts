@@ -36,13 +36,13 @@ export type ConvertFhirR4ToOmopResponse = Buffer;
 
 export type ConvertCombineFhirR4BundlesRequest = {
   content: string;
-  personID?: string;
+  patientID?: string;
 };
 
 export function generateConvertCombinedFhirBundlesRequestFromBundles(fhirBundles: Bundle[], personID?: string) {
   const bundles = fhirBundles.map((bundle) => JSON.stringify(bundle)).join("\n");
   return {
-    personID: personID,
+    patientID: personID,
     content: bundles,
   } as ConvertCombineFhirR4BundlesRequest;
 }

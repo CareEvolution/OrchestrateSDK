@@ -455,7 +455,14 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "text/plain",
     } as { [key: string]: string; };
-    const route = this.getIDDependentRoute("/convert/v1/hl7tofhirr4", request.patientID);
+    const parameters = new URLSearchParams();
+    if (request.patientID) {
+      parameters.append("patientID", request.patientID);
+    }
+    let route = "/convert/v1/hl7tofhirr4";
+    if (parameters.toString()) {
+      route += `?${parameters.toString()}`;
+    }
     return this.httpHandler.post(route, request.content, headers);
   }
 
@@ -469,7 +476,14 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "application/xml",
     } as { [key: string]: string; };
-    const route = this.getIDDependentRoute("/convert/v1/cdatofhirr4", request.patientID);
+    const parameters = new URLSearchParams();
+    if (request.patientID) {
+      parameters.append("patientID", request.patientID);
+    }
+    let route = "/convert/v1/cdatofhirr4";
+    if (parameters.toString()) {
+      route += `?${parameters.toString()}`;
+    }
     return this.httpHandler.post(route, request.content, headers);
   }
 
@@ -522,7 +536,14 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "application/x-ndjson",
     } as { [key: string]: string; };
-    const route = this.getIDDependentRoute("/convert/v1/combinefhirr4bundles", request.personID);
+    const parameters = new URLSearchParams();
+    if (request.patientID) {
+      parameters.append("patientID", request.patientID);
+    }
+    let route = "/convert/v1/combinefhirr4bundles";
+    if (parameters.toString()) {
+      route += `?${parameters.toString()}`;
+    }
     return this.httpHandler.post(route, request.content, headers);
   }
 
@@ -535,7 +556,14 @@ export class OrchestrateApi {
     const headers = {
       "Content-Type": "text/plain",
     } as { [key: string]: string; };
-    const route = this.getIDDependentRoute("/convert/v1/x12tofhirr4", request.patientID);
+    const parameters = new URLSearchParams();
+    if (request.patientID) {
+      parameters.append("patientID", request.patientID);
+    }
+    let route = "/convert/v1/x12tofhirr4";
+    if (parameters.toString()) {
+      route += `?${parameters.toString()}`;
+    }
     return this.httpHandler.post(route, request.content, headers);
   }
 

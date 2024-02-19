@@ -879,14 +879,14 @@ describe("convert hl7 to fhir r4", () => {
   it("should convert hl7 with patient", async () => {
     const result = await orchestrate.convertHl7ToFhirR4({
       content: hl7,
-      patientID: "1234"
+      patientID: "12/34"
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
     const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
     expect(patientResource).toBeDefined();
-    expect(patientResource?.resource?.id).toBe("1234");
+    expect(patientResource?.resource?.id).toBe("12/34");
   });
 });
 
@@ -1210,7 +1210,7 @@ ${JSON.stringify(fhir)}
 
     const result = await orchestrate.convertCombinedFhirR4Bundles({
       content: bundles,
-      personID: "1234"
+      patientID: "1234"
     });
 
     expect(result).toBeDefined();

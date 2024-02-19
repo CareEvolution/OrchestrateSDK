@@ -144,13 +144,13 @@ def _get_pagination_parameters(
     return parameters
 
 
-def _get_id_dependent_route(
-    route: str,
+def _get_id_dependent_parameters(
+    id_name: str,
     id_: Optional[str] = None,
-) -> str:
+) -> dict[str, Optional[str]]:
     if id_ is not None:
-        route += f"/{quote(id_)}"
-    return route
+        return {id_name: id_}
+    return {}
 
 
 class OrchestrateApi(_HttpHandler):
@@ -946,11 +946,12 @@ class OrchestrateApi(_HttpHandler):
         <https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html>
         """
         headers = {"Content-Type": "text/plain"}
-        route = _get_id_dependent_route("/convert/v1/hl7tofhirr4", patient_id)
+        parameters = _get_id_dependent_parameters("patientId", patient_id)
         return self._post(
-            path=route,
+            path="/convert/v1/hl7tofhirr4",
             body=content,
             headers=headers,
+            parameters=parameters,
         )
 
     def convert_cda_to_fhir_r4(
@@ -975,11 +976,12 @@ class OrchestrateApi(_HttpHandler):
         <https://rosetta-api.docs.careevolution.com/convert/cda_to_fhir.html>
         """
         headers = {"Content-Type": "application/xml"}
-        route = _get_id_dependent_route("/convert/v1/cdatofhirr4", patient_id)
+        parameters = _get_id_dependent_parameters("patientId", patient_id)
         return self._post(
-            path=route,
+            path="/convert/v1/cdatofhirr4",
             body=content,
             headers=headers,
+            parameters=parameters,
         )
 
     def convert_cda_to_pdf(self, content: str) -> ConvertCdaToPdfResponse:
@@ -1073,11 +1075,12 @@ class OrchestrateApi(_HttpHandler):
         A FHIR R4 Bundle containing the clinical data parsed out of the X12
         """
         headers = {"Content-Type": "text/plain"}
-        route = _get_id_dependent_route("/convert/v1/x12tofhirr4", patient_id)
+        parameters = _get_id_dependent_parameters("patientId", patient_id)
         return self._post(
-            path=route,
+            path="/convert/v1/x12tofhirr4",
             body=content,
             headers=headers,
+            parameters=parameters,
         )
 
     def insight_risk_profile(
@@ -1404,7 +1407,7 @@ class OrchestrateApi(_HttpHandler):
     def convert_combined_fhir_r4_bundles(
         self,
         content: str,
-        person_id: Optional[str] = None,
+        patient_id: Optional[str] = None,
     ) -> ConvertCombinedFhirR4BundlesResponse:
         """
         This operation aggregates information retrieved from prior Convert API requests into a single entry.
@@ -1423,9 +1426,10 @@ class OrchestrateApi(_HttpHandler):
         <https://rosetta-api.docs.careevolution.com/convert/combine_bundles.html>
         """
         headers = {"Content-Type": "application/x-ndjson"}
-        route = _get_id_dependent_route("/convert/v1/combinefhirr4bundles", person_id)
+        parameters = _get_id_dependent_parameters("patientId", patient_id)
         return self._post(
-            path=route,
+            path="/convert/v1/combinefhirr4bundles",
             body=content,
             headers=headers,
+            parameters=parameters,
         )
