@@ -55,7 +55,6 @@ export type StandardizeLabResponse = StandardizeResponse;
 
 export type StandardizeRadiologyResponse = StandardizeResponse;
 
-
 export type ClassifyRequest = Coding;
 
 
