@@ -147,7 +147,7 @@ def _get_pagination_parameters(
 def _get_id_dependent_parameters(
     id_name: str,
     id_: Optional[str] = None,
-) -> dict[str, Optional[str]]:
+) -> dict[str, str]:
     if id_ is not None:
         return {id_name: id_}
     return {}
