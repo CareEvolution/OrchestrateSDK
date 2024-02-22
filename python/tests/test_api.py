@@ -2,12 +2,14 @@ from io import BytesIO
 import json
 import os
 from pathlib import Path
+from unittest.mock import Mock
 from zipfile import ZipFile
 
 import pytest
 from dotenv import load_dotenv
 from orchestrate import OrchestrateApi
 from requests import HTTPError
+from orchestrate._internal.http_handler import HttpHandler, create_http_handler
 
 from orchestrate.terminology import (
     ClassifyMedicationRequest,
@@ -33,7 +35,6 @@ def setup_test_api():
 
 
 TEST_API = setup_test_api()
-
 
 @pytest.mark.parametrize(
     "condition",

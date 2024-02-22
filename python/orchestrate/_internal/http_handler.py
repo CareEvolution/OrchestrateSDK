@@ -1,7 +1,24 @@
+import os
 import json
 from typing import Any, Mapping, Optional
 
 import requests
+
+
+def _get_priority_base_url(base_url: Optional[str]) -> str:
+    if base_url is not None:
+        return base_url
+    if "ORCHESTRATE_BASE_URL" in os.environ:
+        return os.environ["ORCHESTRATE_BASE_URL"]
+    return "https://api.careevolutionapi.com"
+
+
+def _get_priority_api_key(api_key: Optional[str]) -> Optional[str]:
+    if api_key is not None:
+        return api_key
+    if "ORCHESTRATE_API_KEY" in os.environ:
+        return os.environ["ORCHESTRATE_API_KEY"]
+    return None
 
 
 class HttpHandler:
@@ -75,3 +92,24 @@ class HttpHandler:
             return response.json()
 
         return response.text
+
+
+def create_http_handler(
+    base_url: Optional[str] = None,
+    api_key: Optional[str] = None,
+    additional_headers: Optional[dict] = None,
+) -> HttpHandler:
+    default_headers = {
+        **(additional_headers or {}),
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
+    priority_api_key = _get_priority_api_key(api_key)
+    if priority_api_key is not None:
+        default_headers["x-api-key"] = priority_api_key
+
+    priority_base_url = _get_priority_base_url(base_url)
+    return HttpHandler(
+        base_url=priority_base_url,
+        default_headers=default_headers,
+    )

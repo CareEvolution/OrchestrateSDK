@@ -4,6 +4,7 @@ import { ClassifyConditionRequest, ClassifyMedicationRequest, ClassifyObservatio
 import { describe, it, expect, test } from '@jest/globals';
 import dotenv from 'dotenv';
 
+
 dotenv.config({ path: "../.env" });
 const apiKey = process.env.ORCHESTRATE_API_KEY || "";
 const orchestrateUrl = process.env.ORCHESTRATE_BASE_URL || undefined;
