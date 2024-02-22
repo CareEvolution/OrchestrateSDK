@@ -1058,7 +1058,7 @@ def test_convert_combined_fhir_r4_bundles_with_person_should_combine():
     )
 
     result = TEST_API.convert_combined_fhir_r4_bundles(
-        content=bundles, person_id="1234"
+        content=bundles, patient_id="1234"
     )
 
     assert result is not None
@@ -1130,7 +1130,7 @@ def test_convert_x12_to_fhir_r4_should_return_a_bundle():
 
 
 def test_convert_x12_to_fhir_r4_with_patient_should_return_a_bundle():
-    result = TEST_API.convert_x12_to_fhir_r4(content=_X12_DOCUMENT, patient_id="1234")
+    result = TEST_API.convert_x12_to_fhir_r4(content=_X12_DOCUMENT, patient_id="12/34")
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1142,7 +1142,7 @@ def test_convert_x12_to_fhir_r4_with_patient_should_return_a_bundle():
             if entry["resource"]["resourceType"] == "Patient"
         )
     )
-    assert patient_resource["id"] == "1234"
+    assert patient_resource["id"] == "12/34"
 
 
 def test_get_fhir_r4_code_system_should_return_a_code_system():
