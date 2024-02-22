@@ -457,7 +457,7 @@ export class OrchestrateApi {
     } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
-      parameters.append("patientID", request.patientID);
+      parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/hl7tofhirr4";
     if (parameters.toString()) {
@@ -478,7 +478,7 @@ export class OrchestrateApi {
     } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
-      parameters.append("patientID", request.patientID);
+      parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/cdatofhirr4";
     if (parameters.toString()) {
@@ -538,7 +538,7 @@ export class OrchestrateApi {
     } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
-      parameters.append("patientID", request.patientID);
+      parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/combinefhirr4bundles";
     if (parameters.toString()) {
@@ -558,7 +558,7 @@ export class OrchestrateApi {
     } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
-      parameters.append("patientID", request.patientID);
+      parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/x12tofhirr4";
     if (parameters.toString()) {
