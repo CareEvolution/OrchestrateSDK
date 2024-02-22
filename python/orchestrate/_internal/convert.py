@@ -21,6 +21,10 @@ ConvertX12ToFhirR4Response = Bundle
 
 ConvertCombinedFhirR4BundlesResponse = Bundle
 
+ConvertFhirDstu2ToFhirR4Response = Bundle
+
+ConvertFhirStu3ToFhirR4Response = Bundle
+
 
 def generate_convert_combine_fhir_bundles_request_from_bundles(
     fhir_bundles: list[Bundle],
@@ -242,4 +246,52 @@ class ConvertApi:
             body=content,
             headers=headers,
             parameters=parameters,
+        )
+
+    def fhir_dstu2_to_fhir_r4(
+        self,
+        content: Bundle,
+    ) -> ConvertFhirDstu2ToFhirR4Response:
+        """
+        Converts a FHIR DSTU2 bundle into a FHIR R4 bundle
+
+        ### Parameters
+
+        - `fhir_dstu2_bundle`: The FHIR DSTU2 bundle to convert
+
+        ### Returns
+
+        A FHIR R4 Bundle containing the clinical data parsed out of the FHIR DSTU2 bundle
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html>
+        """
+        return self.__http_handler.post(
+            path="/convert/v1/fhirdstu2tofhirr4",
+            body=content,
+        )
+
+    def fhir_stu3_to_fhir_r4(
+        self,
+        content: Bundle,
+    ) -> ConvertFhirStu3ToFhirR4Response:
+        """
+        Converts a FHIR STU3 bundle into a FHIR R4 bundle
+
+        ### Parameters
+
+        - `fhir_stu3_bundle`: The FHIR STU3 bundle to convert
+
+        ### Returns
+
+        A FHIR R4 Bundle containing the clinical data parsed out of the FHIR STU3 bundle
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html>
+        """
+        return self.__http_handler.post(
+            path="/convert/v1/fhirstu3tofhirr4",
+            body=content,
         )

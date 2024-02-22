@@ -40,6 +40,18 @@ export type ConvertCombineFhirR4BundlesRequest = {
   patientID?: string;
 };
 
+export type ConvertFhirDstu2ToFhirR4Request = {
+  content: unknown;
+};
+
+export type ConvertFhirDstu2ToFhirR4Response = Bundle;
+
+export type ConvertFhirStu3ToFhirR4Request = {
+  content: unknown;
+};
+
+export type ConvertFhirStu3ToFhirR4Response = Bundle;
+
 export function generateConvertCombinedFhirBundlesRequestFromBundles(fhirBundles: Bundle[], personID?: string) {
   const bundles = fhirBundles.map((bundle) => JSON.stringify(bundle)).join("\n");
   return {
@@ -184,5 +196,25 @@ export class ConvertApi {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content, headers);
+  }
+
+  /**
+   * Converts a FHIR DSTU2 bundle into a FHIR R4 bundle.
+   * @param request The FHIR DSTU2 bundle to convert
+   * @returns A FHIR R4 Bundle containing the clinical data parsed out of the FHIR DSTU2 bundle
+   * @link https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html
+   */
+  fhirDstu2ToFhirR4(request: ConvertFhirDstu2ToFhirR4Request): Promise<ConvertFhirDstu2ToFhirR4Response> {
+    return this.httpHandler.post("/convert/v1/fhirdstu2tofhirr4", request.content);
+  }
+
+  /**
+   * Converts a FHIR STU3 bundle into a FHIR R4 bundle.
+   * @param request The FHIR STU3 bundle to convert
+   * @returns A FHIR R4 Bundle containing the clinical data parsed out of the FHIR STU3 bundle
+   * @link https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html
+   */
+  fhirStu3ToFhirR4(request: ConvertFhirStu3ToFhirR4Request): Promise<ConvertFhirStu3ToFhirR4Response> {
+    return this.httpHandler.post("/convert/v1/fhirstu3tofhirr4", request.content);
   }
 }
