@@ -439,7 +439,7 @@ export class OrchestrateApi {
       parameters.append("ra_segment", request.raSegment);
     }
     let route = "/insight/v1/riskprofile";
-    if (parameters.toString()) {
+    if (parameters.size) {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content);
@@ -460,7 +460,7 @@ export class OrchestrateApi {
       parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/hl7tofhirr4";
-    if (parameters.toString()) {
+    if (parameters.size) {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content, headers);
@@ -481,7 +481,7 @@ export class OrchestrateApi {
       parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/cdatofhirr4";
-    if (parameters.toString()) {
+    if (parameters.size) {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content, headers);
@@ -541,7 +541,7 @@ export class OrchestrateApi {
       parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/combinefhirr4bundles";
-    if (parameters.toString()) {
+    if (parameters.size) {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content, headers);
@@ -561,7 +561,7 @@ export class OrchestrateApi {
       parameters.append("patientId", request.patientID);
     }
     let route = "/convert/v1/x12tofhirr4";
-    if (parameters.toString()) {
+    if (parameters.size) {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content, headers);
