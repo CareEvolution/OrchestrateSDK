@@ -1,6 +1,6 @@
 import { Bundle, CodeSystem, CodeableConcept, Coding, ConceptMap, Parameters, ParametersParameter, ValueSet } from "fhir/r4";
-import { IHttpHandler } from "./httpHandler";
-import { handleBatchOverload } from "./batch";
+import { IHttpHandler } from "./httpHandler.js";
+import { handleBatchOverload } from "./batch.js";
 
 const standardizeTargetSystems = [
   "ICD-10-CM",

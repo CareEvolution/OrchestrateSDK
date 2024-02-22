@@ -1,7 +1,7 @@
-import { ConvertApi } from "./convert";
-import { HttpHandler } from "./httpHandler";
-import { InsightApi } from "./insight";
-import { TerminologyApi } from "./terminology";
+import { ConvertApi } from "./convert.js";
+import { HttpHandler } from "./httpHandler.js";
+import { InsightApi } from "./insight.js";
+import { TerminologyApi } from "./terminology.js";
 
 export interface Configuration {
   apiKey?: string;

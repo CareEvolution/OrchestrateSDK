@@ -1,4 +1,4 @@
-import { IHttpHandler } from "./httpHandler";
+import { IHttpHandler } from "./httpHandler.js";
 
 export type BatchResponse<T> = {
   items: T;

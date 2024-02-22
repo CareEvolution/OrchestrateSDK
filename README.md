@@ -26,7 +26,7 @@ TypeScript:
 import { OrchestrateApi } from '@careevolution/orchestrate';
 
 const orchestrate = new OrchestrateApi({apiKey: "your-api-key"});
-await orchestrate.classifyCondition({
+await orchestrate.terminology.classifyCondition({
   code: "119981000146107",
   system: "SNOMED",
 });
@@ -38,5 +38,5 @@ Python:
 from orchestrate import OrchestrateApi
 
 api = OrchestrateApi(api_key="your-api-key")
-api.classify_condition(code="119981000146107", system="SNOMED")
+api.terminology.classify_condition(code="119981000146107", system="SNOMED")
 ```

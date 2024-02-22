@@ -1,5 +1,5 @@
 import { Bundle } from "fhir/r4";
-import { IHttpHandler } from "./httpHandler";
+import { IHttpHandler } from "./httpHandler.js";
 
 export type ConvertHl7ToFhirR4Request = {
   content: string;

@@ -1,5 +1,5 @@
 import { Bundle, MeasureReport, Measure, Patient, RiskAssessment, OperationOutcome } from "fhir/r4";
-import { IHttpHandler } from "./httpHandler";
+import { IHttpHandler } from "./httpHandler.js";
 
 const raSegments = [
   "community nondual aged",
