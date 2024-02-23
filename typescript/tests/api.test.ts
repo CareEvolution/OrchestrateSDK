@@ -1,7 +1,7 @@
 import { Bundle } from 'fhir/r4';
 import { OrchestrateApi } from '../src/api';
 import { ClassifyConditionRequest, ClassifyMedicationRequest, ClassifyObservationRequest, StandardizeRequest } from '../src/terminology';
-import { describe, it, expect, test } from '@jest/globals';
+import { describe, it, expect, test } from 'vitest';
 import dotenv from 'dotenv';
 
 
