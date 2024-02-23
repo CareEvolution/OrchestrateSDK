@@ -9,17 +9,13 @@ const raSegments = [
   "long term institutional",
 ] as const;
 
-const hccVersions = [
-  "22",
-  "23",
-  "24",
-] as const;
+const hccVersions = ["22", "23", "24"] as const;
 
 export type InsightRiskProfileRequest = {
   content: Bundle;
-  hccVersion?: typeof hccVersions[number];
+  hccVersion?: (typeof hccVersions)[number];
   periodEndDate?: string;
-  raSegment?: typeof raSegments[number];
+  raSegment?: (typeof raSegments)[number];
 };
 
 export type InsightRiskProfileResource = Patient | MeasureReport | Measure | RiskAssessment | OperationOutcome;
