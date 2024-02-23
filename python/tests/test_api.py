@@ -827,3 +827,12 @@ def test_convert_fhir_stu3_to_fhir_r4_should_convert():
         identifier["value"] == "1234A" and identifier["id"] == "id3"
         for identifier in patient_resource["identifier"]
     )
+
+def test_convert_fhir_r4_to_health_lake_should_convert():
+    result = TEST_API.convert.fhir_r4_to_health_lake(content=R4_BUNDLE)
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert result["type"] == "collection"
+    assert result["entry"][0]["resource"]["resourceType"] == "Bundle"
+    assert result["entry"][0]["resource"]["type"] == "batch"

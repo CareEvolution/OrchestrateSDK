@@ -52,6 +52,12 @@ export type ConvertFhirStu3ToFhirR4Request = {
 
 export type ConvertFhirStu3ToFhirR4Response = Bundle;
 
+export type ConvertFhirR4ToHealthLakeRequest = {
+  content: Bundle;
+};
+
+export type ConvertFhirR4ToHealthLakeResponse = Bundle;
+
 export function generateConvertCombinedFhirBundlesRequestFromBundles(fhirBundles: Bundle[], personID?: string) {
   const bundles = fhirBundles.map((bundle) => JSON.stringify(bundle)).join("\n");
   return {
@@ -217,4 +223,15 @@ export class ConvertApi {
   fhirStu3ToFhirR4(request: ConvertFhirStu3ToFhirR4Request): Promise<ConvertFhirStu3ToFhirR4Response> {
     return this.httpHandler.post("/convert/v1/fhirstu3tofhirr4", request.content);
   }
+
+  /**
+   * This operation converts a FHIR R4 bundle from one of the other Orchestrate FHIR conversions (CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into a form compatible with the Amazon HealthLake analysis platform.
+   * @param request A FHIR R4 bundle for a single patient
+   * @returns A FHIR R4 bundle of type collection, containing individual FHIR bundles compatible with the HealthLake API restrictions.
+   * @link https://orchestrate.docs.careevolution.com/convert/fhir_to_health_lake.html
+   */
+  fhirR4ToHealthLake(request: ConvertFhirR4ToHealthLakeRequest): Promise<ConvertFhirR4ToHealthLakeResponse> {
+    return this.httpHandler.post("/convert/v1/fhirr4tohealthlake", request.content);
+  }
+
 }

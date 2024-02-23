@@ -3,7 +3,7 @@ import { ClassifyConditionRequest, ClassifyMedicationRequest, ClassifyObservatio
 import { describe, it, expect, test } from '@jest/globals';
 import { hl7, cda, fhir, riskProfileBundle, x12Document, stu3FhirBundle, dstu2FhirBundle } from './data';
 import dotenv from 'dotenv';
-import { Patient } from 'fhir/r4';
+import { Bundle, Patient } from 'fhir/r4';
 
 dotenv.config({ path: "../.env" });
 const apiKey = process.env.ORCHESTRATE_API_KEY || "";
@@ -695,5 +695,21 @@ describe("convert fhir dstu2 to fhir r4", () => {
     const expectedIdentifier = patientResource?.identifier?.find((identifier) => identifier.id === "id3");
     expect(expectedIdentifier).toBeDefined();
     expect(expectedIdentifier?.value).toBe("12345A");
+  });
+});
+
+describe("convert fhir r4 to health lake", () => {
+  it("should convert", async () => {
+    const result = await orchestrate.convert.fhirR4ToHealthLake({
+      content: fhir
+    });
+
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    expect(result.type).toBe("collection");
+    expect(result.entry?.[0].resource?.resourceType).toBe("Bundle");
+    const batchBundle = result.entry?.[0].resource as Bundle;
+    expect(batchBundle.type).toBe("batch");
   });
 });

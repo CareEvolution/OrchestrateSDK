@@ -25,6 +25,8 @@ ConvertFhirDstu2ToFhirR4Response = Bundle
 
 ConvertFhirStu3ToFhirR4Response = Bundle
 
+ConvertFhirR4ToHealthLakeResponse = Bundle
+
 
 def generate_convert_combine_fhir_bundles_request_from_bundles(
     fhir_bundles: list[Bundle],
@@ -293,5 +295,29 @@ class ConvertApi:
         """
         return self.__http_handler.post(
             path="/convert/v1/fhirstu3tofhirr4",
+            body=content,
+        )
+
+    def fhir_r4_to_health_lake(
+        self,
+        content: Bundle,
+    ) -> ConvertFhirR4ToHealthLakeResponse:
+        """
+        This operation converts a FHIR R4 bundle from one of the other Orchestrate FHIR conversions (CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into a form compatible with the Amazon HealthLake analysis platform.
+
+        ### Parameters
+
+        - `content`: A FHIR R4 bundle for a single patient
+
+        ### Returns
+
+        A FHIR R4 bundle of type collection, containing individual FHIR bundles compatible with the HealthLake API restrictions.
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/fhir_to_health_lake.html>
+        """
+        return self.__http_handler.post(
+            path="/convert/v1/fhirr4tohealthlake",
             body=content,
         )
