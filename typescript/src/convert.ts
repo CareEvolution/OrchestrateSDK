@@ -75,6 +75,11 @@ export type ConvertX12ToFhirR4Request = {
 
 export type ConvertX12ToFhirR4Response = Bundle;
 
+export type ConvertCdaToHtmlRequest = {
+  content: string;
+};
+
+export type ConvertCdaToHtmlResponse = string;
 
 export class ConvertApi {
   private httpHandler: IHttpHandler;
@@ -234,4 +239,21 @@ export class ConvertApi {
     return this.httpHandler.post("/convert/v1/fhirr4tohealthlake", request.content);
   }
 
+  /**
+   * Converts a CDA document into human-readable HTML.
+   * @param request A single CDA document
+   * @returns A formatted HTML document suitable for human review
+   * @link https://rosetta-api.docs.careevolution.com/convert/cda_to_html.html
+   */
+  cdaToHtml(request: ConvertCdaToHtmlRequest): Promise<ConvertCdaToHtmlResponse> {
+    const headers = {
+      "Content-Type": "application/xml",
+      "Accept": "text/html",
+    } as { [key: string]: string; };
+    return this.httpHandler.post(
+      "/convert/v1/cdatohtml",
+      request.content,
+      headers
+    );
+  }
 }

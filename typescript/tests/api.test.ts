@@ -713,3 +713,14 @@ describe("convert fhir r4 to health lake", () => {
     expect(batchBundle.type).toBe("batch");
   });
 });
+
+describe("convert cda to html", () => {
+  it("should convert", async () => {
+    const result = await orchestrate.convert.cdaToHtml({
+      content: cda
+    });
+
+    expect(result).toBeDefined();
+    expect(result).toContain("<html");
+  });
+});

@@ -27,6 +27,8 @@ ConvertFhirStu3ToFhirR4Response = Bundle
 
 ConvertFhirR4ToHealthLakeResponse = Bundle
 
+ConvertCdaToHtmlResponse = str
+
 
 def generate_convert_combine_fhir_bundles_request_from_bundles(
     fhir_bundles: list[Bundle],
@@ -320,4 +322,27 @@ class ConvertApi:
         return self.__http_handler.post(
             path="/convert/v1/fhirr4tohealthlake",
             body=content,
+        )
+
+    def cda_to_html(self, content: str) -> ConvertCdaToHtmlResponse:
+        """
+        Converts a CDA document into human-readable HTML.
+
+        ### Parameters
+
+        - `content`: A single CDA document
+
+        ### Returns
+
+        A formatted HTML document suitable for human review
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/cda_to_html.html>
+        """
+        headers = {"Content-Type": "application/xml", "Accept": "text/html"}
+        return self.__http_handler.post(
+            path="/convert/v1/cdatohtml",
+            body=content,
+            headers=headers,
         )

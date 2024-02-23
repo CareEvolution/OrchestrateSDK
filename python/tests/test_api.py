@@ -810,6 +810,7 @@ def test_convert_fhir_dstu2_to_fhir_r4_should_convert():
         for identifier in patient_resource["identifier"]
     )
 
+
 def test_convert_fhir_stu3_to_fhir_r4_should_convert():
     result = TEST_API.convert.fhir_stu3_to_fhir_r4(content=STU3_BUNDLE)
 
@@ -828,6 +829,7 @@ def test_convert_fhir_stu3_to_fhir_r4_should_convert():
         for identifier in patient_resource["identifier"]
     )
 
+
 def test_convert_fhir_r4_to_health_lake_should_convert():
     result = TEST_API.convert.fhir_r4_to_health_lake(content=R4_BUNDLE)
 
@@ -836,3 +838,10 @@ def test_convert_fhir_r4_to_health_lake_should_convert():
     assert result["type"] == "collection"
     assert result["entry"][0]["resource"]["resourceType"] == "Bundle"
     assert result["entry"][0]["resource"]["type"] == "batch"
+
+
+def test_convert_cda_to_html_should_convert():
+    result = TEST_API.convert.cda_to_html(content=CDA)
+
+    assert result is not None
+    assert result.startswith("<html")
