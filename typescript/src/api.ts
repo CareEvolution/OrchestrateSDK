@@ -1,5 +1,5 @@
 import { ConvertApi } from "./convert";
-import { createHttpHandler } from "./httpHandler";
+import { createHttpHandler } from "./httpHandlerFactory";
 import { InsightApi } from "./insight";
 import { TerminologyApi } from "./terminology";
 
