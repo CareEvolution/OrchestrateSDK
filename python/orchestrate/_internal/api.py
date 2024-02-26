@@ -10,14 +10,8 @@ class OrchestrateApi:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
-        additional_headers: Optional[dict] = None,
     ) -> None:
-        self.__http_handler = create_http_handler(
-            base_url=base_url,
-            api_key=api_key,
-            additional_headers=additional_headers,
-        )
+        self.__http_handler = create_http_handler(api_key=api_key)
 
         self.terminology = TerminologyApi(self.__http_handler)
         self.convert = ConvertApi(self.__http_handler)

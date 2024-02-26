@@ -15,19 +15,6 @@ def test_api_base_url_in_environment_should_use_environment(monkeypatch):
     assert mock_http_handler.call_args[1]["base_url"] == "test.api"
 
 
-def test_api_base_url_passed_should_prioritize(monkeypatch):
-    mock_http_handler = Mock(HttpHandler)
-    monkeypatch.setattr(
-        "orchestrate._internal.http_handler.HttpHandler", mock_http_handler
-    )
-    monkeypatch.setenv("ORCHESTRATE_BASE_URL", "test.api")
-
-    handler = create_http_handler("argument.api")
-
-    assert handler is not None
-    assert mock_http_handler.call_args[1]["base_url"] == "argument.api"
-
-
 def test_api_base_url_unconfigured_should_default(monkeypatch):
     mock_http_handler = Mock(HttpHandler)
     monkeypatch.setattr(

@@ -2,14 +2,12 @@ from io import BytesIO
 import json
 import os
 from pathlib import Path
-from unittest.mock import Mock
 from zipfile import ZipFile
 
 import pytest
 from dotenv import load_dotenv
 from orchestrate import OrchestrateApi
 from requests import HTTPError
-from orchestrate._internal.http_handler import HttpHandler, create_http_handler
 
 from orchestrate.terminology import (
     ClassifyMedicationRequest,
@@ -21,17 +19,8 @@ from orchestrate.terminology import (
 def setup_test_api():
     load_dotenv(Path(__file__).parent.parent.parent / ".env", override=True)
     api_key = os.environ.get("ORCHESTRATE_API_KEY", None)
-    orchestrate_url = os.environ.get("ORCHESTRATE_BASE_URL", None)
-    additional_headers_env = os.environ.get("ORCHESTRATE_ADDITIONAL_HEADERS", None)
-    additional_headers = (
-        json.loads(additional_headers_env) if additional_headers_env else None
-    )
 
-    return OrchestrateApi(
-        api_key=api_key,
-        base_url=orchestrate_url,
-        additional_headers=additional_headers,
-    )
+    return OrchestrateApi(api_key=api_key)
 
 
 TEST_API = setup_test_api()

@@ -5,8 +5,6 @@ import { TerminologyApi } from "./terminology";
 
 export interface Configuration {
   apiKey?: string;
-  baseUrl?: string;
-  additionalHeaders?: { [key: string]: string };
 }
 
 export class OrchestrateApi {
@@ -15,7 +13,7 @@ export class OrchestrateApi {
   insight: InsightApi;
 
   constructor(configuration: Configuration) {
-    const httpHandler = createHttpHandler(configuration.baseUrl, configuration.apiKey, configuration.additionalHeaders);
+    const httpHandler = createHttpHandler(configuration.apiKey);
 
     this.terminology = new TerminologyApi(httpHandler);
     this.convert = new ConvertApi(httpHandler);

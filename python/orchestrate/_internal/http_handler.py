@@ -5,9 +5,7 @@ from typing import Any, Mapping, Optional
 import requests
 
 
-def _get_priority_base_url(base_url: Optional[str]) -> str:
-    if base_url is not None:
-        return base_url
+def _get_priority_base_url() -> str:
     if "ORCHESTRATE_BASE_URL" in os.environ:
         return os.environ["ORCHESTRATE_BASE_URL"]
     return "https://api.careevolutionapi.com"
@@ -19,6 +17,12 @@ def _get_priority_api_key(api_key: Optional[str]) -> Optional[str]:
     if "ORCHESTRATE_API_KEY" in os.environ:
         return os.environ["ORCHESTRATE_API_KEY"]
     return None
+
+
+def _get_additional_headers() -> Mapping[str, str]:
+    if "ORCHESTRATE_ADDITIONAL_HEADERS" in os.environ:
+        return json.loads(os.environ["ORCHESTRATE_ADDITIONAL_HEADERS"])
+    return {}
 
 
 class HttpHandler:
@@ -94,11 +98,9 @@ class HttpHandler:
         return response.text
 
 
-def create_http_handler(
-    base_url: Optional[str] = None,
-    api_key: Optional[str] = None,
-    additional_headers: Optional[dict] = None,
-) -> HttpHandler:
+def create_http_handler(api_key: Optional[str] = None) -> HttpHandler:
+    additional_headers = _get_additional_headers()
+    base_url = _get_priority_base_url()
     default_headers = {
         **(additional_headers or {}),
         "Accept": "application/json",
@@ -108,8 +110,7 @@ def create_http_handler(
     if priority_api_key is not None:
         default_headers["x-api-key"] = priority_api_key
 
-    priority_base_url = _get_priority_base_url(base_url)
     return HttpHandler(
-        base_url=priority_base_url,
+        base_url=base_url,
         default_headers=default_headers,
     )

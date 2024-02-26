@@ -1,9 +1,6 @@
 import { HttpHandler, IHttpHandler } from "./httpHandler";
 
-function getPriorityBaseUrl(baseUrl: string | undefined): string {
-  if (baseUrl) {
-    return baseUrl;
-  }
+function getPriorityBaseUrl(): string {
   if (process.env.ORCHESTRATE_BASE_URL) {
     return process.env.ORCHESTRATE_BASE_URL;
   }
@@ -20,25 +17,31 @@ function getPriorityApiKey(apiKey: string | undefined): string | undefined {
   return undefined;
 }
 
+function getAdditionalHeaders(): { [key: string]: string; } | undefined {
+  if (process.env.ORCHESTRATE_ADDITIONAL_HEADERS) {
+    return JSON.parse(process.env.ORCHESTRATE_ADDITIONAL_HEADERS);
+  }
+  return undefined;
+}
+
 export function createHttpHandler(
-  baseUrl: string | undefined,
   apiKey: string | undefined,
-  additionalHeaders: { [key: string]: string } | undefined,
 ): IHttpHandler {
+  const baseUrl = getPriorityBaseUrl();
+  const additionalHeaders = getAdditionalHeaders();
+
   const defaultHeaders = {
     ...(additionalHeaders ?? {}),
     ...{
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-  } as { [key: string]: string };
+  } as { [key: string]: string; };
 
   const priorityApiKey = getPriorityApiKey(apiKey);
   if (priorityApiKey) {
     defaultHeaders["x-api-key"] = priorityApiKey;
   }
 
-  const priorityBaseUrl = getPriorityBaseUrl(baseUrl);
-
-  return new HttpHandler(priorityBaseUrl, defaultHeaders);
+  return new HttpHandler(baseUrl, defaultHeaders);
 }

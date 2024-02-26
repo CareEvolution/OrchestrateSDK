@@ -11,15 +11,8 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
 const apiKey = process.env.ORCHESTRATE_API_KEY || "";
-const orchestrateUrl = process.env.ORCHESTRATE_BASE_URL || undefined;
-const additonalHeaders = process.env.ORCHESTRATE_ADDITIONAL_HEADERS
-  ? JSON.parse(process.env.ORCHESTRATE_ADDITIONAL_HEADERS)
-  : undefined;
-
 const orchestrate = new OrchestrateApi({
   apiKey: apiKey,
-  baseUrl: orchestrateUrl,
-  additionalHeaders: additonalHeaders,
 });
 
 const cda = `
@@ -584,7 +577,7 @@ describe("classify condition", () => {
     },
   ];
   const cases = requests.map((input) => ({ input }));
-  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyConditionRequest }) => {
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyConditionRequest; }) => {
     const result = await orchestrate.terminology.classifyCondition(input);
     expect(result).toBeDefined();
     expect(result.cciAcute).toBeTruthy();
@@ -612,7 +605,7 @@ describe("classify medication", () => {
     },
   ];
   const cases = requests.map((input) => ({ input }));
-  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyMedicationRequest }) => {
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyMedicationRequest; }) => {
     const result = await orchestrate.terminology.classifyMedication(input);
     expect(result).toBeDefined();
     expect(result.rxNormGeneric).toBeTruthy();
@@ -640,7 +633,7 @@ describe("classify observation", () => {
     },
   ];
   const cases = requests.map((input) => ({ input }));
-  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyObservationRequest }) => {
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyObservationRequest; }) => {
     const result = await orchestrate.terminology.classifyObservation(input);
     expect(result).toBeDefined();
     expect(result.loincClass).toBe("MICRO");
@@ -672,7 +665,7 @@ describe("standardize condition", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
       const result = await orchestrate.terminology.standardizeCondition(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -704,7 +697,7 @@ describe("standardize lab", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
       const result = await orchestrate.terminology.standardizeLab(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -741,7 +734,7 @@ describe("standardize medication", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
       const result = await orchestrate.terminology.standardizeMedication(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -774,7 +767,7 @@ describe("standardize observation", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
       const result = await orchestrate.terminology.standardizeObservation(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -807,7 +800,7 @@ describe("standardize procedure", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
       const result = await orchestrate.terminology.standardizeProcedure(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -841,7 +834,7 @@ describe("standardize radiology", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
       const result = await orchestrate.terminology.standardizeRadiology(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
