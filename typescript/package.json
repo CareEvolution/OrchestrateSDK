@@ -5,7 +5,7 @@
 	"main": "dist/cjs/index.js",
 	"module": "dist/esm/index.js",
 	"scripts": {
-		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && echo {\"type\": \"module\"} > dist/esm/package.json",
+		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node ./scripts/build-esm-package.mjs",
 		"test": "jest"
 	},
 	"author": "CareEvolution",
