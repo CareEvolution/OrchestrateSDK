@@ -29,6 +29,10 @@ ConvertFhirR4ToHealthLakeResponse = Bundle
 
 ConvertCdaToHtmlResponse = str
 
+ConvertFhirR4ToNemsisV34Response = str
+
+ConvertFhirR4ToNemsisV35Response = str
+
 
 def generate_convert_combine_fhir_bundles_request_from_bundles(
     fhir_bundles: list[Bundle],
@@ -343,6 +347,56 @@ class ConvertApi:
         headers = {"Content-Type": "application/xml", "Accept": "text/html"}
         return self.__http_handler.post(
             path="/convert/v1/cdatohtml",
+            body=content,
+            headers=headers,
+        )
+
+    def fhir_r4_to_nemsis_v34(
+        self, content: Bundle
+    ) -> ConvertFhirR4ToNemsisV34Response:
+        """
+        Converts a FHIR R4 bundle (including one from CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into the National Emergency Medical Services Information System (NEMSIS) XML format.
+
+        ### Parameters
+
+        - `fhir_bundle`: A FHIR R4 bundle for a single patient. The bundle must contain at least one Encounter resource with a valid admission date.
+
+        ### Returns
+
+        A NEMSIS v3.4 document in XML format.
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/fhir_to_nemsis.html>
+        """
+        headers = {"Accept": "application/xml"}
+        return self.__http_handler.post(
+            path="/convert/v1/fhirr4tonemsisv34",
+            body=content,
+            headers=headers,
+        )
+
+    def fhir_r4_to_nemsis_v35(
+        self, content: Bundle
+    ) -> ConvertFhirR4ToNemsisV35Response:
+        """
+        Converts a FHIR R4 bundle (including one from CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into the National Emergency Medical Services Information System (NEMSIS) XML format.
+
+        ### Parameters
+
+        - `fhir_bundle`: A FHIR R4 bundle for a single patient. The bundle must contain at least one Encounter resource with a valid admission date.
+
+        ### Returns
+
+        A NEMSIS v3.5 document in XML format.
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/fhir_to_nemsis.html>
+        """
+        headers = {"Accept": "application/xml"}
+        return self.__http_handler.post(
+            path="/convert/v1/fhirr4tonemsisv35",
             body=content,
             headers=headers,
         )

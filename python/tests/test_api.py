@@ -17,6 +17,7 @@ from .data import (
     CDA,
     DSTU2_BUNDLE,
     HL7,
+    NEMSIS_BUNDLE,
     R4_BUNDLE,
     RISK_PROFILE_BUNDLE,
     STU3_BUNDLE,
@@ -848,3 +849,19 @@ def test_convert_cda_to_fhir_r4_alternative_encoding_should_send_bytes():
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
+
+
+def test_convert_fhir_r4_to_nemsis_v34_should_convert():
+    result = TEST_API.convert.fhir_r4_to_nemsis_v34(content=NEMSIS_BUNDLE)
+
+    assert result is not None
+    assert "<EMSDataSet" in result
+    assert "<eOutcome.18" not in result
+
+
+def test_convert_fhir_r4_to_nemsis_v35_should_convert():
+    result = TEST_API.convert.fhir_r4_to_nemsis_v35(content=NEMSIS_BUNDLE)
+
+    assert result is not None
+    assert "<EMSDataSet" in result
+    assert "<eOutcome.18" in result

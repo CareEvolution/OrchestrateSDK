@@ -81,6 +81,18 @@ export type ConvertCdaToHtmlRequest = {
 
 export type ConvertCdaToHtmlResponse = string;
 
+export type ConvertFhirR4ToNemsisV34Request = {
+  content: Bundle;
+};
+
+export type ConvertFhirR4ToNemsisV34Response = string;
+
+export type ConvertFhirR4ToNemsisV35Request = {
+  content: Bundle;
+};
+
+export type ConvertFhirR4ToNemsisV35Response = string;
+
 export class ConvertApi {
   private httpHandler: IHttpHandler;
 
@@ -252,6 +264,40 @@ export class ConvertApi {
     } as { [key: string]: string; };
     return this.httpHandler.post(
       "/convert/v1/cdatohtml",
+      request.content,
+      headers
+    );
+  }
+
+  /**
+   * Converts a FHIR R4 bundle (including one from CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into the National Emergency Medical Services Information System (NEMSIS) XML format.
+   * @param request A FHIR R4 bundle for a single patient. The bundle must contain at least one Encounter resource with a valid admission date.
+   * @returns A NEMSIS v3.4 document in XML format.
+   * @link https://orchestrate.docs.careevolution.com/convert/fhir_to_nemsis.html
+   */
+  fhirR4ToNemsisV34(request: ConvertFhirR4ToNemsisV34Request): Promise<ConvertFhirR4ToNemsisV34Response> {
+    const headers = {
+      "Accept": "application/xml",
+    } as { [key: string]: string; };
+    return this.httpHandler.post(
+      "/convert/v1/fhirr4tonemsisv34",
+      request.content,
+      headers
+    );
+  }
+
+  /**
+   * Converts a FHIR R4 bundle (including one from CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into the National Emergency Medical Services Information System (NEMSIS) XML format.
+   * @param request A FHIR R4 bundle for a single patient. The bundle must contain at least one Encounter resource with a valid admission date.
+   * @returns A NEMSIS v3.5 document in XML format.
+   * @link https://orchestrate.docs.careevolution.com/convert/fhir_to_nemsis.html
+   */
+  fhirR4ToNemsisV35(request: ConvertFhirR4ToNemsisV35Request): Promise<ConvertFhirR4ToNemsisV35Response> {
+    const headers = {
+      "Accept": "application/xml",
+    } as { [key: string]: string; };
+    return this.httpHandler.post(
+      "/convert/v1/fhirr4tonemsisv35",
       request.content,
       headers
     );
