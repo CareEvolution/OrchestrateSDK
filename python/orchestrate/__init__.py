@@ -1,6 +1,6 @@
-from importlib import metadata
+from orchestrate._internal.version import __version__
 from orchestrate._internal.api import OrchestrateApi
 
-__version__ = metadata.version("orchestrate-api")
+__version__ = __version__
 
 __all__ = ["OrchestrateApi"]

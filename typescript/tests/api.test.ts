@@ -589,13 +589,13 @@ describe("classify condition", () => {
   ];
   const cases = requests.map((input) => ({ input }));
   test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyConditionRequest; }) => {
-    const result = await orchestrate.classifyCondition(input);
+    const result = await orchestrate.terminology.classifyCondition(input);
     expect(result).toBeDefined();
     expect(result.cciAcute).toBeTruthy();
   });
 
   it("should classify batch", async () => {
-    const results = await orchestrate.classifyCondition(requests);
+    const results = await orchestrate.terminology.classifyCondition(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
     results.forEach((result) => {
@@ -617,13 +617,13 @@ describe("classify medication", () => {
   ];
   const cases = requests.map((input) => ({ input }));
   test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyMedicationRequest; }) => {
-    const result = await orchestrate.classifyMedication(input);
+    const result = await orchestrate.terminology.classifyMedication(input);
     expect(result).toBeDefined();
     expect(result.rxNormGeneric).toBeTruthy();
   });
 
   it("should classify batch", async () => {
-    const results = await orchestrate.classifyMedication(requests);
+    const results = await orchestrate.terminology.classifyMedication(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
     results.forEach((result) => {
@@ -645,13 +645,13 @@ describe("classify observation", () => {
   ];
   const cases = requests.map((input) => ({ input }));
   test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyObservationRequest; }) => {
-    const result = await orchestrate.classifyObservation(input);
+    const result = await orchestrate.terminology.classifyObservation(input);
     expect(result).toBeDefined();
     expect(result.loincClass).toBe("MICRO");
   });
 
   it("should classify with name", async () => {
-    const results = await orchestrate.classifyObservation(requests);
+    const results = await orchestrate.terminology.classifyObservation(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
     results.forEach((result) => {
@@ -679,14 +679,14 @@ describe("standardize condition", () => {
   ];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
   test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.standardizeCondition(input);
+    const result = await orchestrate.terminology.standardizeCondition(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
     expect(result.coding[0].code).toBe(expected);
   });
 
   it("should standardize batch", async () => {
-    const results = await orchestrate.standardizeCondition(requests);
+    const results = await orchestrate.terminology.standardizeCondition(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(3);
     results.forEach((result, index) => {
@@ -711,14 +711,14 @@ describe("standardize lab", () => {
   ];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
   test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.standardizeLab(input);
+    const result = await orchestrate.terminology.standardizeLab(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
     expect(result.coding[0].code).toBe(expected);
   });
 
   it("should standardize batch", async () => {
-    const results = await orchestrate.standardizeLab(requests);
+    const results = await orchestrate.terminology.standardizeLab(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
     results.forEach((result, index) => {
@@ -749,14 +749,14 @@ describe("standardize medication", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
   test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.standardizeMedication(input);
+    const result = await orchestrate.terminology.standardizeMedication(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
     expect(result.coding[0].code).toBe(expected);
   });
 
   it("should standardize batch", async () => {
-    const results = await orchestrate.standardizeMedication(requests);
+    const results = await orchestrate.terminology.standardizeMedication(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(3);
     results.forEach((result, index) => {
@@ -782,14 +782,14 @@ describe("standardize observation", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
   test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.standardizeObservation(input);
+    const result = await orchestrate.terminology.standardizeObservation(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
     expect(result.coding[0].code).toBe(expected);
   });
 
   it("should standardize batch", async () => {
-    const results = await orchestrate.standardizeObservation(requests);
+    const results = await orchestrate.terminology.standardizeObservation(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
     results.forEach((result, index) => {
@@ -815,14 +815,14 @@ describe("standardize procedure", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
   test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.standardizeProcedure(input);
+    const result = await orchestrate.terminology.standardizeProcedure(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
     expect(result.coding[0].code).toBe(expected);
   });
 
   it("should standardize batch", async () => {
-    const results = await orchestrate.standardizeProcedure(requests);
+    const results = await orchestrate.terminology.standardizeProcedure(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
     results.forEach((result, index) => {
@@ -849,14 +849,14 @@ describe("standardize radiology", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
   test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.standardizeRadiology(input);
+    const result = await orchestrate.terminology.standardizeRadiology(input);
     expect(result).toBeDefined();
     expect(result.coding.length).toBeGreaterThan(0);
     expect(result.coding[0].code).toBe(expected);
   });
 
   it("should standardize batch", async () => {
-    const results = await orchestrate.standardizeRadiology(requests);
+    const results = await orchestrate.terminology.standardizeRadiology(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
     results.forEach((result, index) => {
@@ -868,7 +868,7 @@ describe("standardize radiology", () => {
 
 describe("convert hl7 to fhir r4", () => {
   it("should convert hl7", async () => {
-    const result = await orchestrate.convertHl7ToFhirR4({
+    const result = await orchestrate.convert.hl7ToFhirR4({
       content: hl7
     });
     expect(result).toBeDefined();
@@ -877,7 +877,7 @@ describe("convert hl7 to fhir r4", () => {
   });
 
   it("should convert hl7 with patient", async () => {
-    const result = await orchestrate.convertHl7ToFhirR4({
+    const result = await orchestrate.convert.hl7ToFhirR4({
       content: hl7,
       patientID: "12/34"
     });
@@ -893,7 +893,7 @@ describe("convert hl7 to fhir r4", () => {
 
 describe("convert cda to fhir r4", () => {
   it("should convert cda", async () => {
-    const result = await orchestrate.convertCdaToFhirR4({
+    const result = await orchestrate.convert.cdaToFhirR4({
       content: cda
     });
     expect(result).toBeDefined();
@@ -902,7 +902,7 @@ describe("convert cda to fhir r4", () => {
   });
 
   it("should convert cda with patient", async () => {
-    const result = await orchestrate.convertCdaToFhirR4({
+    const result = await orchestrate.convert.cdaToFhirR4({
       content: cda,
       patientID: "1234"
     });
@@ -918,7 +918,7 @@ describe("convert cda to fhir r4", () => {
 
 describe("convert cda to pdf", () => {
   it("should convert cda", async () => {
-    const result = await orchestrate.convertCdaToPdf({
+    const result = await orchestrate.convert.cdaToPdf({
       content: cda
     });
     expect(result).toBeDefined();
@@ -930,7 +930,7 @@ describe("convert cda to pdf", () => {
 
 describe("convert fhir r4 to cda", () => {
   it("should convert fhir", async () => {
-    const result = await orchestrate.convertFhirR4ToCda({
+    const result = await orchestrate.convert.fhirR4ToCda({
       content: fhir
     });
     expect(result).toBeDefined();
@@ -940,7 +940,7 @@ describe("convert fhir r4 to cda", () => {
 
 describe("convert fhir r4 to omop", () => {
   it("should convert fhir", async () => {
-    const result = await orchestrate.convertFhirR4ToOmop({
+    const result = await orchestrate.convert.fhirR4ToOmop({
       content: fhir
     });
     expect(result).toBeDefined();
@@ -952,7 +952,7 @@ describe("convert fhir r4 to omop", () => {
 
 describe("convert x12 to fhir r4", () => {
   it("should convert x12", async () => {
-    const result = await orchestrate.convertX12ToFhirR4({
+    const result = await orchestrate.convert.x12ToFhirR4({
       content: x12Document
     });
     expect(result).toBeDefined();
@@ -961,7 +961,7 @@ describe("convert x12 to fhir r4", () => {
   });
 
   it("should convert x12 with patient", async () => {
-    const result = await orchestrate.convertX12ToFhirR4({
+    const result = await orchestrate.convert.x12ToFhirR4({
       content: x12Document,
       patientID: "1234"
     });
@@ -976,7 +976,7 @@ describe("convert x12 to fhir r4", () => {
 
 describe("insight risk profile", () => {
   it("should return a bundle", async () => {
-    const result = await orchestrate.insightRiskProfile({
+    const result = await orchestrate.insight.riskProfile({
       hccVersion: "22",
       periodEndDate: "2020-12-31",
       raSegment: "community nondual aged",
@@ -990,7 +990,7 @@ describe("insight risk profile", () => {
 
 describe("get fhir r4 code system", () => {
   it("should return a code_system", async () => {
-    const result = await orchestrate.getFhirR4CodeSystem({
+    const result = await orchestrate.terminology.getFhirR4CodeSystem({
       codeSystem: "SNOMED"
     });
     expect(result).toBeDefined();
@@ -999,7 +999,7 @@ describe("get fhir r4 code system", () => {
   }, 10000);
 
   it("should return a code system with page", async () => {
-    const result = await orchestrate.getFhirR4CodeSystem({
+    const result = await orchestrate.terminology.getFhirR4CodeSystem({
       codeSystem: "SNOMED",
       pageNumber: 1,
       pageSize: 2
@@ -1010,7 +1010,7 @@ describe("get fhir r4 code system", () => {
   });
 
   it("should return a code system with search", async () => {
-    const result = await orchestrate.getFhirR4CodeSystem({
+    const result = await orchestrate.terminology.getFhirR4CodeSystem({
       codeSystem: "ICD-10-CM",
       conceptContains: "myocardial infarction",
       pageNumber: 0,
@@ -1024,7 +1024,7 @@ describe("get fhir r4 code system", () => {
 
 describe("summarize fhir r4 code systems", () => {
   it("should return a bundle", async () => {
-    const result = await orchestrate.summarizeFhirR4CodeSystems();
+    const result = await orchestrate.terminology.summarizeFhirR4CodeSystems();
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
@@ -1033,7 +1033,7 @@ describe("summarize fhir r4 code systems", () => {
 
 describe("get fhir r4 concept maps", () => {
   it("should return a bundle", async () => {
-    const result = await orchestrate.getFhirR4ConceptMaps();
+    const result = await orchestrate.terminology.getFhirR4ConceptMaps();
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
@@ -1043,7 +1043,7 @@ describe("get fhir r4 concept maps", () => {
 
 describe("translate fhir r4 concept map", () => {
   it("should translate code", async () => {
-    const result = await orchestrate.translateFhirR4ConceptMap({
+    const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
     });
     expect(result).toBeDefined();
@@ -1051,7 +1051,7 @@ describe("translate fhir r4 concept map", () => {
   });
 
   it("should translate code and system", async () => {
-    const result = await orchestrate.translateFhirR4ConceptMap({
+    const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
       domain: "Condition"
     });
@@ -1062,7 +1062,7 @@ describe("translate fhir r4 concept map", () => {
 
 describe("summarize fhir r4 value set scope", () => {
   it("should return a bundle", async () => {
-    const result = await orchestrate.summarizeFhirR4ValueSetScope({
+    const result = await orchestrate.terminology.summarizeFhirR4ValueSetScope({
       scope: "http://loinc.org"
     });
     expect(result).toBeDefined();
@@ -1075,7 +1075,7 @@ describe("summarize fhir r4 value set scope", () => {
 
 describe("get fhir r4 value set", () => {
   it("should return a value set", async () => {
-    const result = await orchestrate.getFhirR4ValueSet({
+    const result = await orchestrate.terminology.getFhirR4ValueSet({
       id: "00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2"
     });
     expect(result).toBeDefined();
@@ -1086,7 +1086,7 @@ describe("get fhir r4 value set", () => {
 
 describe("summarize fhir r4 value set", () => {
   it("should return a value set", async () => {
-    const result = await orchestrate.summarizeFhirR4ValueSet({
+    const result = await orchestrate.terminology.summarizeFhirR4ValueSet({
       id: "00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2",
     });
     expect(result).toBeDefined();
@@ -1096,7 +1096,7 @@ describe("summarize fhir r4 value set", () => {
 
 describe("get fhir r4 value set scopes", () => {
   it("should return a value set", async () => {
-    const result = await orchestrate.getFhirR4ValueSetScopes();
+    const result = await orchestrate.terminology.getFhirR4ValueSetScopes();
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("ValueSet");
     expect(result.compose?.include.length).toBeGreaterThan(0);
@@ -1105,13 +1105,13 @@ describe("get fhir r4 value set scopes", () => {
 
 describe("get fhir r4 value set by scope", () => {
   it("should throw without pagination", async () => {
-    await expect(orchestrate.getFhirR4ValueSetsByScope({
+    await expect(orchestrate.terminology.getFhirR4ValueSetsByScope({
       scope: "http://loinc.org",
     })).rejects.toThrow();
   });
 
   it("should return a bundle with page and scope", async () => {
-    const result = await orchestrate.getFhirR4ValueSetsByScope({
+    const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({
       scope: "http://loinc.org",
       pageNumber: 1,
       pageSize: 2
@@ -1122,7 +1122,7 @@ describe("get fhir r4 value set by scope", () => {
   });
 
   it("should return a bundle with page and name", async () => {
-    const result = await orchestrate.getFhirR4ValueSetsByScope({
+    const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({
       name: "LP7839-6",
       pageNumber: 1,
       pageSize: 2
@@ -1133,7 +1133,7 @@ describe("get fhir r4 value set by scope", () => {
   });
 
   it("should return a bundle with page, name, and scope", async () => {
-    const result = await orchestrate.getFhirR4ValueSetsByScope({
+    const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({
       name: "LP7839-6",
       scope: "http://loinc.org",
       pageNumber: 1,
@@ -1145,7 +1145,7 @@ describe("get fhir r4 value set by scope", () => {
   });
 
   it("should return a bundle with just page", async () => {
-    const result = await orchestrate.getFhirR4ValueSetsByScope({
+    const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({
       pageNumber: 1,
       pageSize: 2
     });
@@ -1157,7 +1157,7 @@ describe("get fhir r4 value set by scope", () => {
 
 describe("summarize fhir r4 code system", () => {
   it("should return a code system", async () => {
-    const result = await orchestrate.summarizeFhirR4CodeSystem({
+    const result = await orchestrate.terminology.summarizeFhirR4CodeSystem({
       codeSystem: "SNOMED"
     });
     expect(result).toBeDefined();
@@ -1168,7 +1168,7 @@ describe("summarize fhir r4 code system", () => {
 
 describe("get all fhir r4 value sets for codes", () => {
   it("should return parameters", async () => {
-    const result = await orchestrate.getAllFhirR4ValueSetsForCodes({
+    const result = await orchestrate.terminology.getAllFhirR4ValueSetsForCodes({
       resourceType: "Parameters",
       parameter: [
         {
@@ -1193,7 +1193,7 @@ ${JSON.stringify(fhir)}
 ${JSON.stringify(fhir)}
 `);
 
-    const result = await orchestrate.convertCombinedFhirR4Bundles({
+    const result = await orchestrate.convert.combineFhirR4Bundles({
       content: bundles
     });
 
@@ -1208,7 +1208,7 @@ ${JSON.stringify(fhir)}
 ${JSON.stringify(fhir)}
 `);
 
-    const result = await orchestrate.convertCombinedFhirR4Bundles({
+    const result = await orchestrate.convert.combineFhirR4Bundles({
       content: bundles,
       patientID: "1234"
     });

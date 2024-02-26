@@ -5,7 +5,7 @@
 	"main": "dist/cjs/index.js",
 	"module": "dist/esm/index.js",
 	"scripts": {
-		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
+		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node ./scripts/build-esm-package.mjs",
 		"test": "jest"
 	},
 	"author": "CareEvolution",
@@ -33,5 +33,47 @@
 	],
 	"engines": {
 		"node": ">=18.0.0"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/esm/index.js",
+			"require": "./dist/cjs/index.js",
+			"types": "./dist/esm/index.d.ts",
+			"default": "./dist/esm/index.mjs"
+		},
+		"./terminology": {
+			"import": "./dist/esm/terminology.js",
+			"require": "./dist/cjs/terminology.js",
+			"types": "./dist/esm/terminology.d.ts",
+			"default": "./dist/esm/terminology.js"
+		},
+		"./convert": {
+			"import": "./dist/esm/convert.js",
+			"require": "./dist/cjs/convert.js",
+			"types": "./dist/esm/convert.d.ts",
+			"default": "./dist/esm/convert.js"
+		},
+		"./insight": {
+			"import": "./dist/esm/insight.js",
+			"require": "./dist/cjs/insight.js",
+			"types": "./dist/esm/insight.d.ts",
+			"default": "./dist/esm/insight.js"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			".": [
+				"./dist/esm/index.d.ts"
+			],
+			"terminology": [
+				"./dist/esm/terminology.d.ts"
+			],
+			"convert": [
+				"./dist/esm/convert.d.ts"
+			],
+			"insight": [
+				"./dist/esm/insight.d.ts"
+			]
+		}
 	}
 }

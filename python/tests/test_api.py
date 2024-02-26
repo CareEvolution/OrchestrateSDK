@@ -70,8 +70,8 @@ TEST_API = setup_test_api()
     ],
 )
 def test_api_classify_condition_should_classify(condition):
-    kwarg_response = TEST_API.classify_condition(**condition)
-    positional_response = TEST_API.classify_condition(
+    kwarg_response = TEST_API.terminology.classify_condition(**condition)
+    positional_response = TEST_API.terminology.classify_condition(
         *[condition[key] for key in condition]
     )
 
@@ -112,8 +112,8 @@ def test_api_classify_condition_should_classify(condition):
     ],
 )
 def test_api_classify_medication_should_classify(medication):
-    kwarg_response = TEST_API.classify_medication(**medication)
-    positional_response = TEST_API.classify_medication(
+    kwarg_response = TEST_API.terminology.classify_medication(**medication)
+    positional_response = TEST_API.terminology.classify_medication(
         *[medication[key] for key in medication]
     )
 
@@ -132,8 +132,8 @@ def test_api_classify_medication_should_classify_batch() -> None:
         {"code": "2468231", "system": "RxNorm"},
     ]
 
-    response = TEST_API.classify_medication(request=request)
-    positional_response = TEST_API.classify_medication(request)
+    response = TEST_API.terminology.classify_medication(request=request)
+    positional_response = TEST_API.terminology.classify_medication(request)
 
     assert response == positional_response
     assert response is not None
@@ -168,8 +168,8 @@ def test_api_classify_medication_should_classify_batch() -> None:
     ],
 )
 def test_api_classify_observation_should_classify(observation):
-    kwarg_response = TEST_API.classify_observation(**observation)
-    positional_response = TEST_API.classify_observation(
+    kwarg_response = TEST_API.terminology.classify_observation(**observation)
+    positional_response = TEST_API.terminology.classify_observation(
         *[observation[key] for key in observation]
     )
 
@@ -188,8 +188,8 @@ def test_api_classify_observation_should_classify_batch() -> None:
         {"code": "94558-4", "system": "LOINC"},
     ]
 
-    kwarg_response = TEST_API.classify_observation(request=requests)
-    positional_response = TEST_API.classify_observation(requests)
+    kwarg_response = TEST_API.terminology.classify_observation(request=requests)
+    positional_response = TEST_API.terminology.classify_observation(requests)
 
     response = kwarg_response
     assert kwarg_response == positional_response
@@ -210,8 +210,8 @@ _STANDARDIZE_CONDITION_PAYLOADS = [
 
 @pytest.mark.parametrize("payload, expected", _STANDARDIZE_CONDITION_PAYLOADS)
 def test_api_standardize_condition_should_standardize(payload, expected):
-    response = TEST_API.standardize_condition(**payload)
-    positional_response = TEST_API.standardize_condition(
+    response = TEST_API.terminology.standardize_condition(**payload)
+    positional_response = TEST_API.terminology.standardize_condition(
         *[payload[key] for key in payload]
     )
 
@@ -227,8 +227,8 @@ def test_api_standardize_condition_should_standardize_batch() -> None:
         {"display": "dm2"},
     ]
     expected = ["370221004", "J45.50", "44054006"]
-    response = TEST_API.standardize_condition(request=requests)
-    positional_response = TEST_API.standardize_condition(requests)
+    response = TEST_API.terminology.standardize_condition(request=requests)
+    positional_response = TEST_API.terminology.standardize_condition(requests)
 
     assert response == positional_response
     assert response is not None
@@ -254,8 +254,10 @@ _STANDARDIZE_LAB_PAYLOADS = [
 
 @pytest.mark.parametrize("payload, expected", _STANDARDIZE_LAB_PAYLOADS)
 def test_api_standardize_lab_should_standardize(payload, expected):
-    response = TEST_API.standardize_lab(**payload)
-    positional_response = TEST_API.standardize_lab(*[payload[key] for key in payload])
+    response = TEST_API.terminology.standardize_lab(**payload)
+    positional_response = TEST_API.terminology.standardize_lab(
+        *[payload[key] for key in payload]
+    )
 
     assert response == positional_response
     assert response is not None
@@ -269,8 +271,8 @@ def test_api_standardize_lab_should_standardize_batch() -> None:
     ]
     expected = ["4548-4", "43396009"]
 
-    response = TEST_API.standardize_lab(request=requests)
-    positional_response = TEST_API.standardize_lab(requests)
+    response = TEST_API.terminology.standardize_lab(request=requests)
+    positional_response = TEST_API.terminology.standardize_lab(requests)
 
     assert response == positional_response
     assert response is not None
@@ -309,8 +311,8 @@ _STANDARDIZE_MEDICATION_PAYOADS = [
 
 @pytest.mark.parametrize("payload, expected", _STANDARDIZE_MEDICATION_PAYOADS)
 def test_api_standardize_medication_should_standardize(payload, expected):
-    response = TEST_API.standardize_medication(**payload)
-    positional_response = TEST_API.standardize_medication(
+    response = TEST_API.terminology.standardize_medication(**payload)
+    positional_response = TEST_API.terminology.standardize_medication(
         *[payload[key] for key in payload]
     )
 
@@ -327,8 +329,8 @@ def test_api_standardize_medication_should_standardize_batch() -> None:
     ]
     expected = ["861004", "59267100002", "1796093"]
 
-    response = TEST_API.standardize_medication(request=requests)
-    positional_response = TEST_API.standardize_medication(requests)
+    response = TEST_API.terminology.standardize_medication(request=requests)
+    positional_response = TEST_API.terminology.standardize_medication(requests)
 
     assert response == positional_response
     assert response is not None
@@ -348,8 +350,8 @@ _STANDARDIZE_OBSERVATION_PAYLOADS = [
 
 @pytest.mark.parametrize("payload, expected", _STANDARDIZE_OBSERVATION_PAYLOADS)
 def test_api_standardize_observation_should_standardize(payload, expected):
-    response = TEST_API.standardize_observation(**payload)
-    positional_response = TEST_API.standardize_observation(
+    response = TEST_API.terminology.standardize_observation(**payload)
+    positional_response = TEST_API.terminology.standardize_observation(
         *[payload[key] for key in payload]
     )
 
@@ -362,8 +364,8 @@ def test_api_standardize_observation_should_standardize_batch() -> None:
     requests: list[StandardizeRequest] = [{"code": "8480-6"}, {"display": "BMI"}]
     expected = ["8480-6", "39156-5"]
 
-    response = TEST_API.standardize_observation(request=requests)
-    positional_response = TEST_API.standardize_observation(requests)
+    response = TEST_API.terminology.standardize_observation(request=requests)
+    positional_response = TEST_API.terminology.standardize_observation(requests)
 
     assert response == positional_response
     assert response is not None
@@ -382,8 +384,8 @@ _STANDARDIZE_PROCEDURE_PAYLOADS = [
 
 @pytest.mark.parametrize("payload, expected", _STANDARDIZE_PROCEDURE_PAYLOADS)
 def test_api_standardize_procedure_should_standardize(payload, expected):
-    response = TEST_API.standardize_procedure(**payload)
-    positional_response = TEST_API.standardize_procedure(
+    response = TEST_API.terminology.standardize_procedure(**payload)
+    positional_response = TEST_API.terminology.standardize_procedure(
         *[payload[key] for key in payload]
     )
 
@@ -399,8 +401,8 @@ def test_api_standardize_procedure_should_standardize_batch() -> None:
     ]
     expected = ["80146002", "429858000"]
 
-    response = TEST_API.standardize_procedure(request=requests)
-    positional_response = TEST_API.standardize_procedure(requests)
+    response = TEST_API.terminology.standardize_procedure(request=requests)
+    positional_response = TEST_API.terminology.standardize_procedure(requests)
 
     assert response == positional_response
     assert response is not None
@@ -431,8 +433,8 @@ _STANDARDIZE_RADIOLOGY_PAYLOADS = [
 
 @pytest.mark.parametrize("payload, expected", _STANDARDIZE_RADIOLOGY_PAYLOADS)
 def test_api_standardize_radiology_should_standardize(payload, expected):
-    response = TEST_API.standardize_radiology(**payload)
-    positional_response = TEST_API.standardize_radiology(
+    response = TEST_API.terminology.standardize_radiology(**payload)
+    positional_response = TEST_API.terminology.standardize_radiology(
         *[payload[key] for key in payload]
     )
 
@@ -448,8 +450,8 @@ def test_api_standardize_radiology_should_standardize_batch() -> None:
     ]
     expected = ["711232001", "30799-1"]
 
-    response = TEST_API.standardize_radiology(request=requests)
-    positional_response = TEST_API.standardize_radiology(requests)
+    response = TEST_API.terminology.standardize_radiology(request=requests)
+    positional_response = TEST_API.terminology.standardize_radiology(requests)
 
     assert response == positional_response
     assert response is not None
@@ -484,7 +486,7 @@ ZPR||
 
 
 def test_api_convert_hl7_to_fhir_r4_without_patient_should_convert():
-    result = TEST_API.convert_hl7_to_fhir_r4(content=_HL7)
+    result = TEST_API.convert.hl7_to_fhir_r4(content=_HL7)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -492,7 +494,7 @@ def test_api_convert_hl7_to_fhir_r4_without_patient_should_convert():
 
 
 def test_api_convert_hl7_to_fhir_r4_with_patient_should_convert():
-    result = TEST_API.convert_hl7_to_fhir_r4(content=_HL7, patient_id="1234")
+    result = TEST_API.convert.hl7_to_fhir_r4(content=_HL7, patient_id="1234")
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -582,7 +584,7 @@ _CDA = """
 
 
 def test_convert_cda_to_fhir_r4_without_patient_should_convert():
-    result = TEST_API.convert_cda_to_fhir_r4(content=_CDA)
+    result = TEST_API.convert.cda_to_fhir_r4(content=_CDA)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -590,7 +592,7 @@ def test_convert_cda_to_fhir_r4_without_patient_should_convert():
 
 
 def test_convert_cda_to_fhir_r4_with_patient_should_convert():
-    result = TEST_API.convert_cda_to_fhir_r4(content=_CDA, patient_id="1234")
+    result = TEST_API.convert.cda_to_fhir_r4(content=_CDA, patient_id="1234")
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -606,7 +608,7 @@ def test_convert_cda_to_fhir_r4_with_patient_should_convert():
 
 
 def test_convert_cda_to_pdf_should_convert():
-    result = TEST_API.convert_cda_to_pdf(content=_CDA)
+    result = TEST_API.convert.cda_to_pdf(content=_CDA)
 
     assert result is not None
     assert isinstance(result, bytes)
@@ -668,14 +670,14 @@ _BUNDLE = {
 
 
 def test_convert_fhir_r4_to_cda_should_convert():
-    result = TEST_API.convert_fhir_r4_to_cda(content=_BUNDLE)
+    result = TEST_API.convert.fhir_r4_to_cda(content=_BUNDLE)
 
     assert result is not None
     assert result.startswith("<?xml")
 
 
 def test_convert_fhir_r4_to_omop_should_convert():
-    result = TEST_API.convert_fhir_r4_to_omop(content=_BUNDLE)
+    result = TEST_API.convert.fhir_r4_to_omop(content=_BUNDLE)
 
     assert result is not None
     assert isinstance(result, bytes)
@@ -1022,8 +1024,8 @@ _RISK_PROFILE_BUNDLE = {
 
 
 def test_insight_risk_profile_should_return_bundle():
-    result = TEST_API.insight_risk_profile(
-        content=_RISK_PROFILE_BUNDLE,
+    result = TEST_API.insight.risk_profile(
+        content=_RISK_PROFILE_BUNDLE,  # type: ignore
         hcc_version="22",
         period_end_date="2020-12-31",
         ra_segment="community nondual aged",
@@ -1042,7 +1044,7 @@ def test_convert_combined_fhir_r4_bundles_should_combine():
         ]
     )
 
-    result = TEST_API.convert_combined_fhir_r4_bundles(content=bundles)
+    result = TEST_API.convert.combine_fhir_r4_bundles(content=bundles)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1057,7 +1059,7 @@ def test_convert_combined_fhir_r4_bundles_with_person_should_combine():
         ]
     )
 
-    result = TEST_API.convert_combined_fhir_r4_bundles(
+    result = TEST_API.convert.combine_fhir_r4_bundles(
         content=bundles, patient_id="1234"
     )
 
@@ -1122,7 +1124,7 @@ IEA*1*000000031~
 
 
 def test_convert_x12_to_fhir_r4_should_return_a_bundle():
-    result = TEST_API.convert_x12_to_fhir_r4(content=_X12_DOCUMENT)
+    result = TEST_API.convert.x12_to_fhir_r4(content=_X12_DOCUMENT)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1130,7 +1132,7 @@ def test_convert_x12_to_fhir_r4_should_return_a_bundle():
 
 
 def test_convert_x12_to_fhir_r4_with_patient_should_return_a_bundle():
-    result = TEST_API.convert_x12_to_fhir_r4(content=_X12_DOCUMENT, patient_id="12/34")
+    result = TEST_API.convert.x12_to_fhir_r4(content=_X12_DOCUMENT, patient_id="12/34")
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1146,7 +1148,7 @@ def test_convert_x12_to_fhir_r4_with_patient_should_return_a_bundle():
 
 
 def test_get_fhir_r4_code_system_should_return_a_code_system():
-    result = TEST_API.get_fhir_r4_code_system(code_system="SNOMED")
+    result = TEST_API.terminology.get_fhir_r4_code_system(code_system="SNOMED")
 
     assert result is not None
     assert result["resourceType"] == "CodeSystem"
@@ -1154,7 +1156,7 @@ def test_get_fhir_r4_code_system_should_return_a_code_system():
 
 
 def test_get_fhir_r4_code_system_with_page_should_return_a_code_system():
-    result = TEST_API.get_fhir_r4_code_system(
+    result = TEST_API.terminology.get_fhir_r4_code_system(
         code_system="SNOMED",
         page_number=0,
         page_size=2,
@@ -1166,7 +1168,7 @@ def test_get_fhir_r4_code_system_with_page_should_return_a_code_system():
 
 
 def test_get_fhir_r4_code_system_with_search_should_return_a_code_system():
-    result = TEST_API.get_fhir_r4_code_system(
+    result = TEST_API.terminology.get_fhir_r4_code_system(
         code_system="SNOMED",
         concept_contains="myocardial infarction",
         page_number=0,
@@ -1179,7 +1181,7 @@ def test_get_fhir_r4_code_system_with_search_should_return_a_code_system():
 
 
 def test_summarize_fhir_r4_code_systems_should_return_bundle():
-    result = TEST_API.summarize_fhir_r4_code_systems()
+    result = TEST_API.terminology.summarize_fhir_r4_code_systems()
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1187,7 +1189,7 @@ def test_summarize_fhir_r4_code_systems_should_return_bundle():
 
 
 def test_get_fhir_r4_concept_maps_should_return_a_bundle():
-    result = TEST_API.get_fhir_r4_concept_maps()
+    result = TEST_API.terminology.get_fhir_r4_concept_maps()
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1195,7 +1197,7 @@ def test_get_fhir_r4_concept_maps_should_return_a_bundle():
 
 
 def test_translate_fhir_r4_concept_map_with_code_should_translate():
-    result = TEST_API.translate_fhir_r4_concept_map(code="119981000146107")
+    result = TEST_API.terminology.translate_fhir_r4_concept_map(code="119981000146107")
 
     assert result is not None
     assert result["resourceType"] == "Parameters"
@@ -1203,7 +1205,7 @@ def test_translate_fhir_r4_concept_map_with_code_should_translate():
 
 
 def test_translate_fhir_r4_concept_map_with_code_and_domain_should_translate():
-    result = TEST_API.translate_fhir_r4_concept_map(
+    result = TEST_API.terminology.translate_fhir_r4_concept_map(
         code="119981000146107", domain="Condition"
     )
 
@@ -1213,7 +1215,9 @@ def test_translate_fhir_r4_concept_map_with_code_and_domain_should_translate():
 
 
 def test_summarize_fhir_r4_value_set_scope_should_return_bundle():
-    result = TEST_API.summarize_fhir_r4_value_set_scope(scope="http://loinc.org")
+    result = TEST_API.terminology.summarize_fhir_r4_value_set_scope(
+        scope="http://loinc.org"
+    )
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1222,7 +1226,7 @@ def test_summarize_fhir_r4_value_set_scope_should_return_bundle():
 
 
 def test_get_fhir_r4_value_set_should_return_a_value_set():
-    result = TEST_API.get_fhir_r4_value_set(
+    result = TEST_API.terminology.get_fhir_r4_value_set(
         value_set_id="00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2"
     )
 
@@ -1232,7 +1236,7 @@ def test_get_fhir_r4_value_set_should_return_a_value_set():
 
 
 def test_summarize_fhir_r4_value_set_should_return_a_value_set():
-    result = TEST_API.summarize_fhir_r4_value_set(
+    result = TEST_API.terminology.summarize_fhir_r4_value_set(
         value_set_id="00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2"
     )
 
@@ -1241,7 +1245,7 @@ def test_summarize_fhir_r4_value_set_should_return_a_value_set():
 
 
 def test_get_fhir_r4_value_set_scopes_should_return_value_set():
-    result = TEST_API.get_fhir_r4_value_set_scopes()
+    result = TEST_API.terminology.get_fhir_r4_value_set_scopes()
 
     assert result is not None
     assert result["resourceType"] == "ValueSet"
@@ -1250,11 +1254,11 @@ def test_get_fhir_r4_value_set_scopes_should_return_value_set():
 
 def test_get_fhir_r4_value_sets_by_scope_no_pagination_should_raise():
     with pytest.raises(HTTPError):
-        TEST_API.get_fhir_r4_value_sets_by_scope(scope="http://loinc.org")
+        TEST_API.terminology.get_fhir_r4_value_sets_by_scope(scope="http://loinc.org")
 
 
 def test_get_fhir_r4_value_seets_by_scope_with_page_and_scope_should_return_bundle():
-    result = TEST_API.get_fhir_r4_value_sets_by_scope(
+    result = TEST_API.terminology.get_fhir_r4_value_sets_by_scope(
         scope="http://loinc.org", page_number=0, page_size=2
     )
 
@@ -1264,7 +1268,7 @@ def test_get_fhir_r4_value_seets_by_scope_with_page_and_scope_should_return_bund
 
 
 def test_get_fhir_r4_value_seets_by_scope_with_page_and_name_should_return_bundle():
-    result = TEST_API.get_fhir_r4_value_sets_by_scope(
+    result = TEST_API.terminology.get_fhir_r4_value_sets_by_scope(
         name="LP7839-6", page_number=0, page_size=2
     )
 
@@ -1274,7 +1278,7 @@ def test_get_fhir_r4_value_seets_by_scope_with_page_and_name_should_return_bundl
 
 
 def test_get_fhir_r4_value_seets_by_scope_with_page_and_name_and_scope_should_return_bundle():
-    result = TEST_API.get_fhir_r4_value_sets_by_scope(
+    result = TEST_API.terminology.get_fhir_r4_value_sets_by_scope(
         name="LP7839-6", scope="http://loinc.org", page_number=0, page_size=2
     )
 
@@ -1284,7 +1288,9 @@ def test_get_fhir_r4_value_seets_by_scope_with_page_and_name_and_scope_should_re
 
 
 def test_get_fhir_r4_value_seets_by_scope_with_page_should_return_bundle():
-    result = TEST_API.get_fhir_r4_value_sets_by_scope(page_number=0, page_size=2)
+    result = TEST_API.terminology.get_fhir_r4_value_sets_by_scope(
+        page_number=0, page_size=2
+    )
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -1292,7 +1298,7 @@ def test_get_fhir_r4_value_seets_by_scope_with_page_should_return_bundle():
 
 
 def test_summarize_fhir_r4_code_system_should_return_code_system():
-    result = TEST_API.summarize_fhir_r4_code_system(code_system="SNOMED")
+    result = TEST_API.terminology.summarize_fhir_r4_code_system(code_system="SNOMED")
 
     assert result is not None
     assert result["resourceType"] == "CodeSystem"
@@ -1300,15 +1306,14 @@ def test_summarize_fhir_r4_code_system_should_return_code_system():
 
 
 def test_get_all_fhir_r4_value_sets_for_codes_should_return_parameters():
-    result = TEST_API.get_all_fhir_r4_value_sets_for_codes(
-        {
-            "resourceType": "Parameters",
-            "parameter": [
-                {"name": "code", "valueString": "119981000146107"},
-                {"name": "system", "valueString": "http://snomed.info/sct"},
-            ],
-        }
-    )
+    parameters = {
+        "resourceType": "Parameters",
+        "parameter": [
+            {"name": "code", "valueString": "119981000146107"},
+            {"name": "system", "valueString": "http://snomed.info/sct"},
+        ],
+    }
+    result = TEST_API.terminology.get_all_fhir_r4_value_sets_for_codes(parameters)
 
     assert result is not None
     assert result["resourceType"] == "Parameters"
