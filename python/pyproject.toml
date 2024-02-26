@@ -17,6 +17,7 @@ version = "0.0.0"
 [tool.poetry.dependencies]
 python = "^3.9"
 requests = "^2.31.0"
+typing-extensions = {version = "^4.0.1", python = "<3.11"}
 
 [tool.poetry.group.dev.dependencies]
 black = ">=23.7,<25.0"
