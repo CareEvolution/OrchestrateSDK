@@ -25,6 +25,7 @@ def setup_test_api():
 
 TEST_API = setup_test_api()
 
+
 @pytest.mark.parametrize(
     "condition",
     [
