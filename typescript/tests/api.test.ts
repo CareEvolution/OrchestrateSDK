@@ -1,22 +1,18 @@
-import { Bundle } from 'fhir/r4';
-import { OrchestrateApi } from '../src/api';
-import { ClassifyConditionRequest, ClassifyMedicationRequest, ClassifyObservationRequest, StandardizeRequest } from '../src/terminology';
-import { describe, it, expect, test } from '@jest/globals';
-import dotenv from 'dotenv';
+import { Bundle } from "fhir/r4";
+import { OrchestrateApi } from "../src/api";
+import {
+  ClassifyConditionRequest,
+  ClassifyMedicationRequest,
+  ClassifyObservationRequest,
+  StandardizeRequest,
+} from "../src/terminology";
+import { describe, it, expect, test } from "vitest";
+import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
-const apiKey = process.env.ORCHESTRATE_API_KEY || "";
-const orchestrateUrl = process.env.ORCHESTRATE_BASE_URL || undefined;
-const additonalHeaders = process.env.ORCHESTRATE_ADDITIONAL_HEADERS ? JSON.parse(process.env.ORCHESTRATE_ADDITIONAL_HEADERS) : undefined;
+const orchestrate = new OrchestrateApi();
 
-
-const orchestrate = new OrchestrateApi({
-  apiKey: apiKey,
-  baseUrl: orchestrateUrl,
-  additionalHeaders: additonalHeaders,
-});
-
-const cda = (`
+const cda = `
 <?xml-stylesheet type="text/xsl" href=""?>
 <ClinicalDocument xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:hl7-org:v3 cda.xsd" moodCode="EVN" xmlns="urn:hl7-org:v3">
   <realmCode code="US" />
@@ -87,9 +83,9 @@ const cda = (`
     </structuredBody>
   </component>
 </ClinicalDocument>
-`);
+`;
 
-const hl7 = (`
+const hl7 = `
 MSH|^~\\&|LAB|MYFAC|LAB||201411130917||ORU^R01|3216598|D|2.3|||AL|NE|
 PID|1|ABC123DF|AND234DA_PID3|PID_4_ALTID|Smith^Patient^M||19670202 |F|||2222 22 st^^LAKE COUNTRY^NY^22222||222-222-2222|||||7890|
 PV1|1|O|MYFACSOMPL||||^Smith^Patient^^^^^XAVS|||||||||||REF||SELF|||||||||||||||||||MYFAC||REG|||201411071440||||||||23390^PV1_52Smith^PV1_52Patient^H^^Dr^^PV1_52Mnemonic|
@@ -111,75 +107,71 @@ OBX|13|NM|301.2700^Eosinophils^00065227^711-2^Eosinophils^pCLOCD|1|0.0|10\\S\\9/
 OBX|14|NM|301.2900^Basophils^00065227^704-7^Basophils^pCLOCD|1|0.0|10\\S\\9/L|0.0-0.2|N||A~S|F|||201411130916|MYFAC^MyFake Hospital^L|
 ZDR||^Smith^Patient^^^^^XAVS^^^^^XX^^ATP|
 ZPR||
-`);
+`;
 
 const fhir = {
-  "resourceType": "Bundle",
-  "type": "batch-response",
-  "entry": [
+  resourceType: "Bundle",
+  type: "batch-response",
+  entry: [
     {
-      "fullUrl": "https://api.careevolutionapi.com/Patient/35b77437-425d-419c-90b5-af4bc433ebe9",
-      "resource": {
-        "resourceType": "Patient",
-        "id": "35b77437-425d-419c-90b5-af4bc433ebe9",
-        "meta": {
-          "source": "http://rosetta.careevolution.com/identifiers/CareEvolution/MRN/1.3.6.1.4.1.37608_1.3.6.1.4.1.37608"
+      fullUrl: "https://api.careevolutionapi.com/Patient/35b77437-425d-419c-90b5-af4bc433ebe9",
+      resource: {
+        resourceType: "Patient",
+        id: "35b77437-425d-419c-90b5-af4bc433ebe9",
+        meta: {
+          source: "http://rosetta.careevolution.com/identifiers/CareEvolution/MRN/1.3.6.1.4.1.37608_1.3.6.1.4.1.37608",
         },
-        "identifier": [
+        identifier: [
           {
-            "use": "usual",
-            "type": {
-              "coding": [
+            use: "usual",
+            type: {
+              coding: [
                 {
-                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                  "code": "MR"
-                }
-              ]
+                  system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  code: "MR",
+                },
+              ],
             },
-            "system": "urn:oid:1.3.6.1.4.1.37608",
-            "value": "IheTestPatient"
+            system: "urn:oid:1.3.6.1.4.1.37608",
+            value: "IheTestPatient",
           },
           {
-            "system": "http://rosetta.careevolution.com/identifiers/Proprietary/1.3.6.1.4.1.37608",
-            "value": "IheTestPatient"
-          }
+            system: "http://rosetta.careevolution.com/identifiers/Proprietary/1.3.6.1.4.1.37608",
+            value: "IheTestPatient",
+          },
         ],
-        "name": [
+        name: [
           {
-            "use": "official",
-            "family": "Smith",
-            "given": [
-              "Patient"
-            ]
-          }
+            use: "official",
+            family: "Smith",
+            given: ["Patient"],
+          },
         ],
-        "telecom": [
+        telecom: [
           {
-            "system": "phone",
-            "value": "534-555-6666",
-            "use": "home"
-          }
+            system: "phone",
+            value: "534-555-6666",
+            use: "home",
+          },
         ],
-        "gender": "female",
-        "birthDate": "1956-08-13",
-        "deceasedBoolean": false,
-        "address": [
+        gender: "female",
+        birthDate: "1956-08-13",
+        deceasedBoolean: false,
+        address: [
           {
-            "use": "home",
-            "line": [
-              "34 Drury Lane"
-            ],
-            "city": "Disney Land",
-            "state": "CA",
-            "postalCode": "90210"
-          }
-        ]
-      }
-    }
-  ]
+            use: "home",
+            line: ["34 Drury Lane"],
+            city: "Disney Land",
+            state: "CA",
+            postalCode: "90210",
+          },
+        ],
+      },
+    },
+  ],
 } as Bundle;
 
-const x12Document = (`ISA*00*          *00*          *ZZ*SUBMITTERID    *ZZ*RECEIVERID     *230616*1145*^*00501*000000001*0*T*:~
+const x12Document = `ISA*00*          *00*          *ZZ*SUBMITTERID    *ZZ*RECEIVERID     *230616*1145*^*00501*000000001*0*T*:~
 GS*HC*SENDERCODE*RECEIVERCODE*20230627*11301505*123456789*X*005010X222A1~
 ST*837*0034*005010X223A1~
 BHT*0019*00*3920394930203*20100816*1615*CH~
@@ -223,357 +215,351 @@ DTP*472*D8*20100730~
 SE*38*0034~
 GE*1*30~
 IEA*1*000000031~
-`);
+`;
 
 const riskProfileBundle = {
-  "resourceType": "Bundle",
-  "type": "searchset",
-  "entry": [
+  resourceType: "Bundle",
+  type: "searchset",
+  entry: [
     {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "9cee689b-6501-4349-af32-e6849e179a2f",
-        "meta": {
-          "lastUpdated": "2023-02-22T11:27:29.9499804+00:00",
-          "profile": [
+      resource: {
+        resourceType: "Patient",
+        id: "9cee689b-6501-4349-af32-e6849e179a2f",
+        meta: {
+          lastUpdated: "2023-02-22T11:27:29.9499804+00:00",
+          profile: [
             "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient",
-            "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient"
-          ]
+            "http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Patient",
+          ],
         },
-        "extension": [
+        extension: [
           {
-            "url": "http://hl7.org/fhir/StructureDefinition/patient-religion",
-            "valueCodeableConcept": {
-              "coding": [
+            url: "http://hl7.org/fhir/StructureDefinition/patient-religion",
+            valueCodeableConcept: {
+              coding: [
                 {
-                  "system": "urn:oid:1.2.3.4.5.1.1",
-                  "code": "Example",
-                  "display": "Example",
-                  "userSelected": true
-                }
-              ]
-            }
+                  system: "urn:oid:1.2.3.4.5.1.1",
+                  code: "Example",
+                  display: "Example",
+                  userSelected: true,
+                },
+              ],
+            },
           },
           {
-            "extension": [
+            extension: [
               {
-                "url": "text",
-                "valueString": "N"
-              }
+                url: "text",
+                valueString: "N",
+              },
             ],
-            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+            url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
           },
           {
-            "extension": [
+            extension: [
               {
-                "url": "text",
-                "valueString": "Black"
+                url: "text",
+                valueString: "Black",
               },
               {
-                "url": "detailed",
-                "valueCoding": {
-                  "system": "urn:oid:2.16.840.1.113883.6.238",
-                  "code": "2056-0",
-                  "display": "BLACK",
-                  "userSelected": false
-                }
-              }
+                url: "detailed",
+                valueCoding: {
+                  system: "urn:oid:2.16.840.1.113883.6.238",
+                  code: "2056-0",
+                  display: "BLACK",
+                  userSelected: false,
+                },
+              },
             ],
-            "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
-          }
+            url: "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+          },
         ],
-        "identifier": [
+        identifier: [
           {
-            "use": "usual",
-            "type": {
-              "coding": [
+            use: "usual",
+            type: {
+              coding: [
                 {
-                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                  "code": "MR"
-                }
-              ]
+                  system: "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  code: "MR",
+                },
+              ],
             },
-            "system": "http://test.careevolution.com/identifiers/CareEvolution/MRN/1.2.3.4.5.1.7_1.2.3.4.5.1.7",
-            "value": "0i56756845575l8yw6u886k4"
+            system: "http://test.careevolution.com/identifiers/CareEvolution/MRN/1.2.3.4.5.1.7_1.2.3.4.5.1.7",
+            value: "0i56756845575l8yw6u886k4",
           },
           {
-            "system": "http://test.careevolution.com/identifiers/1.2.3.4.5.1.7/1.2.3.4.5.1.7",
-            "value": "0i56756845575l8yw6u886k4"
+            system: "http://test.careevolution.com/identifiers/1.2.3.4.5.1.7/1.2.3.4.5.1.7",
+            value: "0i56756845575l8yw6u886k4",
           },
           {
-            "system": "http://test.careevolution.com/identifiers/1.2.3.4.5.1.7/1.3.6.1.4.1.5641",
-            "value": "46274464"
-          }
+            system: "http://test.careevolution.com/identifiers/1.2.3.4.5.1.7/1.3.6.1.4.1.5641",
+            value: "46274464",
+          },
         ],
-        "name": [
+        name: [
           {
-            "use": "official",
-            "_use": {
-              "extension": [
+            use: "official",
+            _use: {
+              extension: [
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "http://careevolution.com/fhircodes#NameType",
-                        "code": "LegalName",
-                        "display": "Legal Name",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
+                        system: "http://careevolution.com/fhircodes#NameType",
+                        code: "LegalName",
+                        display: "Legal Name",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
             },
-            "family": "Tester",
-            "given": [
-              "Brittany"
-            ]
+            family: "Tester",
+            given: ["Brittany"],
           },
           {
-            "_use": {
-              "extension": [
+            _use: {
+              extension: [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                  "valueCode": "unsupported"
+                  url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  valueCode: "unsupported",
                 },
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "http://careevolution.com/fhircodes#NameType",
-                        "code": "P",
-                        "display": "Pseudonym",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
+                        system: "http://careevolution.com/fhircodes#NameType",
+                        code: "P",
+                        display: "Pseudonym",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
             },
-            "family": "Tester",
-            "given": [
-              "Brittany"
-            ]
-          }
+            family: "Tester",
+            given: ["Brittany"],
+          },
         ],
-        "telecom": [
+        telecom: [
           {
-            "system": "phone",
-            "_system": {
-              "extension": [
+            system: "phone",
+            _system: {
+              extension: [
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "http://careevolution.com/fhircodes#ContactInfoType",
-                        "code": "HomePhone",
-                        "display": "Home Phone",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
+                        system: "http://careevolution.com/fhircodes#ContactInfoType",
+                        code: "HomePhone",
+                        display: "Home Phone",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
             },
-            "value": "tel:(680)555-1234",
-            "use": "home",
-            "_use": {
-              "extension": [
+            value: "tel:(680)555-1234",
+            use: "home",
+            _use: {
+              extension: [
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "urn:oid:1.2.3.4.5.1.7",
-                        "code": "HP",
-                        "display": "primary home",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
+                        system: "urn:oid:1.2.3.4.5.1.7",
+                        code: "HP",
+                        display: "primary home",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
           },
           {
-            "system": "phone",
-            "_system": {
-              "extension": [
+            system: "phone",
+            _system: {
+              extension: [
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "http://careevolution.com/fhircodes#ContactInfoType",
-                        "code": "OfficePhone",
-                        "display": "Office Phone",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
+                        system: "http://careevolution.com/fhircodes#ContactInfoType",
+                        code: "OfficePhone",
+                        display: "Office Phone",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
             },
-            "value": "tel:(548)555-8765",
-            "use": "work",
-            "_use": {
-              "extension": [
+            value: "tel:(548)555-8765",
+            use: "work",
+            _use: {
+              extension: [
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "urn:oid:1.2.3.4.5.1.7",
-                        "code": "WP",
-                        "display": "work place",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
+                        system: "urn:oid:1.2.3.4.5.1.7",
+                        code: "WP",
+                        display: "work place",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
           },
           {
-            "_system": {
-              "extension": [
+            _system: {
+              extension: [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                  "valueCode": "unsupported"
+                  url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  valueCode: "unsupported",
                 },
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "urn:oid:1.2.3.4.5.1.7",
-                        "code": "MC",
-                        "display": "mobile contact",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
+                        system: "urn:oid:1.2.3.4.5.1.7",
+                        code: "MC",
+                        display: "mobile contact",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
             },
-            "value": "tel:(574)555-3737"
+            value: "tel:(574)555-3737",
           },
           {
-            "_system": {
-              "extension": [
+            _system: {
+              extension: [
                 {
-                  "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
-                  "valueCode": "unsupported"
+                  url: "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                  valueCode: "unsupported",
                 },
                 {
-                  "url": "http://careevolution.com/fhirextensions#term",
-                  "valueCodeableConcept": {
-                    "coding": [
+                  url: "http://careevolution.com/fhirextensions#term",
+                  valueCodeableConcept: {
+                    coding: [
                       {
-                        "system": "urn:oid:1.2.3.4.5.1.7",
-                        "code": "Other",
-                        "display": "Other",
-                        "userSelected": true
-                      }
-                    ]
-                  }
-                }
-              ]
+                        system: "urn:oid:1.2.3.4.5.1.7",
+                        code: "Other",
+                        display: "Other",
+                        userSelected: true,
+                      },
+                    ],
+                  },
+                },
+              ],
             },
-            "value": "tel:(189)555-333"
-          }
+            value: "tel:(189)555-333",
+          },
         ],
-        "gender": "male",
-        "_gender": {
-          "extension": [
+        gender: "male",
+        _gender: {
+          extension: [
             {
-              "url": "http://careevolution.com/fhirextensions#term",
-              "valueCodeableConcept": {
-                "coding": [
+              url: "http://careevolution.com/fhirextensions#term",
+              valueCodeableConcept: {
+                coding: [
                   {
-                    "system": "urn:oid:2.16.840.1.113883.5.1",
-                    "code": "M",
-                    "display": "Male",
-                    "userSelected": true
+                    system: "urn:oid:2.16.840.1.113883.5.1",
+                    code: "M",
+                    display: "Male",
+                    userSelected: true,
                   },
                   {
-                    "system": "http://careevolution.com",
-                    "code": "M",
-                    "display": "Male",
-                    "userSelected": false
+                    system: "http://careevolution.com",
+                    code: "M",
+                    display: "Male",
+                    userSelected: false,
                   },
                   {
-                    "system": "http://test.careevolution.com/codes/FhirCodesAlternate1/Gender",
-                    "code": "M",
-                    "display": "M",
-                    "userSelected": false
+                    system: "http://test.careevolution.com/codes/FhirCodesAlternate1/Gender",
+                    code: "M",
+                    display: "M",
+                    userSelected: false,
                   },
                   {
-                    "system": "http://hl7.org/fhir/v3/AdministrativeGender",
-                    "code": "M",
-                    "display": "Male",
-                    "userSelected": false
+                    system: "http://hl7.org/fhir/v3/AdministrativeGender",
+                    code: "M",
+                    display: "Male",
+                    userSelected: false,
                   },
                   {
-                    "system": "http://hl7.org/fhir/administrative-gender",
-                    "code": "male",
-                    "display": "male",
-                    "userSelected": false
+                    system: "http://hl7.org/fhir/administrative-gender",
+                    code: "male",
+                    display: "male",
+                    userSelected: false,
                   },
                   {
-                    "system": "http://test.careevolution.com/codes/FhirCodes/Gender",
-                    "code": "male",
-                    "userSelected": false
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "birthDate": "1948-12-17",
-        "deceasedBoolean": false,
-        "address": [
-          {
-            "use": "home",
-            "line": [
-              "2608 Main Street"
-            ],
-            "city": "Anytown",
-            "state": "MI",
-            "postalCode": "48761"
-          }
-        ],
-        "maritalStatus": {
-          "coding": [
-            {
-              "system": "urn:oid:1.2.3.4.5.1.1",
-              "code": "M",
-              "display": "M",
-              "userSelected": true
-            }
-          ]
-        },
-        "communication": [
-          {
-            "language": {
-              "coding": [
-                {
-                  "system": "urn:oid:1.2.3.4.5.1.7",
-                  "code": "ENGLISH",
-                  "display": "ENGLISH",
-                  "userSelected": true
-                }
-              ]
+                    system: "http://test.careevolution.com/codes/FhirCodes/Gender",
+                    code: "male",
+                    userSelected: false,
+                  },
+                ],
+              },
             },
-            "preferred": true
-          }
-        ]
-      }
-    }
-  ]
+          ],
+        },
+        birthDate: "1948-12-17",
+        deceasedBoolean: false,
+        address: [
+          {
+            use: "home",
+            line: ["2608 Main Street"],
+            city: "Anytown",
+            state: "MI",
+            postalCode: "48761",
+          },
+        ],
+        maritalStatus: {
+          coding: [
+            {
+              system: "urn:oid:1.2.3.4.5.1.1",
+              code: "M",
+              display: "M",
+              userSelected: true,
+            },
+          ],
+        },
+        communication: [
+          {
+            language: {
+              coding: [
+                {
+                  system: "urn:oid:1.2.3.4.5.1.7",
+                  code: "ENGLISH",
+                  display: "ENGLISH",
+                  userSelected: true,
+                },
+              ],
+            },
+            preferred: true,
+          },
+        ],
+      },
+    },
+  ],
 } as Bundle;
 
 describe("classify condition", () => {
@@ -672,18 +658,17 @@ describe("standardize condition", () => {
       display: "dm2",
     },
   ];
-  const expected = [
-    "370221004",
-    "J45.50",
-    "44054006",
-  ];
+  const expected = ["370221004", "J45.50", "44054006"];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
-  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.terminology.standardizeCondition(input);
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe(expected);
-  });
+  test.each(cases)(
+    "should standardize single $input",
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+      const result = await orchestrate.terminology.standardizeCondition(input);
+      expect(result).toBeDefined();
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected);
+    },
+  );
 
   it("should standardize batch", async () => {
     const results = await orchestrate.terminology.standardizeCondition(requests);
@@ -702,20 +687,20 @@ describe("standardize lab", () => {
       code: "4548-4",
     },
     {
-      display: "hba1c 1/15/22 from outside lab"
+      display: "hba1c 1/15/22 from outside lab",
     },
   ];
-  const expected = [
-    "4548-4",
-    "43396009",
-  ];
+  const expected = ["4548-4", "43396009"];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
-  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.terminology.standardizeLab(input);
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe(expected);
-  });
+  test.each(cases)(
+    "should standardize single $input",
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+      const result = await orchestrate.terminology.standardizeLab(input);
+      expect(result).toBeDefined();
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected);
+    },
+  );
 
   it("should standardize batch", async () => {
     const results = await orchestrate.terminology.standardizeLab(requests);
@@ -732,28 +717,27 @@ describe("standardize medication", () => {
   const requests: StandardizeRequest[] = [
     {
       code: "861004",
-      system: "RxNorm"
+      system: "RxNorm",
     },
     {
       code: "59267-1000-02",
     },
     {
-      display: "Jentadueto extended (linagliptin 2.5 / metFORMIN  1000mg)"
+      display: "Jentadueto extended (linagliptin 2.5 / metFORMIN  1000mg)",
     },
   ];
-  const expected = [
-    "861004",
-    "59267100002",
-    "1796093",
-  ];
+  const expected = ["861004", "59267100002", "1796093"];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
-  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.terminology.standardizeMedication(input);
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe(expected);
-  });
+  test.each(cases)(
+    "should standardize single $input",
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+      const result = await orchestrate.terminology.standardizeMedication(input);
+      expect(result).toBeDefined();
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected);
+    },
+  );
 
   it("should standardize batch", async () => {
     const results = await orchestrate.terminology.standardizeMedication(requests);
@@ -772,21 +756,21 @@ describe("standardize observation", () => {
       code: "8480-6",
     },
     {
-      display: "BMI"
+      display: "BMI",
     },
   ];
-  const expected = [
-    "8480-6",
-    "39156-5",
-  ];
+  const expected = ["8480-6", "39156-5"];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
-  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.terminology.standardizeObservation(input);
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe(expected);
-  });
+  test.each(cases)(
+    "should standardize single $input",
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+      const result = await orchestrate.terminology.standardizeObservation(input);
+      expect(result).toBeDefined();
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected);
+    },
+  );
 
   it("should standardize batch", async () => {
     const results = await orchestrate.terminology.standardizeObservation(requests);
@@ -805,21 +789,21 @@ describe("standardize procedure", () => {
       code: "80146002",
     },
     {
-      display: "ct head&neck"
+      display: "ct head&neck",
     },
   ];
-  const expected = [
-    "80146002",
-    "429858000",
-  ];
+  const expected = ["80146002", "429858000"];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
-  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.terminology.standardizeProcedure(input);
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe(expected);
-  });
+  test.each(cases)(
+    "should standardize single $input",
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+      const result = await orchestrate.terminology.standardizeProcedure(input);
+      expect(result).toBeDefined();
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected);
+    },
+  );
 
   it("should standardize batch", async () => {
     const results = await orchestrate.terminology.standardizeProcedure(requests);
@@ -836,24 +820,24 @@ describe("standardize radiology", () => {
   const requests: StandardizeRequest[] = [
     {
       code: "711232001",
-      system: "SNOMED"
+      system: "SNOMED",
     },
     {
-      display: "CT scan of head w/o iv contrast 3d ago@StJoes"
+      display: "CT scan of head w/o iv contrast 3d ago@StJoes",
     },
   ];
-  const expected = [
-    "711232001",
-    "30799-1",
-  ];
+  const expected = ["711232001", "30799-1"];
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
 
-  test.each(cases)("should standardize single $input", async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
-    const result = await orchestrate.terminology.standardizeRadiology(input);
-    expect(result).toBeDefined();
-    expect(result.coding.length).toBeGreaterThan(0);
-    expect(result.coding[0].code).toBe(expected);
-  });
+  test.each(cases)(
+    "should standardize single $input",
+    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+      const result = await orchestrate.terminology.standardizeRadiology(input);
+      expect(result).toBeDefined();
+      expect(result.coding.length).toBeGreaterThan(0);
+      expect(result.coding[0].code).toBe(expected);
+    },
+  );
 
   it("should standardize batch", async () => {
     const results = await orchestrate.terminology.standardizeRadiology(requests);
@@ -869,7 +853,7 @@ describe("standardize radiology", () => {
 describe("convert hl7 to fhir r4", () => {
   it("should convert hl7", async () => {
     const result = await orchestrate.convert.hl7ToFhirR4({
-      content: hl7
+      content: hl7,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -879,7 +863,7 @@ describe("convert hl7 to fhir r4", () => {
   it("should convert hl7 with patient", async () => {
     const result = await orchestrate.convert.hl7ToFhirR4({
       content: hl7,
-      patientID: "12/34"
+      patientID: "12/34",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -890,11 +874,10 @@ describe("convert hl7 to fhir r4", () => {
   });
 });
 
-
 describe("convert cda to fhir r4", () => {
   it("should convert cda", async () => {
     const result = await orchestrate.convert.cdaToFhirR4({
-      content: cda
+      content: cda,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -904,7 +887,7 @@ describe("convert cda to fhir r4", () => {
   it("should convert cda with patient", async () => {
     const result = await orchestrate.convert.cdaToFhirR4({
       content: cda,
-      patientID: "1234"
+      patientID: "1234",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -915,11 +898,10 @@ describe("convert cda to fhir r4", () => {
   });
 });
 
-
 describe("convert cda to pdf", () => {
   it("should convert cda", async () => {
     const result = await orchestrate.convert.cdaToPdf({
-      content: cda
+      content: cda,
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
@@ -931,7 +913,7 @@ describe("convert cda to pdf", () => {
 describe("convert fhir r4 to cda", () => {
   it("should convert fhir", async () => {
     const result = await orchestrate.convert.fhirR4ToCda({
-      content: fhir
+      content: fhir,
     });
     expect(result).toBeDefined();
     expect(result).toContain("<?xml");
@@ -941,7 +923,7 @@ describe("convert fhir r4 to cda", () => {
 describe("convert fhir r4 to omop", () => {
   it("should convert fhir", async () => {
     const result = await orchestrate.convert.fhirR4ToOmop({
-      content: fhir
+      content: fhir,
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
@@ -953,7 +935,7 @@ describe("convert fhir r4 to omop", () => {
 describe("convert x12 to fhir r4", () => {
   it("should convert x12", async () => {
     const result = await orchestrate.convert.x12ToFhirR4({
-      content: x12Document
+      content: x12Document,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -963,7 +945,7 @@ describe("convert x12 to fhir r4", () => {
   it("should convert x12 with patient", async () => {
     const result = await orchestrate.convert.x12ToFhirR4({
       content: x12Document,
-      patientID: "1234"
+      patientID: "1234",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -991,7 +973,7 @@ describe("insight risk profile", () => {
 describe("get fhir r4 code system", () => {
   it("should return a code_system", async () => {
     const result = await orchestrate.terminology.getFhirR4CodeSystem({
-      codeSystem: "SNOMED"
+      codeSystem: "SNOMED",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("CodeSystem");
@@ -1002,7 +984,7 @@ describe("get fhir r4 code system", () => {
     const result = await orchestrate.terminology.getFhirR4CodeSystem({
       codeSystem: "SNOMED",
       pageNumber: 1,
-      pageSize: 2
+      pageSize: 2,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("CodeSystem");
@@ -1014,7 +996,7 @@ describe("get fhir r4 code system", () => {
       codeSystem: "ICD-10-CM",
       conceptContains: "myocardial infarction",
       pageNumber: 0,
-      pageSize: 2
+      pageSize: 2,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("CodeSystem");
@@ -1053,7 +1035,7 @@ describe("translate fhir r4 concept map", () => {
   it("should translate code and system", async () => {
     const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
-      domain: "Condition"
+      domain: "Condition",
     });
     expect(result).toBeDefined();
     expect(result.parameter?.length).toBeGreaterThan(0);
@@ -1063,7 +1045,7 @@ describe("translate fhir r4 concept map", () => {
 describe("summarize fhir r4 value set scope", () => {
   it("should return a bundle", async () => {
     const result = await orchestrate.terminology.summarizeFhirR4ValueSetScope({
-      scope: "http://loinc.org"
+      scope: "http://loinc.org",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -1072,11 +1054,10 @@ describe("summarize fhir r4 value set scope", () => {
   }, 10000);
 });
 
-
 describe("get fhir r4 value set", () => {
   it("should return a value set", async () => {
     const result = await orchestrate.terminology.getFhirR4ValueSet({
-      id: "00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2"
+      id: "00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("ValueSet");
@@ -1105,16 +1086,18 @@ describe("get fhir r4 value set scopes", () => {
 
 describe("get fhir r4 value set by scope", () => {
   it("should throw without pagination", async () => {
-    await expect(orchestrate.terminology.getFhirR4ValueSetsByScope({
-      scope: "http://loinc.org",
-    })).rejects.toThrow();
+    await expect(
+      orchestrate.terminology.getFhirR4ValueSetsByScope({
+        scope: "http://loinc.org",
+      }),
+    ).rejects.toThrow();
   });
 
   it("should return a bundle with page and scope", async () => {
     const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({
       scope: "http://loinc.org",
       pageNumber: 1,
-      pageSize: 2
+      pageSize: 2,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -1125,7 +1108,7 @@ describe("get fhir r4 value set by scope", () => {
     const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({
       name: "LP7839-6",
       pageNumber: 1,
-      pageSize: 2
+      pageSize: 2,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -1137,7 +1120,7 @@ describe("get fhir r4 value set by scope", () => {
       name: "LP7839-6",
       scope: "http://loinc.org",
       pageNumber: 1,
-      pageSize: 2
+      pageSize: 2,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -1147,7 +1130,7 @@ describe("get fhir r4 value set by scope", () => {
   it("should return a bundle with just page", async () => {
     const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({
       pageNumber: 1,
-      pageSize: 2
+      pageSize: 2,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -1158,7 +1141,7 @@ describe("get fhir r4 value set by scope", () => {
 describe("summarize fhir r4 code system", () => {
   it("should return a code system", async () => {
     const result = await orchestrate.terminology.summarizeFhirR4CodeSystem({
-      codeSystem: "SNOMED"
+      codeSystem: "SNOMED",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("CodeSystem");
@@ -1173,13 +1156,13 @@ describe("get all fhir r4 value sets for codes", () => {
       parameter: [
         {
           name: "code",
-          valueString: "119981000146107"
+          valueString: "119981000146107",
         },
         {
           name: "system",
-          valueString: "http://snomed.info/sct"
-        }
-      ]
+          valueString: "http://snomed.info/sct",
+        },
+      ],
     });
     expect(result).toBeDefined();
     expect(result.parameter?.length).toBeGreaterThan(0);
@@ -1188,13 +1171,13 @@ describe("get all fhir r4 value sets for codes", () => {
 
 describe("convert combined fhir r4 bundles", () => {
   it("should combine", async () => {
-    const bundles = (`
+    const bundles = `
 ${JSON.stringify(fhir)}
 ${JSON.stringify(fhir)}
-`);
+`;
 
     const result = await orchestrate.convert.combineFhirR4Bundles({
-      content: bundles
+      content: bundles,
     });
 
     expect(result).toBeDefined();
@@ -1203,14 +1186,14 @@ ${JSON.stringify(fhir)}
   });
 
   it("should combine with patient", async () => {
-    const bundles = (`
+    const bundles = `
 ${JSON.stringify(fhir)}
 ${JSON.stringify(fhir)}
-`);
+`;
 
     const result = await orchestrate.convert.combineFhirR4Bundles({
       content: bundles,
-      patientID: "1234"
+      patientID: "1234",
     });
 
     expect(result).toBeDefined();

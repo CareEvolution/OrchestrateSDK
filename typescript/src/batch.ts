@@ -7,7 +7,7 @@ export type BatchResponse<T> = {
 export async function handleBatchOverload<TIn, TOut>(
   httpHandler: IHttpHandler,
   url: string,
-  request: TIn
+  request: TIn,
 ): Promise<TOut> {
   if (Array.isArray(request)) {
     const batchResponse = await httpHandler.post(`${url}/batch`, { items: request });

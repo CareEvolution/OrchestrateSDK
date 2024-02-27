@@ -57,7 +57,6 @@ export type ConvertX12ToFhirR4Request = {
 
 export type ConvertX12ToFhirR4Response = Bundle;
 
-
 export class ConvertApi {
   private httpHandler: IHttpHandler;
 
@@ -73,7 +72,7 @@ export class ConvertApi {
   hl7ToFhirR4(request: ConvertHl7ToFhirR4Request): Promise<ConvertHl7ToFhirR4Response> {
     const headers = {
       "Content-Type": "text/plain",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -94,7 +93,7 @@ export class ConvertApi {
   cdaToFhirR4(request: ConvertCdaToFhirR4Request): Promise<ConvertCdaToFhirR4Response> {
     const headers = {
       "Content-Type": "application/xml",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -115,8 +114,8 @@ export class ConvertApi {
   cdaToPdf(request: ConvertCdaToPdfRequest): Promise<ConvertCdaToPdfResponse> {
     const headers = {
       "Content-Type": "application/xml",
-      "Accept": "application/pdf",
-    } as { [key: string]: string; };
+      Accept: "application/pdf",
+    } as { [key: string]: string };
     return this.httpHandler.post("/convert/v1/cdatopdf", request.content, headers);
   }
 
@@ -128,8 +127,8 @@ export class ConvertApi {
    */
   fhirR4ToCda(request: ConvertFhirR4ToCdaRequest): Promise<ConvertFhirR4ToCdaResponse> {
     const headers = {
-      "Accept": "application/xml",
-    } as { [key: string]: string; };
+      Accept: "application/xml",
+    } as { [key: string]: string };
     return this.httpHandler.post("/convert/v1/fhirr4tocda", request.content, headers);
   }
 
@@ -140,8 +139,8 @@ export class ConvertApi {
    */
   fhirR4ToOmop(request: ConvertFhirR4ToOmopRequest): Promise<ConvertFhirR4ToOmopResponse> {
     const headers = {
-      "Accept": "application/zip",
-    } as { [key: string]: string; };
+      Accept: "application/zip",
+    } as { [key: string]: string };
     return this.httpHandler.post("/convert/v1/fhirr4toomop", request.content, headers);
   }
 
@@ -154,7 +153,7 @@ export class ConvertApi {
   combineFhirR4Bundles(request: ConvertCombineFhirR4BundlesRequest): Promise<ConvertCombineFhirR4BundlesResponse> {
     const headers = {
       "Content-Type": "application/x-ndjson",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -174,7 +173,7 @@ export class ConvertApi {
   x12ToFhirR4(request: ConvertX12ToFhirR4Request): Promise<ConvertX12ToFhirR4Response> {
     const headers = {
       "Content-Type": "text/plain",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
