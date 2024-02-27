@@ -10,10 +10,7 @@ import { describe, it, expect, test } from "vitest";
 import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
-const apiKey = process.env.ORCHESTRATE_API_KEY || "";
-const orchestrate = new OrchestrateApi({
-  apiKey: apiKey,
-});
+const orchestrate = new OrchestrateApi();
 
 const cda = `
 <?xml-stylesheet type="text/xsl" href=""?>

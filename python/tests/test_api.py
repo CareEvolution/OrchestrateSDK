@@ -18,9 +18,7 @@ from orchestrate.terminology import (
 
 def setup_test_api():
     load_dotenv(Path(__file__).parent.parent.parent / ".env", override=True)
-    api_key = os.environ.get("ORCHESTRATE_API_KEY", None)
-
-    return OrchestrateApi(api_key=api_key)
+    return OrchestrateApi()
 
 
 TEST_API = setup_test_api()

@@ -12,7 +12,7 @@ export class OrchestrateApi {
   convert: ConvertApi;
   insight: InsightApi;
 
-  constructor(configuration: Configuration) {
+  constructor(configuration: Configuration | undefined = {}) {
     const httpHandler = createHttpHandler(configuration.apiKey);
 
     this.terminology = new TerminologyApi(httpHandler);
