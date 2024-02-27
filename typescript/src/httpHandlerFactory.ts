@@ -22,11 +22,9 @@ export function createHttpHandler(
   const additionalHeaders = getAdditionalHeaders();
 
   const defaultHeaders = {
-    ...(additionalHeaders ?? {}),
-    ...{
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    ...additionalHeaders,
+    "Content-Type": "application/json",
+    Accept: "application/json",
   } as { [key: string]: string; };
 
   const priorityApiKey = getPriorityApiKey(apiKey);
