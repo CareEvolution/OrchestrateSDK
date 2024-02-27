@@ -1,20 +1,11 @@
 import { HttpHandler, IHttpHandler } from "./httpHandler";
 
 function getPriorityBaseUrl(): string {
-  if (process.env.ORCHESTRATE_BASE_URL) {
-    return process.env.ORCHESTRATE_BASE_URL;
-  }
-  return "https://api.careevolutionapi.com";
+  return process.env.ORCHESTRATE_BASE_URL || "https://api.careevolutionapi.com";
 }
 
 function getPriorityApiKey(apiKey: string | undefined): string | undefined {
-  if (apiKey) {
-    return apiKey;
-  }
-  if (process.env.ORCHESTRATE_API_KEY) {
-    return process.env.ORCHESTRATE_API_KEY;
-  }
-  return undefined;
+  return apiKey || process.env.ORCHESTRATE_API_KEY;
 }
 
 function getAdditionalHeaders(): { [key: string]: string; } | undefined {
