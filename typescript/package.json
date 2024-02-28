@@ -68,6 +68,12 @@
 			"require": "./dist/cjs/exceptions.js",
 			"types": "./dist/esm/exceptions.d.ts",
 			"default": "./dist/esm/exceptions.js"
+		},
+		"./identity": {
+			"import": "./dist/esm/identity.js",
+			"require": "./dist/cjs/identity.js",
+			"types": "./dist/esm/identity.d.ts",
+			"default": "./dist/esm/identity.js"
 		}
 	},
 	"typesVersions": {
@@ -86,6 +92,9 @@
 			],
 			"exceptions": [
 				"./dist/esm/exceptions.d.ts"
+			],
+			"identity": [
+				"./dist/esm/identity.d.ts"
 			]
 		}
 	}

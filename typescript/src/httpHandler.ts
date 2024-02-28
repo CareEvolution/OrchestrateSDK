@@ -62,6 +62,10 @@ export class HttpHandler implements IHttpHandler {
     };
   }
 
+  toString(): string {
+    return this.baseUrl;
+  }
+
   async post(
     path: string,
     body: any, // eslint-disable-line @typescript-eslint/no-explicit-any

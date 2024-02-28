@@ -30,9 +30,16 @@ jobs:
             throw "ORCHESTRATE_API_KEY secret is required for this workflow."
           }
           "ORCHESTRATE_API_KEY=${{ secrets.ORCHESTRATE_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
+          "ORCHESTRATE_IDENTITY_API_KEY=${{ secrets.ORCHESTRATE_IDENTITY_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8 -Append
+          "ORCHESTRATE_IDENTITY_METRICS_KEY=${{ secrets.ORCHESTRATE_IDENTITY_METRICS_KEY }}" | Out-File -FilePath ./.env -Encoding utf8 -Append
+          "ORCHESTRATE_IDENTITY_URL=${{ secrets.ORCHESTRATE_IDENTITY_URL }}" | Out-File -FilePath ./.env -Encoding utf8 -Append
+          "ORCHESTRATE_IDENTITY_LOCAL_HASHING_URL==http://127.0.0.1:7002" | Out-File -FilePath ./.env -Encoding utf8 -Append
+          "TESTING_HASH_KEY=${{ secrets.TESTING_HASH_KEY }}" | Out-File -FilePath ./.env -Encoding utf8 -Append
       - name: Install dependencies
         working-directory: typescript
         run: npm ci
+      - name: Run Local Hashing
+        run: docker run -p 7002:7002 -e HASH__KEY=${{ secrets.TESTING_HASH_KEY }} --cap-drop ALL careevolution/bmpi-hashing-service:latest
       - name: Run tests
         working-directory: typescript
         shell: pwsh
@@ -76,6 +83,8 @@ jobs:
       - name: Lint
         working-directory: python
         run: poetry run black --check .
+      - name: Run Local Hashing
+        run: docker run -p 7002:7002 -e HASH__KEY=${{ secrets.TESTING_HASH_KEY }} --cap-drop ALL careevolution/bmpi-hashing-service:latest
       - name: Test
         working-directory: python
         run: poetry run pytest

@@ -4,7 +4,15 @@ from orchestrate import terminology
 from orchestrate import insight
 from orchestrate import convert
 from orchestrate import exceptions
+from orchestrate import identity
 
 __version__ = __version__
 
-__all__ = ["OrchestrateApi", "terminology", "insight", "convert", "exceptions"]
+__all__ = [
+    "OrchestrateApi",
+    "terminology",
+    "insight",
+    "convert",
+    "exceptions",
+    "identity",
+]
