@@ -21,6 +21,14 @@ ConvertX12ToFhirR4Response = Bundle
 
 ConvertCombinedFhirR4BundlesResponse = Bundle
 
+ConvertFhirDstu2ToFhirR4Response = Bundle
+
+ConvertFhirStu3ToFhirR4Response = Bundle
+
+ConvertFhirR4ToHealthLakeResponse = Bundle
+
+ConvertCdaToHtmlResponse = str
+
 
 def generate_convert_combine_fhir_bundles_request_from_bundles(
     fhir_bundles: list[Bundle],
@@ -242,4 +250,99 @@ class ConvertApi:
             body=content,
             headers=headers,
             parameters=parameters,
+        )
+
+    def fhir_dstu2_to_fhir_r4(
+        self,
+        content: Bundle,
+    ) -> ConvertFhirDstu2ToFhirR4Response:
+        """
+        Converts a FHIR DSTU2 bundle into a FHIR R4 bundle
+
+        ### Parameters
+
+        - `fhir_dstu2_bundle`: The FHIR DSTU2 bundle to convert
+
+        ### Returns
+
+        A FHIR R4 Bundle containing the clinical data parsed out of the FHIR DSTU2 bundle
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html>
+        """
+        return self.__http_handler.post(
+            path="/convert/v1/fhirdstu2tofhirr4",
+            body=content,
+        )
+
+    def fhir_stu3_to_fhir_r4(
+        self,
+        content: Bundle,
+    ) -> ConvertFhirStu3ToFhirR4Response:
+        """
+        Converts a FHIR STU3 bundle into a FHIR R4 bundle
+
+        ### Parameters
+
+        - `fhir_stu3_bundle`: The FHIR STU3 bundle to convert
+
+        ### Returns
+
+        A FHIR R4 Bundle containing the clinical data parsed out of the FHIR STU3 bundle
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html>
+        """
+        return self.__http_handler.post(
+            path="/convert/v1/fhirstu3tofhirr4",
+            body=content,
+        )
+
+    def fhir_r4_to_health_lake(
+        self,
+        content: Bundle,
+    ) -> ConvertFhirR4ToHealthLakeResponse:
+        """
+        This operation converts a FHIR R4 bundle from one of the other Orchestrate FHIR conversions (CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into a form compatible with the Amazon HealthLake analysis platform.
+
+        ### Parameters
+
+        - `content`: A FHIR R4 bundle for a single patient
+
+        ### Returns
+
+        A FHIR R4 bundle of type collection, containing individual FHIR bundles compatible with the HealthLake API restrictions.
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/fhir_to_health_lake.html>
+        """
+        return self.__http_handler.post(
+            path="/convert/v1/fhirr4tohealthlake",
+            body=content,
+        )
+
+    def cda_to_html(self, content: str) -> ConvertCdaToHtmlResponse:
+        """
+        Converts a CDA document into human-readable HTML.
+
+        ### Parameters
+
+        - `content`: A single CDA document
+
+        ### Returns
+
+        A formatted HTML document suitable for human review
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/cda_to_html.html>
+        """
+        headers = {"Content-Type": "application/xml", "Accept": "text/html"}
+        return self.__http_handler.post(
+            path="/convert/v1/cdatohtml",
+            body=content,
+            headers=headers,
         )

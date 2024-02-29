@@ -40,6 +40,24 @@ export type ConvertCombineFhirR4BundlesRequest = {
   patientID?: string;
 };
 
+export type ConvertFhirDstu2ToFhirR4Request = {
+  content: unknown;
+};
+
+export type ConvertFhirDstu2ToFhirR4Response = Bundle;
+
+export type ConvertFhirStu3ToFhirR4Request = {
+  content: unknown;
+};
+
+export type ConvertFhirStu3ToFhirR4Response = Bundle;
+
+export type ConvertFhirR4ToHealthLakeRequest = {
+  content: Bundle;
+};
+
+export type ConvertFhirR4ToHealthLakeResponse = Bundle;
+
 export function generateConvertCombinedFhirBundlesRequestFromBundles(fhirBundles: Bundle[], personID?: string) {
   const bundles = fhirBundles.map((bundle) => JSON.stringify(bundle)).join("\n");
   return {
@@ -57,6 +75,12 @@ export type ConvertX12ToFhirR4Request = {
 
 export type ConvertX12ToFhirR4Response = Bundle;
 
+export type ConvertCdaToHtmlRequest = {
+  content: string;
+};
+
+export type ConvertCdaToHtmlResponse = string;
+
 export class ConvertApi {
   private httpHandler: IHttpHandler;
 
@@ -72,7 +96,7 @@ export class ConvertApi {
   hl7ToFhirR4(request: ConvertHl7ToFhirR4Request): Promise<ConvertHl7ToFhirR4Response> {
     const headers = {
       "Content-Type": "text/plain",
-    } as { [key: string]: string };
+    } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -93,7 +117,7 @@ export class ConvertApi {
   cdaToFhirR4(request: ConvertCdaToFhirR4Request): Promise<ConvertCdaToFhirR4Response> {
     const headers = {
       "Content-Type": "application/xml",
-    } as { [key: string]: string };
+    } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -115,7 +139,7 @@ export class ConvertApi {
     const headers = {
       "Content-Type": "application/xml",
       Accept: "application/pdf",
-    } as { [key: string]: string };
+    } as { [key: string]: string; };
     return this.httpHandler.post("/convert/v1/cdatopdf", request.content, headers);
   }
 
@@ -128,7 +152,7 @@ export class ConvertApi {
   fhirR4ToCda(request: ConvertFhirR4ToCdaRequest): Promise<ConvertFhirR4ToCdaResponse> {
     const headers = {
       Accept: "application/xml",
-    } as { [key: string]: string };
+    } as { [key: string]: string; };
     return this.httpHandler.post("/convert/v1/fhirr4tocda", request.content, headers);
   }
 
@@ -140,7 +164,7 @@ export class ConvertApi {
   fhirR4ToOmop(request: ConvertFhirR4ToOmopRequest): Promise<ConvertFhirR4ToOmopResponse> {
     const headers = {
       Accept: "application/zip",
-    } as { [key: string]: string };
+    } as { [key: string]: string; };
     return this.httpHandler.post("/convert/v1/fhirr4toomop", request.content, headers);
   }
 
@@ -153,7 +177,7 @@ export class ConvertApi {
   combineFhirR4Bundles(request: ConvertCombineFhirR4BundlesRequest): Promise<ConvertCombineFhirR4BundlesResponse> {
     const headers = {
       "Content-Type": "application/x-ndjson",
-    } as { [key: string]: string };
+    } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -173,7 +197,7 @@ export class ConvertApi {
   x12ToFhirR4(request: ConvertX12ToFhirR4Request): Promise<ConvertX12ToFhirR4Response> {
     const headers = {
       "Content-Type": "text/plain",
-    } as { [key: string]: string };
+    } as { [key: string]: string; };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -183,5 +207,53 @@ export class ConvertApi {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content, headers);
+  }
+
+  /**
+   * Converts a FHIR DSTU2 bundle into a FHIR R4 bundle.
+   * @param request The FHIR DSTU2 bundle to convert
+   * @returns A FHIR R4 Bundle containing the clinical data parsed out of the FHIR DSTU2 bundle
+   * @link https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html
+   */
+  fhirDstu2ToFhirR4(request: ConvertFhirDstu2ToFhirR4Request): Promise<ConvertFhirDstu2ToFhirR4Response> {
+    return this.httpHandler.post("/convert/v1/fhirdstu2tofhirr4", request.content);
+  }
+
+  /**
+   * Converts a FHIR STU3 bundle into a FHIR R4 bundle.
+   * @param request The FHIR STU3 bundle to convert
+   * @returns A FHIR R4 Bundle containing the clinical data parsed out of the FHIR STU3 bundle
+   * @link https://orchestrate.docs.careevolution.com/convert/update_fhir_version.html
+   */
+  fhirStu3ToFhirR4(request: ConvertFhirStu3ToFhirR4Request): Promise<ConvertFhirStu3ToFhirR4Response> {
+    return this.httpHandler.post("/convert/v1/fhirstu3tofhirr4", request.content);
+  }
+
+  /**
+   * This operation converts a FHIR R4 bundle from one of the other Orchestrate FHIR conversions (CDA-to-FHIR, HL7-to-FHIR, or Combine Bundles) into a form compatible with the Amazon HealthLake analysis platform.
+   * @param request A FHIR R4 bundle for a single patient
+   * @returns A FHIR R4 bundle of type collection, containing individual FHIR bundles compatible with the HealthLake API restrictions.
+   * @link https://orchestrate.docs.careevolution.com/convert/fhir_to_health_lake.html
+   */
+  fhirR4ToHealthLake(request: ConvertFhirR4ToHealthLakeRequest): Promise<ConvertFhirR4ToHealthLakeResponse> {
+    return this.httpHandler.post("/convert/v1/fhirr4tohealthlake", request.content);
+  }
+
+  /**
+   * Converts a CDA document into human-readable HTML.
+   * @param request A single CDA document
+   * @returns A formatted HTML document suitable for human review
+   * @link https://rosetta-api.docs.careevolution.com/convert/cda_to_html.html
+   */
+  cdaToHtml(request: ConvertCdaToHtmlRequest): Promise<ConvertCdaToHtmlResponse> {
+    const headers = {
+      "Content-Type": "application/xml",
+      "Accept": "text/html",
+    } as { [key: string]: string; };
+    return this.httpHandler.post(
+      "/convert/v1/cdatohtml",
+      request.content,
+      headers
+    );
   }
 }
