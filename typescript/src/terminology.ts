@@ -1,6 +1,15 @@
-import { Bundle, CodeSystem, CodeableConcept, Coding, ConceptMap, Parameters, ParametersParameter, ValueSet } from "fhir/r4";
-import { IHttpHandler } from "./httpHandler.js";
-import { handleBatchOverload } from "./batch.js";
+import {
+  Bundle,
+  CodeSystem,
+  CodeableConcept,
+  Coding,
+  ConceptMap,
+  Parameters,
+  ParametersParameter,
+  ValueSet,
+} from "fhir/r4";
+import { IHttpHandler } from "./httpHandler";
+import { handleBatchOverload } from "./batch";
 
 const standardizeTargetSystems = [
   "ICD-10-CM",
@@ -33,11 +42,11 @@ const standardizeResponseSystems = [
   "http://loinc.org",
 ] as const;
 
-export type StandardizeTargetSystem = typeof standardizeTargetSystems[number];
+export type StandardizeTargetSystem = (typeof standardizeTargetSystems)[number];
 
 export type StandardizeRequest = Coding & { targetSystem?: StandardizeTargetSystem; };
 
-export type StandardizeResponseCoding = Coding & { system: typeof standardizeResponseSystems[number]; };
+export type StandardizeResponseCoding = Coding & { system: (typeof standardizeResponseSystems)[number]; };
 
 export type StandardizeResponse = {
   readonly coding: ReadonlyArray<StandardizeResponseCoding>;
@@ -57,7 +66,6 @@ export type StandardizeRadiologyResponse = StandardizeResponse;
 
 export type ClassifyRequest = Coding;
 
-
 const classifyConditionSystems = [
   "http://snomed.info/sct",
   "http://hl7.org/fhir/sid/icd-10-cm",
@@ -67,7 +75,7 @@ const classifyConditionSystems = [
   "SNOMED",
 ] as const;
 
-export type ClassifyConditionSystem = typeof classifyConditionSystems[number];
+export type ClassifyConditionSystem = (typeof classifyConditionSystems)[number];
 
 export type ClassifyConditionRequest = ClassifyRequest & { system: ClassifyConditionSystem; };
 
@@ -93,7 +101,6 @@ export type ClassifyConditionResponse = {
   covid19Condition: typeof covid19Condition;
 };
 
-
 const classifyMedicationSystems = [
   "RxNorm",
   "NDC",
@@ -105,7 +112,7 @@ const classifyMedicationSystems = [
   "http://snomed.info/sct",
 ] as const;
 
-export type ClassifyMedicationSystem = typeof classifyMedicationSystems[number];
+export type ClassifyMedicationSystem = (typeof classifyMedicationSystems)[number];
 
 export type ClassifyMedicationRequest = ClassifyRequest & { system: ClassifyMedicationSystem; };
 
@@ -119,15 +126,9 @@ export type ClassifyMedicationResponse = {
   covid19Rx: typeof covid19Rx;
 };
 
-const classifyObservationSystems = [
-  "http://loinc.org",
-  "LOINC",
-  "http://snomed.info/sct",
-  "SNOMED",
-] as const;
+const classifyObservationSystems = ["http://loinc.org", "LOINC", "http://snomed.info/sct", "SNOMED"] as const;
 
-
-export type ClassifyObservationRequest = ClassifyRequest & { system: typeof classifyObservationSystems[number]; };
+export type ClassifyObservationRequest = ClassifyRequest & { system: (typeof classifyObservationSystems)[number]; };
 
 export type ClassifyObservationResponse = {
   loincComponent: string;
@@ -135,11 +136,7 @@ export type ClassifyObservationResponse = {
   loincSystem: string;
   loincMethodType: string;
   loincTimeAspect: string;
-  covid19Lab: [
-    "antigen",
-    "antibody",
-    "immunoglobulin",
-  ];
+  covid19Lab: ["antigen", "antibody", "immunoglobulin"];
   category: [
     "activity",
     "exam",
@@ -283,14 +280,14 @@ const codeSystems = [
 ] as const;
 
 export type GetFhirR4CodeSystemRequest = {
-  codeSystem: typeof codeSystems[number];
+  codeSystem: (typeof codeSystems)[number];
   conceptContains?: string;
   pageNumber?: number;
   pageSize?: number;
 };
 
 export type SummarizeFhirR4CodeSystemRequest = {
-  codeSystem: typeof codeSystems[number];
+  codeSystem: (typeof codeSystems)[number];
 };
 
 export type SummarizeFhirR4CodeSystemResponse = CodeSystem;
@@ -319,7 +316,7 @@ const translateDomains = [
 
 export type TranslateFhirR4ConceptMapRequest = {
   code: string;
-  domain?: typeof translateDomains[number];
+  domain?: (typeof translateDomains)[number];
 };
 
 export type GetFhirR4ValueSetScopesResponse = ValueSet;
@@ -352,7 +349,7 @@ const classifyValueSetSystems = [
 
 type ClassifyFhirR4ValueSetMembershipRequestSystem = ParametersParameter & {
   name: "system";
-  valueString: typeof classifyValueSetSystems[number];
+  valueString: (typeof classifyValueSetSystems)[number];
 };
 
 type ClassifyFhirR4ValueSetMembershipRequestCode = ParametersParameter & {
@@ -366,7 +363,7 @@ type ClassifyFhirR4ValueSetMembershipRequestScope = ParametersParameter & {
 };
 
 type ClassifyFhirR4ValueSetMembershipRequestParameter =
-  ClassifyFhirR4ValueSetMembershipRequestCode
+  | ClassifyFhirR4ValueSetMembershipRequestCode
   | ClassifyFhirR4ValueSetMembershipRequestScope
   | ClassifyFhirR4ValueSetMembershipRequestSystem;
 
@@ -408,7 +405,7 @@ export class TerminologyApi {
    * @param request A FHIR Coding
    * @returns A set of key/value pairs representing different classification of the supplied coding
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html
-  */
+   */
   classifyCondition(request: ClassifyConditionRequest): Promise<ClassifyConditionResponse>;
   /**
    * Classifies conditions, problems, or diagnoses. The input must be from one of the following code systems:
@@ -420,7 +417,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/condition.html
    */
   classifyCondition(request: ClassifyConditionRequest[]): Promise<ClassifyConditionResponse[]>;
-  classifyCondition(request: ClassifyConditionRequest | ClassifyConditionRequest[]): Promise<ClassifyConditionResponse | ClassifyConditionResponse[]> {
+  classifyCondition(
+    request: ClassifyConditionRequest | ClassifyConditionRequest[],
+  ): Promise<ClassifyConditionResponse | ClassifyConditionResponse[]> {
     return this.handleBatchOverload("/terminology/v1/classify/condition", request);
   }
 
@@ -448,7 +447,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/medication.html
    */
   classifyMedication(request: ClassifyMedicationRequest[]): Promise<ClassifyMedicationResponse[]>;
-  classifyMedication(request: ClassifyMedicationRequest | ClassifyMedicationRequest[]): Promise<ClassifyMedicationResponse | ClassifyMedicationResponse[]> {
+  classifyMedication(
+    request: ClassifyMedicationRequest | ClassifyMedicationRequest[],
+  ): Promise<ClassifyMedicationResponse | ClassifyMedicationResponse[]> {
     return this.handleBatchOverload("/terminology/v1/classify/medication", request);
   }
 
@@ -472,7 +473,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/classify/observation.html
    */
   classifyObservation(request: ClassifyObservationRequest[]): Promise<ClassifyObservationResponse[]>;
-  classifyObservation(request: ClassifyObservationRequest | ClassifyObservationRequest[]): Promise<ClassifyObservationResponse | ClassifyObservationResponse[]> {
+  classifyObservation(
+    request: ClassifyObservationRequest | ClassifyObservationRequest[],
+  ): Promise<ClassifyObservationResponse | ClassifyObservationResponse[]> {
     return this.handleBatchOverload("/terminology/v1/classify/observation", request);
   }
 
@@ -490,7 +493,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/condition.html
    */
   standardizeCondition(request: StandardizeRequest[]): Promise<StandardizeConditionResponse[]>;
-  standardizeCondition(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeConditionResponse | StandardizeConditionResponse[]> {
+  standardizeCondition(
+    request: StandardizeRequest | StandardizeRequest[],
+  ): Promise<StandardizeConditionResponse | StandardizeConditionResponse[]> {
     return this.handleBatchOverload("/terminology/v1/standardize/condition", request);
   }
 
@@ -508,7 +513,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/medication.html
    */
   standardizeMedication(request: StandardizeRequest[]): Promise<StandardizeMedicationResponse[]>;
-  standardizeMedication(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeMedicationResponse | StandardizeMedicationResponse[]> {
+  standardizeMedication(
+    request: StandardizeRequest | StandardizeRequest[],
+  ): Promise<StandardizeMedicationResponse | StandardizeMedicationResponse[]> {
     return this.handleBatchOverload("/terminology/v1/standardize/medication", request);
   }
 
@@ -526,7 +533,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/observation.html
    */
   standardizeObservation(request: StandardizeRequest[]): Promise<StandardizeObservationResponse[]>;
-  standardizeObservation(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeObservationResponse | StandardizeObservationResponse[]> {
+  standardizeObservation(
+    request: StandardizeRequest | StandardizeRequest[],
+  ): Promise<StandardizeObservationResponse | StandardizeObservationResponse[]> {
     return this.handleBatchOverload("/terminology/v1/standardize/observation", request);
   }
 
@@ -544,7 +553,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/procedure.html
    */
   standardizeProcedure(request: StandardizeRequest[]): Promise<StandardizeObservationResponse[]>;
-  standardizeProcedure(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeObservationResponse | StandardizeObservationResponse[]> {
+  standardizeProcedure(
+    request: StandardizeRequest | StandardizeRequest[],
+  ): Promise<StandardizeObservationResponse | StandardizeObservationResponse[]> {
     return this.handleBatchOverload("/terminology/v1/standardize/procedure", request);
   }
 
@@ -562,7 +573,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/lab.html
    */
   standardizeLab(request: StandardizeRequest[]): Promise<StandardizeLabResponse[]>;
-  standardizeLab(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeLabResponse | StandardizeLabResponse[]> {
+  standardizeLab(
+    request: StandardizeRequest | StandardizeRequest[],
+  ): Promise<StandardizeLabResponse | StandardizeLabResponse[]> {
     return this.handleBatchOverload("/terminology/v1/standardize/lab", request);
   }
 
@@ -580,7 +593,9 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/terminology/standardize/radiology.html
    */
   standardizeRadiology(request: StandardizeRequest[]): Promise<StandardizeRadiologyResponse[]>;
-  standardizeRadiology(request: StandardizeRequest | StandardizeRequest[]): Promise<StandardizeRadiologyResponse | StandardizeRadiologyResponse[]> {
+  standardizeRadiology(
+    request: StandardizeRequest | StandardizeRequest[],
+  ): Promise<StandardizeRadiologyResponse | StandardizeRadiologyResponse[]> {
     return this.handleBatchOverload("/terminology/v1/standardize/radiology", request);
   }
 
@@ -649,10 +664,12 @@ export class TerminologyApi {
    * @returns A bundle of ValueSets within the requested scope
    * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
-  summarizeFhirR4ValueSetScope(request: SummarizeFhirR4ValueSetScopeRequest): Promise<SummarizeFhirR4ValueSetScopeResponse> {
+  summarizeFhirR4ValueSetScope(
+    request: SummarizeFhirR4ValueSetScopeRequest,
+  ): Promise<SummarizeFhirR4ValueSetScopeResponse> {
     const params = new URLSearchParams({
       "extension.scope": request.scope,
-      _summary: "true"
+      _summary: "true",
     });
     const route = `/terminology/v1/fhir/r4/valueset?${params.toString()}`;
     return this.httpHandler.get(route);
@@ -666,7 +683,7 @@ export class TerminologyApi {
    */
   summarizeFhirR4ValueSet(request: SummarizeFhirR4ValueSetRequest): Promise<SummarizeFhirR4ValueSetResponse> {
     const parameters = new URLSearchParams({
-      _summary: "true"
+      _summary: "true",
     });
     const route = `/terminology/v1/fhir/r4/valueset/${encodeURIComponent(request.id)}?${parameters.toString()}`;
     return this.httpHandler.get(route);
@@ -726,7 +743,9 @@ export class TerminologyApi {
    * @returns A Parameters resource containing the classification results
    * @link https://rosetta-api.docs.careevolution.com/fhir/valueset.html
    */
-  getAllFhirR4ValueSetsForCodes(request: GetAllFhirR4ValueSetsForCodesRequest): Promise<GetAllFhirR4ValueSetsForCodesResponse> {
+  getAllFhirR4ValueSetsForCodes(
+    request: GetAllFhirR4ValueSetsForCodesRequest,
+  ): Promise<GetAllFhirR4ValueSetsForCodesResponse> {
     const route = "/terminology/v1/fhir/r4/valueset/$classify";
     return this.httpHandler.post(route, request);
   }
@@ -741,5 +760,4 @@ export class TerminologyApi {
     const route = `/terminology/v1/fhir/r4/codesystem/${encodeURIComponent(request.codeSystem)}?_summary=true`;
     return this.httpHandler.get(route);
   }
-
 }

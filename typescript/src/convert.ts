@@ -138,7 +138,7 @@ export class ConvertApi {
   cdaToPdf(request: ConvertCdaToPdfRequest): Promise<ConvertCdaToPdfResponse> {
     const headers = {
       "Content-Type": "application/xml",
-      "Accept": "application/pdf",
+      Accept: "application/pdf",
     } as { [key: string]: string; };
     return this.httpHandler.post("/convert/v1/cdatopdf", request.content, headers);
   }
@@ -151,7 +151,7 @@ export class ConvertApi {
    */
   fhirR4ToCda(request: ConvertFhirR4ToCdaRequest): Promise<ConvertFhirR4ToCdaResponse> {
     const headers = {
-      "Accept": "application/xml",
+      Accept: "application/xml",
     } as { [key: string]: string; };
     return this.httpHandler.post("/convert/v1/fhirr4tocda", request.content, headers);
   }
@@ -163,7 +163,7 @@ export class ConvertApi {
    */
   fhirR4ToOmop(request: ConvertFhirR4ToOmopRequest): Promise<ConvertFhirR4ToOmopResponse> {
     const headers = {
-      "Accept": "application/zip",
+      Accept: "application/zip",
     } as { [key: string]: string; };
     return this.httpHandler.post("/convert/v1/fhirr4toomop", request.content, headers);
   }
