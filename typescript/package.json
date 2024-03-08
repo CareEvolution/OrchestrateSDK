@@ -4,8 +4,9 @@
 	"description": "A TypeScript client for the Orchestrate API",
 	"main": "dist/cjs/index.js",
 	"module": "dist/esm/index.js",
+	"type": "module",
 	"scripts": {
-		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node ./scripts/build-esm-package.mjs",
+		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node ./scripts/build-cjs-package.mjs",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"fmt": "prettier --check .",

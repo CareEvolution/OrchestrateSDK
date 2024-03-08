@@ -3,7 +3,6 @@
 		"strict": true,
 		"declaration": false,
 		"lib": [
-			"dom",
 			"ES6"
 		],
 		"target": "ES6",

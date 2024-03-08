@@ -1,4 +1,4 @@
-import { HttpHandler, IHttpHandler } from "./httpHandler";
+import { HttpHandler, IHttpHandler } from "./httpHandler.js";
 
 function getPriorityBaseUrl(): string {
   return process.env.ORCHESTRATE_BASE_URL || "https://api.careevolutionapi.com";

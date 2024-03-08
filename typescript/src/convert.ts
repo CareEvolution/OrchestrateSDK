@@ -1,4 +1,4 @@
-import { Bundle } from "fhir/r4";
+import type { Bundle } from "fhir/r4.js";
 import { IHttpHandler } from "./httpHandler.js";
 
 export type ConvertHl7ToFhirR4Request = {

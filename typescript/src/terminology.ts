@@ -7,9 +7,9 @@ import {
   Parameters,
   ParametersParameter,
   ValueSet,
-} from "fhir/r4";
-import { IHttpHandler } from "./httpHandler";
-import { handleBatchOverload } from "./batch";
+} from "fhir/r4.js";
+import { IHttpHandler } from "./httpHandler.js";
+import { handleBatchOverload } from "./batch.js";
 
 const standardizeTargetSystems = [
   "ICD-10-CM",
