@@ -8,6 +8,11 @@ import pytest
 from dotenv import load_dotenv
 from orchestrate import OrchestrateApi
 from requests import HTTPError
+
+from orchestrate._internal.exceptions import (
+    OrchestrateClientError,
+    OrchestrateHttpError,
+)
 from .data import (
     CDA,
     DSTU2_BUNDLE,
@@ -714,7 +719,7 @@ def test_get_fhir_r4_value_set_scopes_should_return_value_set():
 
 
 def test_get_fhir_r4_value_sets_by_scope_no_pagination_should_raise():
-    with pytest.raises(HTTPError):
+    with pytest.raises(OrchestrateHttpError):
         TEST_API.terminology.get_fhir_r4_value_sets_by_scope(scope="http://loinc.org")
 
 

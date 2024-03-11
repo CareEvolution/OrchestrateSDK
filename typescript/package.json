@@ -62,6 +62,12 @@
 			"require": "./dist/cjs/insight.js",
 			"types": "./dist/esm/insight.d.ts",
 			"default": "./dist/esm/insight.js"
+		},
+		"./exceptions": {
+			"import": "./dist/esm/exceptions.js",
+			"require": "./dist/cjs/exceptions.js",
+			"types": "./dist/esm/exceptions.d.ts",
+			"default": "./dist/esm/exceptions.js"
 		}
 	},
 	"typesVersions": {
@@ -77,6 +83,9 @@
 			],
 			"insight": [
 				"./dist/esm/insight.d.ts"
+			],
+			"exceptions": [
+				"./dist/esm/exceptions.d.ts"
 			]
 		}
 	}
