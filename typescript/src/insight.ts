@@ -1,4 +1,4 @@
-import { Bundle, MeasureReport, Measure, Patient, RiskAssessment, OperationOutcome } from "fhir/r4";
+import { Bundle, MeasureReport, Measure, Patient, RiskAssessment, OperationOutcome } from "fhir/r4.js";
 import { IHttpHandler } from "./httpHandler.js";
 
 const raSegments = [
