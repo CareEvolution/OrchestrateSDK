@@ -2,8 +2,6 @@ import json
 import os
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional
-from xml.etree import ElementTree
-from xml.etree.ElementTree import Element
 
 import requests
 from orchestrate._internal.exceptions import (
@@ -32,41 +30,14 @@ def _get_additional_headers() -> Mapping[str, str]:
     return {}
 
 
-def _coalesce_nullable_value(element: Element, tag: str) -> str:
-    value = element.find(tag)
-    return value.attrib["value"] if value is not None else ""
-
-
 @dataclass
 class _OperationalOutcomeIssue:
     severity: str
     code: str
     diagnostics: str
 
-    @staticmethod
-    def from_xml_element(element: Element) -> "_OperationalOutcomeIssue":
-        severity = _coalesce_nullable_value(element, "{http://hl7.org/fhir}severity")
-        code = _coalesce_nullable_value(element, "{http://hl7.org/fhir}code")
-        diagnostics = _coalesce_nullable_value(
-            element, "{http://hl7.org/fhir}diagnostics"
-        )
-        return _OperationalOutcomeIssue(severity, code, diagnostics)
-
     def __str__(self) -> str:
         return f"{self.severity}: {self.code} - {self.diagnostics}"
-
-
-def _read_xml_outcomes(response: requests.Response) -> list[_OperationalOutcomeIssue]:
-    try:
-        operation_outcome = ElementTree.fromstring(response.text)
-        return [
-            _OperationalOutcomeIssue.from_xml_element(issue)
-            for issue in operation_outcome.findall(".//{http://hl7.org/fhir}issue")
-        ]
-    except Exception:
-        pass
-
-    return []
 
 
 def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcomeIssue]:
@@ -99,19 +70,16 @@ def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcome
 
 
 def _read_operational_outcomes(response: requests.Response) -> list[str]:
-    outcomes = _read_xml_outcomes(response)
-    if outcomes:
-        return [str(outcome) for outcome in outcomes]
     outcomes = _read_json_outcomes(response)
     if outcomes:
         return [str(outcome) for outcome in outcomes]
 
-    return []
+    return [response.text]
 
 
 def _exception_from_response(response: requests.Response) -> OrchestrateHttpError:
     operational_outcomes = _read_operational_outcomes(response)
-    if str(response.status_code).startswith("4"):
+    if response.status_code >= 400 and response.status_code < 600:
         return OrchestrateClientError(response.text, operational_outcomes)
     return OrchestrateHttpError()
 

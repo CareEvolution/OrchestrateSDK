@@ -11,28 +11,6 @@ class OperationalOutcomeIssue {
   diagnostics: string | undefined;
 }
 
-async function readXmlOutcomes(responseText: string): Promise<string> {
-  return responseText;
-  // const parser = new DOMParser();
-  // try {
-  //   const xmlDoc = parser.parseFromString(responseText, "text/xml");
-  //   const issues = xmlDoc.getElementsByTagName("issue");
-  //   const result: OperationalOutcomeIssue[] = [];
-  //   for (let i = 0; i < issues.length; i++) {
-  //     const issue = issues[i];
-  //     result.push({
-  //       severity: issue.getAttribute("severity") || "",
-  //       code: issue.getAttribute("code") || "",
-  //       diagnostics: issue.getAttribute("details") || "",
-  //     });
-  //   }
-  //   return result;
-  // }
-  // catch (e) {
-  //   return [];
-  // }
-}
-
 async function readJsonOutcomes(responseText: string): Promise<OperationalOutcomeIssue[]> {
   try {
     const json = JSON.parse(responseText);
@@ -53,22 +31,18 @@ async function readJsonOutcomes(responseText: string): Promise<OperationalOutcom
   }
 }
 
-async function readOperationalOutcomes(response: Response, responseText: string): Promise<string[]> {
+async function readOperationalOutcomes(responseText: string): Promise<string[]> {
   const outcomes = await readJsonOutcomes(responseText);
   if (outcomes.length > 0) {
     return outcomes.map((o) => `${o.severity}: ${o.code} - ${o.diagnostics}`);
   }
-  const xmlOutcomes = await readXmlOutcomes(responseText);
-  if (xmlOutcomes.length > 0) {
-    return [xmlOutcomes];
-  }
-  return [];
+  return [responseText];
 }
 
 async function errorFromResponse(response: Response): Promise<never> {
   const responseText = await response.text();
-  const operationalOutcomes = await readOperationalOutcomes(response, responseText);
-  if (response.status.toString().startsWith("4")) {
+  const operationalOutcomes = await readOperationalOutcomes(responseText);
+  if (response.status >= 400 && response.status < 600) {
     throw new OrchestrateClientError(responseText, operationalOutcomes);
   }
 
