@@ -1,13 +1,14 @@
 import json
 import os
 from dataclasses import dataclass
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping, Optional, Union
 
 import requests
 from orchestrate._internal.exceptions import (
     OrchestrateClientError,
     OrchestrateHttpError,
 )
+from orchestrate._internal.fhir import Bundle
 
 
 def _get_priority_base_url() -> str:
@@ -84,6 +85,15 @@ def _exception_from_response(response: requests.Response) -> OrchestrateHttpErro
     return OrchestrateHttpError()
 
 
+def _prepare_body(body: Union[bytes, str, Mapping[Any, Any]]) -> bytes:
+    if isinstance(body, dict):
+        return json.dumps(body).encode("utf-8")
+    if isinstance(body, str):
+        return body.encode("utf-8")
+
+    return body  # type: ignore
+
+
 class HttpHandler:
     def __init__(
         self,
@@ -104,17 +114,13 @@ class HttpHandler:
     def post(
         self,
         path: str,
-        body: Any,
+        body: Union[str, Mapping[Any, Any], bytes],
         headers: Optional[dict[str, str]] = None,
         parameters: Optional[Mapping[str, Optional[str]]] = None,
     ) -> Any:
         request_headers = self.__merge_headers(headers)
 
-        prepared_body = (
-            json.dumps(body)
-            if request_headers["Content-Type"] == "application/json"
-            else body
-        )
+        prepared_body = _prepare_body(body)
         url = f"{self.base_url}{path}"
 
         response = requests.post(

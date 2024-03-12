@@ -1,0 +1,46 @@
+<ClinicalDocument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="urn:hl7-org:v3" moodCode="EVN">
+  <typeId extension="POCD_HD000040" root="2.16.840.1.113883.1.3" />
+  <templateId root="2.16.840.1.113883.10.20.1" />
+  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.1" />
+  <templateId root="1.3.6.1.4.1.19376.1.5.3.1.1.2" />
+  <id extension="326541157" root="6.14.983.0.653038.8.1114.0.7" />
+  <code code="34133-9" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Summarization of Episode Note" />
+  <title>Minute Clinic Continuity of Care Document</title>
+  <effectiveTime value="20170830091100-0400" />
+  <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" codeSystemName="Confidentiality" displayName="Normal" />
+  <languageCode code="en-US" />
+  <setId assigningAuthorityName="EPC" extension="52a22bb4-d0f5-441f-89a8-d204e21c4445" root="1.2.3.4.5.6.1.13.418.3.7.1.1" />
+  <versionNumber value="1" />
+  <recordTarget contextControlCode="OP" typeCode="RCT">
+    <patientRole classCode="PAT">
+      <id extension="H60863152" root="1.2.3.4.5.1.7" />
+      <patient classCode="PSN" determinerCode="INSTANCE">
+        <name use="L">
+          <given>George</given>
+          <family>Example</family>
+        </name>
+      </patient>
+    </patientRole>
+  </recordTarget>
+  <component>
+    <structuredBody classCode="DOCBODY" moodCode="EVN">
+      <component>
+        <section>
+          <templateId root="1.3.6.1.4.1.19376.1.5.3.1.3.4" />
+          <id root="f49b7e6f-c9f8-4f31-abd8-9b531dfc714e" />
+          <code code="10164-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="History of Present Illness" />
+          <title>Progress Notes</title>
+          <text mediaType="text/x-hl7-text+xml">
+            <list styleCode="TOC">
+              <item>
+                <caption>War, Jo - 07/31/2007 9:02 AM EST</caption>
+                <paragraph>Smoking Status   � Never Smoker   Smokeless Tobacco   � Not on file</paragraph>
+              </item>
+            </list>
+          </text>
+        </section>
+      </component>
+    </structuredBody>
+  </component>
+</ClinicalDocument>
