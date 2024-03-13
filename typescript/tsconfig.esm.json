@@ -2,14 +2,24 @@
   "compilerOptions": {
     "strict": true,
     "declaration": true,
-    "lib": [ "ES6"],
+    "lib": [
+      "ES6"
+    ],
     "target": "ES6",
     "module": "NodeNext",
     "outDir": "dist/esm",
     "moduleResolution": "NodeNext",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "esModuleInterop": true
   },
-  "include": ["src"],
-  "exclude": ["tests", "dist", "node_modules"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "tests",
+    "dist",
+    "node_modules"
+  ]
 }

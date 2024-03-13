@@ -1,8 +1,13 @@
-import os
 import json
+import os
+from dataclasses import dataclass
 from typing import Any, Mapping, Optional
 
 import requests
+from orchestrate._internal.exceptions import (
+    OrchestrateClientError,
+    OrchestrateHttpError,
+)
 
 
 def _get_priority_base_url() -> str:
@@ -23,6 +28,60 @@ def _get_additional_headers() -> Mapping[str, str]:
     if "ORCHESTRATE_ADDITIONAL_HEADERS" in os.environ:
         return json.loads(os.environ["ORCHESTRATE_ADDITIONAL_HEADERS"])
     return {}
+
+
+@dataclass
+class _OperationalOutcomeIssue:
+    severity: str
+    code: str
+    diagnostics: str
+
+    def __str__(self) -> str:
+        return f"{self.severity}: {self.code} - {self.diagnostics}"
+
+
+def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcomeIssue]:
+    try:
+        json_response = response.json()
+        if "issue" in json_response:
+            return [
+                _OperationalOutcomeIssue(
+                    issue.get("severity", ""),
+                    issue.get("code", ""),
+                    issue.get("diagnostics", ""),
+                )
+                for issue in json_response["issue"]
+            ]
+        if (
+            json_response.get("type")
+            == "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+        ):
+            return [
+                _OperationalOutcomeIssue(
+                    severity="error",
+                    code=json_response.get("title", ""),
+                    diagnostics=json_response.get("detail", ""),
+                )
+            ]
+    except Exception:
+        pass
+
+    return []
+
+
+def _read_operational_outcomes(response: requests.Response) -> list[str]:
+    outcomes = _read_json_outcomes(response)
+    if outcomes:
+        return [str(outcome) for outcome in outcomes]
+
+    return [response.text]
+
+
+def _exception_from_response(response: requests.Response) -> OrchestrateHttpError:
+    operational_outcomes = _read_operational_outcomes(response)
+    if response.status_code >= 400 and response.status_code < 600:
+        return OrchestrateClientError(response.text, operational_outcomes)
+    return OrchestrateHttpError()
 
 
 class HttpHandler:
@@ -64,7 +123,10 @@ class HttpHandler:
             headers=request_headers,
             params=parameters,
         )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as http_error:
+            raise _exception_from_response(response) from http_error
 
         if (
             request_headers["Accept"] in ["application/zip", "application/pdf"]
@@ -90,7 +152,10 @@ class HttpHandler:
             headers=request_headers,
             params=parameters,
         )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as http_error:
+            raise _exception_from_response(response) from http_error
 
         if (request_headers["Accept"] == "application/json") and response.text:
             return response.json()

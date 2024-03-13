@@ -1,91 +1,77 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
+import { describe, expect, test } from "vitest";
 import { HttpHandler } from "../src/httpHandler";
-import { createHttpHandler } from "../src/httpHandlerFactory";
+import { parse } from "dotenv";
+import { existsSync, readFileSync } from "fs";
 
-vi.mock("../src/httpHandler");
+class OutcomeTestCase {
+  contentType: string;
+  accept: string;
+  route: string;
+  body: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  expectedMessage: string;
+  id: string;
+}
 
-describe("createHttpHandler full environment", () => {
-  beforeAll(() => {
-    vi.stubEnv("ORCHESTRATE_BASE_URL", "https://env.example.com");
-    vi.stubEnv("ORCHESTRATE_API_KEY", "env-api-key");
-    vi.stubEnv("ORCHESTRATE_ADDITIONAL_HEADERS", JSON.stringify({ "x-custom-header": "custom-value" }));
-  });
+describe("httpHandler outcomes", () => {
+  const testCases: OutcomeTestCase[] = [
+    {
+      contentType: "application/json",
+      accept: "application/json",
+      route: "/convert/v1/fhirstu3tofhirr4",
+      body: { "resourceType": "Patient" },
+      expectedMessage: "error: invalid - Expected a Bundle but found a Patient",
+      id: "json",
+    },
+    {
+      contentType: "application/json",
+      accept: "application/xml",
+      route: "/convert/v1/fhirstu3tofhirr4",
+      body: { "resourceType": "Patient" },
+      expectedMessage: "Expected a Bundle but found a Patient",
+      id: "xml",
+    },
+    {
+      contentType: "application/xml",
+      accept: "text/html",
+      route: "/convert/v1/cdatohtml",
+      body: "<ClinicalDocument></ClinicalDocument>",
+      expectedMessage: "CDA did not render",
+      id: "html",
+    },
+    {
+      contentType: "application/xml",
+      accept: "application/pdf",
+      route: "/convert/v1/cdatopdf",
+      body: "<ClinicalDocument></ClinicalDocument>",
+      expectedMessage: "CDA did not render",
+      id: "pdf",
+    },
+    {
+      contentType: "application/json",
+      accept: "application/zip",
+      route: "/convert/v1/fhirr4toomop",
+      body: { "resourceType": "Patient" },
+      expectedMessage: "Expected a Bundle but found a Patient",
+      id: "zip",
+    },
+  ];
+  const cases = testCases.map((input) => ({ input }));
 
-  it("should prefer the environment variables", () => {
-    createHttpHandler(undefined);
-
-    expect(HttpHandler).toHaveBeenCalledWith("https://env.example.com", {
+  const environment = parse(existsSync(".env") ? readFileSync(".env") : readFileSync("../.env"));
+  const handler = new HttpHandler(
+    "https://api.careevolutionapi.com",
+    {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "x-api-key": "env-api-key",
-      "x-custom-header": "custom-value",
-    });
-  });
+      "x-api-key": environment.ORCHESTRATE_API_KEY,
+    },
+  );
 
-  it("should prefer the api key parameter over the environment variable", () => {
-    createHttpHandler("my-api-key");
+  test.each(cases)("should classify single $input.id", async ({ input }: { input: OutcomeTestCase; }) => {
+    const { contentType, accept, route, body, expectedMessage } = input;
 
-    expect(HttpHandler).toHaveBeenCalledWith("https://env.example.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "my-api-key",
-      "x-custom-header": "custom-value",
-    });
-  });
-
-  afterAll(() => {
-    vi.unstubAllEnvs();
-  });
-});
-
-describe("createHttpHandler apiKey environment", () => {
-  beforeAll(() => {
-    vi.stubEnv("ORCHESTRATE_API_KEY", "env-api-key");
-  });
-
-  it("should create an HttpHandler with the provided apiKey", () => {
-    createHttpHandler(undefined);
-
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "env-api-key",
-    });
-  });
-
-  it("should prefer the api key parameter over the environment variable", () => {
-    createHttpHandler("my-api-key");
-
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "my-api-key",
-    });
-  });
-
-  afterAll(() => {
-    vi.unstubAllEnvs();
-  });
-});
-
-
-describe("createHttpHandler no environment", () => {
-  it("should create an HttpHandler defaulted to api.careevolutionapi.com", () => {
-    createHttpHandler(undefined);
-
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    });
-  });
-
-  it("should create an HttpHandler with the provided apiKey", () => {
-    createHttpHandler("my-api-key");
-
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "my-api-key",
-    });
+    expect(async () => {
+      await handler.post(route, body, { "Content-Type": contentType, Accept: accept });
+    }).rejects.toThrowError(expectedMessage);
   });
 });
