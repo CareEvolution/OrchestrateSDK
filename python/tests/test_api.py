@@ -839,3 +839,12 @@ def test_convert_cda_to_html_should_convert():
 
     assert result is not None
     assert result.startswith("<html")
+
+
+def test_convert_cda_to_fhir_r4_alternative_encoding_should_send_bytes():
+    file = Path(__file__).parent / "data" / "encoding_cda.xml"
+
+    result = TEST_API.convert.cda_to_fhir_r4(content=file.read_text())
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
