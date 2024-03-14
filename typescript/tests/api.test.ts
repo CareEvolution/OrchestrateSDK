@@ -1,5 +1,5 @@
 import { OrchestrateApi } from '../src/api';
-import { hl7, cda, fhir, riskProfileBundle, x12Document, stu3FhirBundle, dstu2FhirBundle } from './data';
+import { hl7, cda, fhir, riskProfileBundle, x12Document, stu3FhirBundle, dstu2FhirBundle, nemsisBundle } from './data';
 import dotenv from 'dotenv';
 import { Bundle, Patient } from 'fhir/r4';
 import {
@@ -714,5 +714,29 @@ describe("convert cda to html", () => {
 
     expect(result).toBeDefined();
     expect(result).toContain("<html");
+  });
+});
+
+describe("convert fhir r4 to nemsis v34", () => {
+  it("should convert", async () => {
+    const result = await orchestrate.convert.fhirR4ToNemsisV34({
+      content: nemsisBundle
+    });
+
+    expect(result).toBeDefined();
+    expect(result).toContain("<EMSDataSet");
+    expect(result).not.toContain("<eOutcome.18");
+  });
+});
+
+describe("convert fhir r4 to nemsis v35", () => {
+  it("should convert", async () => {
+    const result = await orchestrate.convert.fhirR4ToNemsisV35({
+      content: nemsisBundle
+    });
+
+    expect(result).toBeDefined();
+    expect(result).toContain("<EMSDataSet");
+    expect(result).toContain("<eOutcome.18");
   });
 });
