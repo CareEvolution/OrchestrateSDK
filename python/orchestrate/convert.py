@@ -1,11 +1,17 @@
 from orchestrate._internal.convert import (
+    ConvertHl7ToFhirR4Response,
     ConvertCdaToFhirR4Response,
     ConvertCdaToPdfResponse,
-    ConvertCombinedFhirR4BundlesResponse,
     ConvertFhirR4ToCdaResponse,
     ConvertFhirR4ToOmopResponse,
-    ConvertHl7ToFhirR4Response,
     ConvertX12ToFhirR4Response,
+    ConvertCombinedFhirR4BundlesResponse,
+    ConvertFhirDstu2ToFhirR4Response,
+    ConvertFhirStu3ToFhirR4Response,
+    ConvertFhirR4ToHealthLakeResponse,
+    ConvertCdaToHtmlResponse,
+    ConvertFhirR4ToNemsisV34Response,
+    ConvertFhirR4ToNemsisV35Response,
     generate_convert_combine_fhir_bundles_request_from_bundles,
 )
 
@@ -17,5 +23,11 @@ __all__ = [
     "ConvertFhirR4ToOmopResponse",
     "ConvertX12ToFhirR4Response",
     "ConvertCombinedFhirR4BundlesResponse",
+    "ConvertFhirDstu2ToFhirR4Response",
+    "ConvertFhirStu3ToFhirR4Response",
+    "ConvertFhirR4ToHealthLakeResponse",
+    "ConvertCdaToHtmlResponse",
+    "ConvertFhirR4ToNemsisV34Response",
+    "ConvertFhirR4ToNemsisV35Response",
     "generate_convert_combine_fhir_bundles_request_from_bundles",
 ]
