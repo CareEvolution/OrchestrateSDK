@@ -1,29 +1,28 @@
-from orchestrate._internal.identity.demographic import Demographic
+from orchestrate._internal.identity.demographic import Demographic, BlindedDemographic
 from orchestrate._internal.identity.advisories import (
     Advisories,
     InvalidDemographicField,
 )
 from orchestrate._internal.identity.local_hashing import (
     LocalHashingApi,
-    BlindedDemographic,
     HashDemographicResponse,
 )
 from orchestrate._internal.identity.api import (
-    AddMatchGuidanceResponse,
-    AddOrUpdateBlindedRecordResponse,
+    PersonStatus,
+    Record,
+    Person,
+    MatchedPersonReference,
     AddOrUpdateRecordResponse,
+    MatchDemographicsResponse,
+    MatchBlindedDemographicsResponse,
     DeleteRecordResponse,
+    AddMatchGuidanceResponse,
+    RemoveMatchGuidanceResponse,
     IdentityApi,
+    AddOrUpdateBlindedRecordResponse,
     GetPersonByRecordResponse,
     GetPersonByIdResponse,
     MatchBlindedDemographicRequest,
-    MatchBlindedDemographicsResponse,
-    MatchedPersonReference,
-    MatchDemographicsResponse,
-    RemoveMatchGuidanceResponse,
-    Person,
-    PersonStatus,
-    Record,
 )
 
 __all__ = [

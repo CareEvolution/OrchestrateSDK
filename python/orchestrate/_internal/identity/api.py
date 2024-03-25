@@ -1,4 +1,3 @@
-from ctypes import ArgumentError
 from typing import Any, Callable, Literal, Optional, TypedDict, Union, overload
 from urllib.parse import quote_plus
 from orchestrate._internal.http_handler import create_identity_http_handler
@@ -8,6 +7,7 @@ from orchestrate._internal.identity.demographic import (
     demographic_api_method_overload_handler,
 )
 from orchestrate._internal.identity.local_hashing import BlindedDemographic
+from orchestrate._internal.identity.monitoring import IdentityMonitoringApi
 
 
 class PersonStatus(TypedDict):
@@ -108,7 +108,7 @@ def _get_blinded_request(
             "version": kwargs["request"]["version"],
         }
     if any(argument not in ["data", "version"] for argument in kwargs.keys()):
-        raise ArgumentError("Unable to determine blinded method from arguments")
+        raise TypeError("Unable to determine blinded method from arguments")
     return {
         "data": kwargs["data"],
         "version": kwargs["version"],
@@ -125,6 +125,7 @@ class IdentityApi:
         self.__http_handler = create_identity_http_handler(
             api_key=api_key, metrics_key=metrics_key, base_url=url
         )
+        self.monitoring = IdentityMonitoringApi(self.__http_handler)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(base_url={self.__http_handler.base_url!r})"

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Union
 from uuid import uuid4
 
@@ -308,3 +309,41 @@ def test_remove_match_guidance_should_separate_persons() -> None:
         changed_person["id"] in [first_added_person["id"], second_added_person["id"]]
         for changed_person in response["changedPersons"]
     )
+
+
+def test_monitoring_identity_metrics_should_have_metrics():
+    _create_random_record()
+
+    response = _TEST_API.monitoring.identifier_metrics()
+
+    assert response is not None
+    assert "refreshed" in response
+    assert response["totalRecordCount"] > 0
+    assert response["totalPersonCount"] > 0
+    assert response["globalMetricsRecords"] is not None
+    assert response["globalMetricsRecords"][0]["source"] == ""
+    assert response["summaryMetricsRecords"] is not None
+    assert any(
+        record["source"] == _DEFAULT_SOURCE
+        for record in response["summaryMetricsRecords"]
+    )
+    assert response["sourceTotals"][0]["totalRecordCount"] > 0
+
+
+def test_monitoring_overlap_metrics_should_have_metrics():
+    _create_random_record()
+    _create_random_record()
+
+    response = _TEST_API.monitoring.overlap_metrics()
+
+    assert response is not None
+    assert response["datasourceOverlapRecords"] is not None
+    assert any(
+        record["datasourceA"] == _DEFAULT_SOURCE
+        for record in response["datasourceOverlapRecords"]
+    )
+    assert any(
+        record["datasourceB"] == _DEFAULT_SOURCE
+        for record in response["datasourceOverlapRecords"]
+    )
+    assert response["datasourceOverlapRecords"][0]["overlapCount"] > 0

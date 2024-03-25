@@ -2,6 +2,7 @@ import { IHttpHandler } from "../httpHandler.js";
 import { createIdentityHttpHandler } from "../httpHandlerFactory.js";
 import { Advisories } from "./advisories.js";
 import { BlindedDemographic, Demographic } from "./demographic.js";
+import { IdentityMonitoringApi } from "./monitoring.js";
 
 export type PersonStatus = {
   code: string;
@@ -10,7 +11,7 @@ export type PersonStatus = {
 
 export type Record = {
   source: string;
-  identitifer: string;
+  identifier: string;
 };
 
 export type Person = {
@@ -20,16 +21,11 @@ export type Person = {
   status: PersonStatus;
 };
 
-export type RecordReference = {
-  source: string;
-  identifier: string;
-};
-
-export type AddOrUpdateRecordRequest = RecordReference & {
+export type AddOrUpdateRecordRequest = Record & {
   demographic: Demographic;
 };
 
-export type AddOrUpdateBlindedRecordRequest = RecordReference & {
+export type AddOrUpdateBlindedRecordRequest = Record & {
   blindedDemographic: BlindedDemographic;
 };
 
@@ -68,15 +64,15 @@ export type MatchBlindedDemographicsResponse = {
   matchedPersons: Person[];
 };
 
-export type DeleteRecordRequest = RecordReference;
+export type DeleteRecordRequest = Record;
 
 export type DeleteRecordResponse = {
   changedPersons: Person[];
 };
 
 export type MatchGuidanceRequest = {
-  recordOne: RecordReference;
-  recordTwo: RecordReference;
+  recordOne: Record;
+  recordTwo: Record;
   comment: string;
 };
 
@@ -94,7 +90,7 @@ export type RemoveMatchGuidanceResponse = {
   changedPersons: Person[];
 };
 
-export type GetPersonByRecordRequest = RecordReference;
+export type GetPersonByRecordRequest = Record;
 
 export type IdentityApiConfiguration = {
   url?: string | undefined;
@@ -108,9 +104,11 @@ function buildSourceIdentifierRoute(source: string, identifier: string): string 
 
 export class IdentityApi {
   private httpHandler: IHttpHandler;
+  public monitoring: IdentityMonitoringApi;
 
   constructor(configuration: IdentityApiConfiguration = {}) {
     this.httpHandler = createIdentityHttpHandler(configuration.apiKey, configuration.metricsKey, configuration.url);
+    this.monitoring = new IdentityMonitoringApi(this.httpHandler);
   }
 
   toString(): string {
@@ -234,4 +232,6 @@ export class IdentityApi {
   public async removeMatchGuidance(request: RemoveMatchGuidanceRequest): Promise<RemoveMatchGuidanceResponse> {
     return this.httpHandler.post(`/mpi/v1/removeGuidance`, request);
   }
+
+
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { IdentityApi, Person } from "../../src/identity/api.js";
 import { Demographic } from "../../src/identity/demographic.js";
 import dotenv from 'dotenv';
@@ -210,5 +210,33 @@ describe("Identity API removeMatchGuidance", () => {
     });
 
     expect(removeMatchGuidanceResponse.changedPersons.map(changedPerson => changedPerson.id).some(id => [firstPerson.id, secondPerson.id].includes(id))).toBeTruthy();
+  });
+});
+
+describe("Identity Metrics API", () => {
+  beforeAll(async () => {
+    await createRandomRecord();
+  });
+
+  it("should have identifier metrics", async () => {
+
+    const identifierMetricsResponse = await identityApi.monitoring.identifierMetrics();
+
+    expect(new Date(identifierMetricsResponse.refreshed).getUTCDate()).toBeDefined();
+    expect(identifierMetricsResponse.totalRecordCount).toBeGreaterThan(0);
+    expect(identifierMetricsResponse.totalPersonCount).toBeGreaterThan(0);
+    expect(identifierMetricsResponse.globalMetricsRecords).toBeDefined();
+    expect(identifierMetricsResponse.globalMetricsRecords[0].source).toBe("");
+    expect(identifierMetricsResponse.summaryMetricsRecords).toBeDefined();
+    expect(identifierMetricsResponse.summaryMetricsRecords.find(record => record.source === defaultSource)?.source).toBe(defaultSource);
+    expect(identifierMetricsResponse.sourceTotals).toBeDefined();
+  });
+
+  it("should return overlap metrics", async () => {
+    const overlapMetricsResponse = await identityApi.monitoring.overlapMetrics();
+
+    expect(overlapMetricsResponse).toBeDefined();
+    expect(overlapMetricsResponse.datasourceOverlapRecords).toBeDefined();
+    expect(overlapMetricsResponse.datasourceOverlapRecords.length).toBeGreaterThan(0);
   });
 });
