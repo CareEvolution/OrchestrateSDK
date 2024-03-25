@@ -94,7 +94,7 @@ def test_constructor_should_build_from_passed_url():
 def test_add_or_update_record_should_add_record():
     response = _TEST_API.add_or_update_record(
         _DEFAULT_SOURCE,
-        "identifier",
+        str(uuid4()),
         first_name=_DEMOGRAPHIC.first_name,
         last_name=_DEMOGRAPHIC.last_name,
         dob=_DEMOGRAPHIC.dob,
@@ -108,7 +108,7 @@ def test_add_or_update_record_should_add_record():
 def test_add_or_update_record_with_demographic_should_add_record():
     response = _TEST_API.add_or_update_record(
         _DEFAULT_SOURCE,
-        "identifier",
+        str(uuid4()),
         _DEMOGRAPHIC,
     )
 
@@ -119,7 +119,7 @@ def test_add_or_update_record_with_demographic_should_add_record():
 def test_add_or_update_record_with_url_unsafe_identifier_should_add_record():
     response = _TEST_API.add_or_update_record(
         _DEFAULT_SOURCE,
-        "id/entifier",
+        str(uuid4()) + "/",
         first_name=_DEMOGRAPHIC.first_name,
         last_name=_DEMOGRAPHIC.last_name,
         dob=_DEMOGRAPHIC.dob,
@@ -133,7 +133,7 @@ def test_add_or_update_record_with_url_unsafe_identifier_should_add_record():
 def test_add_or_update_blinded_record_should_add_record():
     response = _TEST_API.add_or_update_blinded_record(
         _DEFAULT_SOURCE,
-        "identifier",
+        str(uuid4()),
         data=_BLINDED_DEMOGRAPHIC["data"],
         version=_BLINDED_DEMOGRAPHIC["version"],
     )
@@ -145,7 +145,7 @@ def test_add_or_update_blinded_record_should_add_record():
 def test_add_or_update_blinded_record_with_kwargs_should_add_record():
     response = _TEST_API.add_or_update_blinded_record(
         source=_DEFAULT_SOURCE,
-        identifier="identifier",
+        identifier=str(uuid4()),
         data=_BLINDED_DEMOGRAPHIC["data"],
         version=_BLINDED_DEMOGRAPHIC["version"],
     )
@@ -174,8 +174,8 @@ def test_add_or_update_blinded_record_with_request_should_add_record(
 ) -> None:
     response = _TEST_API.add_or_update_blinded_record(
         _DEFAULT_SOURCE,
-        "identifier",
-        request=demographic_request,
+        str(uuid4()),
+        blinded_demographic=demographic_request,
     )
 
     assert response is not None
@@ -246,7 +246,9 @@ def test_match_blinded_demographic_with_demographic_should_match() -> None:
 
 
 def test_match_blinded_demographic_with_demographic_with_kwarg_should_match() -> None:
-    response = _TEST_API.match_blinded_demographics(request=_BLINDED_DEMOGRAPHIC)
+    response = _TEST_API.match_blinded_demographics(
+        blinded_demographic=_BLINDED_DEMOGRAPHIC
+    )
 
     assert response is not None
     assert "matchingPersons" in response

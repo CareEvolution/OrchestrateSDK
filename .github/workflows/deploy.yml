@@ -12,6 +12,9 @@ jobs:
     uses: ./.github/workflows/test.yml
     secrets:
       ORCHESTRATE_API_KEY: ${{ secrets.ORCHESTRATE_API_KEY }}
+      ORCHESTRATE_IDENTITY_API_KEY: ${{ secrets.ORCHESTRATE_IDENTITY_API_KEY }}
+      ORCHESTRATE_IDENTITY_METRICS_KEY: ${{ secrets.ORCHESTRATE_IDENTITY_METRICS_KEY }}
+      ORCHESTRATE_IDENTITY_URL: ${{ secrets.ORCHESTRATE_IDENTITY_URL }}
 
   version:
     name: Version

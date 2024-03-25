@@ -141,7 +141,6 @@ export class IdentityApi {
    */
   public async addOrUpdateBlindedRecord(request: AddOrUpdateBlindedRecordRequest): Promise<AddOrUpdateBlindedRecordResponse> {
     const sourceIdentifierRoute = buildSourceIdentifierRoute(request.source, request.identifier);
-    console.log(sourceIdentifierRoute);
     const payload = {
       data: request.blindedDemographic.data,
       version: request.blindedDemographic.version

@@ -102,10 +102,10 @@ def _get_blinded_request(
             "data": args[0]["data"],
             "version": args[0]["version"],
         }
-    elif isinstance(kwargs.get("request"), dict):
+    elif isinstance(kwargs.get("blinded_demographic"), dict):
         return {
-            "data": kwargs["request"]["data"],
-            "version": kwargs["request"]["version"],
+            "data": kwargs["blinded_demographic"]["data"],
+            "version": kwargs["blinded_demographic"]["version"],
         }
     if any(argument not in ["data", "version"] for argument in kwargs.keys()):
         raise TypeError("Unable to determine blinded method from arguments")
@@ -278,7 +278,7 @@ class IdentityApi:
         self,
         source: str,
         identifier: str,
-        request: BlindedDemographic,
+        blinded_demographic: BlindedDemographic,
     ) -> AddOrUpdateBlindedRecordResponse:
         """
         Adds a new record or updates a previously created one in privacy-preserving (blinded) mode.
@@ -465,7 +465,7 @@ class IdentityApi:
 
     @overload
     def match_blinded_demographics(
-        self, request: MatchBlindedDemographicRequest
+        self, blinded_demographic: MatchBlindedDemographicRequest
     ) -> MatchBlindedDemographicsResponse:
         """
         Finds all persons and their associated records that match the provided demographics. This operation is read-only, and will not create or update any person records.
