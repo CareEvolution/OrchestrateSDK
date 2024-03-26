@@ -5,7 +5,7 @@ import { BlindedDemographic, Demographic } from "./demographic.js";
 import { IdentityMonitoringApi } from "./monitoring.js";
 
 export type PersonStatus = {
-  code: string;
+  code: "Active" | "Retired";
   supercededBy: string[];
 };
 
