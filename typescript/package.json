@@ -68,6 +68,18 @@
 			"require": "./dist/cjs/exceptions.js",
 			"types": "./dist/esm/exceptions.d.ts",
 			"default": "./dist/esm/exceptions.js"
+		},
+		"./identity": {
+			"import": "./dist/esm/identity.js",
+			"require": "./dist/cjs/identity.js",
+			"types": "./dist/esm/identity.d.ts",
+			"default": "./dist/esm/identity.js"
+		},
+		"./identity/monitoring": {
+			"import": "./dist/esm/identityMonitoring.js",
+			"require": "./dist/cjs/identityMonitoring.js",
+			"types": "./dist/esm/identityMonitoring.d.ts",
+			"default": "./dist/esm/identityMonitoring.js"
 		}
 	},
 	"typesVersions": {
@@ -86,6 +98,12 @@
 			],
 			"exceptions": [
 				"./dist/esm/exceptions.d.ts"
+			],
+			"identity": [
+				"./dist/esm/identity.d.ts"
+			],
+			"identity/monitoring": [
+				"./dist/esm/identityMonitoring.d.ts"
 			]
 		}
 	}

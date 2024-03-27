@@ -20,16 +20,12 @@ pip install orchestrate-api
 
 ## Usage
 
-When passing in your Orchestrate API key, you can either specify it during creation of the client or by setting the `ORCHESTRATE_API_KEY` environment variable.
-
 TypeScript:
 
 ```typescript
 import { OrchestrateApi } from '@careevolution/orchestrate';
 
-process.env.ORCHESTRATE_API_KEY = "your-api-key";
-
-const orchestrate = new OrchestrateApi();
+const orchestrate = new OrchestrateApi({apiKey: "your-api-key"});
 await orchestrate.terminology.classifyCondition({
   code: "119981000146107",
   system: "SNOMED",
@@ -39,11 +35,8 @@ await orchestrate.terminology.classifyCondition({
 Python:
 
 ```python
-import os
 from orchestrate import OrchestrateApi
 
-os.environ["ORCHESTRATE_API_KEY"] = "your-api-key"
-
-api = OrchestrateApi()
+api = OrchestrateApi(api_key="your-api-key")
 api.terminology.classify_condition(code="119981000146107", system="SNOMED")
 ```
