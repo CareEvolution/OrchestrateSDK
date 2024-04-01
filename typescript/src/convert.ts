@@ -1,4 +1,4 @@
-import type { Bundle } from "fhir/r4.js";
+import { Bundle } from "fhir/r4.js";
 import { IHttpHandler } from "./httpHandler.js";
 
 export type ConvertHl7ToFhirR4Request = {
@@ -22,7 +22,7 @@ export type ConvertCdaToPdfRequest = {
   content: string;
 };
 
-export type ConvertCdaToPdfResponse = Buffer;
+export type ConvertCdaToPdfResponse = ArrayBuffer;
 
 export type ConvertFhirR4ToCdaRequest = {
   content: Bundle;
@@ -34,7 +34,7 @@ export type ConvertFhirR4ToOmopRequest = {
   content: Bundle;
 };
 
-export type ConvertFhirR4ToOmopResponse = Buffer;
+export type ConvertFhirR4ToOmopResponse = ArrayBuffer;
 
 export type ConvertCombineFhirR4BundlesRequest = {
   content: string;
@@ -159,7 +159,7 @@ export class ConvertApi {
       "Content-Type": "application/xml",
       Accept: "application/pdf",
     } as { [key: string]: string; };
-    return this.httpHandler.post("/convert/v1/cdatopdf", request.content, headers);
+    return this.httpHandler.post<string, ArrayBuffer>("/convert/v1/cdatopdf", request.content, headers);
   }
 
   /**
@@ -184,7 +184,11 @@ export class ConvertApi {
     const headers = {
       Accept: "application/zip",
     } as { [key: string]: string; };
-    return this.httpHandler.post("/convert/v1/fhirr4toomop", request.content, headers);
+    return this.httpHandler.post<Bundle, ArrayBuffer>(
+      "/convert/v1/fhirr4toomop",
+      request.content,
+      headers
+    );
   }
 
   /**
