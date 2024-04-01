@@ -4,6 +4,7 @@ import { IHttpHandler } from "./httpHandler.js";
 export type ConvertHl7ToFhirR4Request = {
   content: string;
   patientID?: string;
+  tz?: string;
 };
 
 export type ConvertHl7ToFhirR4Response = Bundle;
@@ -102,6 +103,9 @@ export class ConvertApi {
   /**
    * Converts one or more HL7v2 messages into a FHIR R4 bundle
    * @param request A single or newline-delimited set of HL7v2.7 messages
+   *  - `content` The HL7v2.7 messages to convert
+   *  - `patientID` The patient ID to associate with the clinical data
+   *  - `tz` The timezone to use when parsing dates and times. Must be IANA or Windows timezone format. If not provided, defaults to UTC.
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
    * @link https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html
    */
@@ -112,6 +116,9 @@ export class ConvertApi {
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
+    }
+    if (request.tz) {
+      parameters.append("tz", request.tz);
     }
     let route = "/convert/v1/hl7tofhirr4";
     if (parameters.size) {

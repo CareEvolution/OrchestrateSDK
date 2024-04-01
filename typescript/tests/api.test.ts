@@ -1,7 +1,7 @@
 import { OrchestrateApi } from '../src/api';
 import { hl7, cda, fhir, riskProfileBundle, x12Document, stu3FhirBundle, dstu2FhirBundle, nemsisBundle } from './data';
 import dotenv from 'dotenv';
-import { Bundle, Patient } from 'fhir/r4';
+import { Bundle, Encounter, Patient } from 'fhir/r4';
 import {
   ClassifyConditionRequest,
   ClassifyMedicationRequest,
@@ -322,6 +322,33 @@ describe("convert hl7 to fhir r4", () => {
     const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
     expect(patientResource).toBeDefined();
     expect(patientResource?.resource?.id).toBe("12/34");
+  });
+
+  it("should convert hl7 with timezone", async () => {
+    const result = await orchestrate.convert.hl7ToFhirR4({
+      content: hl7,
+      tz: "America/New_York",
+    });
+
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const encounter = result.entry?.find((entry) => entry.resource?.resourceType === "Encounter")?.resource as Encounter;
+    expect(encounter).toBeDefined();
+    expect(encounter?.period?.start).toBe("2014-11-07T14:40:00-05:00");
+  });
+
+  it("should use UTC when no timezone is supplied", async () => {
+    const result = await orchestrate.convert.hl7ToFhirR4({
+      content: hl7,
+    });
+
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const encounter = result.entry?.find((entry) => entry.resource?.resourceType === "Encounter")?.resource as Encounter;
+    expect(encounter).toBeDefined();
+    expect(encounter?.period?.start).toBe("2014-11-07T14:40:00+00:00");
   });
 });
 
