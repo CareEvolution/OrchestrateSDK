@@ -80,7 +80,7 @@ class ConvertApi:
 
         - `hl7_message`: The HL7 message(s) to convert
         - `patient_id`: The patient ID to use for the FHIR bundle
-        - `tz`: The timezone to use for the FHIR bundle. Must be IANA or Windows timezone name. Defaults to UTC.
+        - `tz`: Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
 
         ### Returns
 

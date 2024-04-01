@@ -105,7 +105,7 @@ export class ConvertApi {
    * @param request A single or newline-delimited set of HL7v2.7 messages
    *  - `content` The HL7v2.7 messages to convert
    *  - `patientID` The patient ID to associate with the clinical data
-   *  - `tz` The timezone to use when parsing dates and times. Must be IANA or Windows timezone format. If not provided, defaults to UTC.
+   *  - `tz`: Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
    * @link https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html
    */
