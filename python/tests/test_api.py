@@ -488,6 +488,38 @@ def test_api_convert_hl7_to_fhir_r4_with_patient_should_convert():
     assert patient_resource["id"] == "1234"
 
 
+def test_api_convert_hl7_to_fhir_r4_with_timezone_should_convert():
+    result = TEST_API.convert.hl7_to_fhir_r4(content=HL7, tz="America/New_York")
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) > 0
+    encounter = next(
+        (
+            entry["resource"]
+            for entry in result["entry"]
+            if entry["resource"]["resourceType"] == "Encounter"
+        )
+    )
+    assert encounter["period"]["start"] == "2014-11-07T14:40:00-05:00"
+
+
+def test_api_convert_hl7_to_fhir_r4_without_timezone_should_presume_utc():
+    result = TEST_API.convert.hl7_to_fhir_r4(content=HL7)
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) > 0
+    encounter = next(
+        (
+            entry["resource"]
+            for entry in result["entry"]
+            if entry["resource"]["resourceType"] == "Encounter"
+        )
+    )
+    assert encounter["period"]["start"] == "2014-11-07T14:40:00+00:00"
+
+
 def test_convert_cda_to_fhir_r4_without_patient_should_convert():
     result = TEST_API.convert.cda_to_fhir_r4(content=CDA)
 

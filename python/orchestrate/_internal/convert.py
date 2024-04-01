@@ -71,6 +71,7 @@ class ConvertApi:
         self,
         content: str,
         patient_id: Optional[str] = None,
+        tz: Optional[str] = None,
     ) -> ConvertHl7ToFhirR4Response:
         """
         Converts one or more HL7v2 messages into a FHIR R4 bundle
@@ -79,6 +80,7 @@ class ConvertApi:
 
         - `hl7_message`: The HL7 message(s) to convert
         - `patient_id`: The patient ID to use for the FHIR bundle
+        - `tz`: Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
 
         ### Returns
 
@@ -90,6 +92,7 @@ class ConvertApi:
         """
         headers = {"Content-Type": "text/plain"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
+        parameters = {**parameters, **_get_id_dependent_parameters("tz", tz)}
         return self.__http_handler.post(
             path="/convert/v1/hl7tofhirr4",
             body=content,
