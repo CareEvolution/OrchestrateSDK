@@ -914,4 +914,7 @@ def test_insight_fhir_r4_to_manifest_should_have_csvs():
                 "conditions.csv",
             ]
         )
-        assert all(file.filename.endswith(".csv") and file.file_size > 0 for file in zip_file.infolist())
+        assert all(
+            file.filename.endswith(".csv") and file.file_size > 0
+            for file in zip_file.infolist()
+        )
