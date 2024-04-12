@@ -897,3 +897,24 @@ def test_convert_fhir_r4_to_nemsis_v35_should_convert():
     assert result is not None
     assert "<EMSDataSet" in result
     assert "<eOutcome.18" in result
+
+
+def test_insight_fhir_r4_to_manifest_should_have_csvs():
+    result = TEST_API.insight.fhir_r4_to_manifest(content=R4_BUNDLE)
+
+    assert result is not None
+    assert isinstance(result, bytes)
+    with ZipFile(BytesIO(result)) as zip_file:
+        assert all(
+            file in [csv.filename for csv in zip_file.infolist()]
+            for file in [
+                "patients.csv",
+                "encounters.csv",
+                "procedures.csv",
+                "conditions.csv",
+            ]
+        )
+        assert all(
+            file.filename.endswith(".csv") and file.file_size > 0
+            for file in zip_file.infolist()
+        )

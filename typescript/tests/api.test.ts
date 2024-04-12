@@ -12,6 +12,7 @@ import { describe, it, expect, test } from "vitest";
 
 dotenv.config({ path: "../.env" });
 const orchestrate = new OrchestrateApi();
+const pkZipMagicNumber = new Int8Array([80, 75, 3, 4]);
 
 describe("classify condition", () => {
   const requests: ClassifyConditionRequest[] = [
@@ -383,8 +384,8 @@ describe("convert cda to pdf", () => {
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
-    // Check for PDF magic number
-    expect(resultIntegers.slice(0, 4)).toStrictEqual(new Int8Array([37, 80, 68, 70]));
+    const pdfMagicNumber = new Int8Array([37, 80, 68, 70]);
+    expect(resultIntegers.slice(0, 4)).toStrictEqual(pdfMagicNumber);
   });
 });
 
@@ -405,8 +406,7 @@ describe("convert fhir r4 to omop", () => {
     });
     expect(result).toBeDefined();
     const resultIntegers = new Int8Array(result);
-    // Check for PKZip magic number
-    expect(resultIntegers.slice(0, 4)).toStrictEqual(new Int8Array([80, 75, 3, 4]));
+    expect(resultIntegers.slice(0, 4)).toStrictEqual(pkZipMagicNumber);
   });
 });
 
@@ -765,5 +765,18 @@ describe("convert fhir r4 to nemsis v35", () => {
     expect(result).toBeDefined();
     expect(result).toContain("<EMSDataSet");
     expect(result).toContain("<eOutcome.18");
+  });
+});
+
+describe("insight fhir r4 to manifest", async () => {
+  it("should return a buffer", async () => {
+    const result = await orchestrate.insight.fhirR4ToManifest({
+      content: fhir,
+    });
+
+    expect(result).toBeDefined();
+    console.log(typeof result);
+    const resultIntegers = new Int8Array(result);
+    expect(resultIntegers.slice(0, 4)).toStrictEqual(pkZipMagicNumber);
   });
 });
