@@ -5,7 +5,20 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
+    inputs:
+      suite:
+        required: true
+        description: "The test suite name: e2e, default"
+        default: "default"
+        type: string
   workflow_call:
+    inputs:
+      suite:
+        required: true
+        description: "The test suite name: e2e, default"
+        default: "default"
+        type: string
     secrets:
       ORCHESTRATE_API_KEY:
         required: true
@@ -22,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      max-parallel: 1
+      max-parallel: ${{ (inputs.suite || 'default') == 'e2e' && 1 || 4 }}
       matrix:
         node-version: ["18", "20"]
     steps:
@@ -44,12 +57,19 @@ jobs:
       - name: Install dependencies
         working-directory: typescript
         run: npm ci
-      - name: Run Local Hashing
-        run: docker run -d -p 7002:7002 -e HASH__KEY=${{ secrets.TESTING_HASH_KEY }} --cap-drop ALL careevolution/bmpi-hashing-service:latest
-      - name: Run tests
+      - name: Default Tests
+        if: ${{ (inputs.suite || 'default') == 'default' }}
         working-directory: typescript
         shell: pwsh
         run: npm run test
+      - name: Run Local Hashing
+        if: ${{ (inputs.suite || 'default') == 'e2e' }}
+        run: docker run -d -p 7002:7002 -e HASH__KEY=${{ secrets.TESTING_HASH_KEY }} --cap-drop ALL careevolution/bmpi-hashing-service:latest
+      - name: E2E Tests
+        if: ${{ (inputs.suite || 'default') == 'e2e' }}
+        working-directory: typescript
+        shell: pwsh
+        run: npm run test:e2e
 
   python:
     name: Python
@@ -58,7 +78,7 @@ jobs:
       - typescript
     strategy:
       fail-fast: true
-      max-parallel: 1
+      max-parallel: ${{ (inputs.suite || 'default') == 'e2e' && 1 || 4 }}
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
@@ -97,7 +117,8 @@ jobs:
         working-directory: python
         run: poetry run black --check .
       - name: Run Local Hashing
+        if: ${{ (inputs.suite || 'default') == 'e2e' }}
         run: docker run -d -p 7002:7002 -e HASH__KEY=${{ secrets.TESTING_HASH_KEY }} --cap-drop ALL careevolution/bmpi-hashing-service:latest
       - name: Test
         working-directory: python
-        run: poetry run pytest
+        run: poetry run pytest -m "${{ (inputs.suite || 'default') }}"

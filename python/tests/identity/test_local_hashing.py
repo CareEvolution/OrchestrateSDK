@@ -3,6 +3,11 @@ from orchestrate._internal.identity.demographic import Demographic
 from orchestrate._internal.identity.local_hashing import LocalHashingApi
 from dotenv import load_dotenv
 
+import pytest
+
+pytestmark = pytest.mark.e2e
+
+
 load_dotenv(Path(__file__).parent.parent.parent.parent / ".env", override=True)
 _TEST_API = LocalHashingApi()
 

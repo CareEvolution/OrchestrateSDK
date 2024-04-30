@@ -13,7 +13,7 @@ const demographic: Demographic = {
   gender: "male",
 };
 
-describe("LocalHashingApi hash", () => {
+describe.concurrent("LocalHashingApi", () => {
   it("should hash by demographic", async () => {
     const result = await localHashingApi.hash(demographic);
 
@@ -30,9 +30,7 @@ describe("LocalHashingApi hash", () => {
     expect(result.version).greaterThan(0);
     expect(result.advisories.invalidDemographicFields).toEqual(["dob"]);
   });
-});
 
-describe("LocalHashingApi constructor", () => {
   it("should build from passed url", () => {
     const localHashingApi = new LocalHashingApi({ url: "http://localhost:8080" });
 

@@ -6,6 +6,8 @@ from orchestrate._internal.exceptions import OrchestrateClientError
 from orchestrate._internal.http_handler import HttpHandler, create_http_handler
 from dotenv import dotenv_values
 
+pytestmark = [pytest.mark.e2e, pytest.mark.default]
+
 
 def test_api_base_url_in_environment_should_use_environment(monkeypatch):
     mock_http_handler = Mock(HttpHandler)

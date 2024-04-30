@@ -10,7 +10,8 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"fmt": "prettier --check .",
-		"fmt:fix": "prettier --write ."
+		"fmt:fix": "prettier --write .",
+		"test:e2e": "vitest -c vitest.config.e2e.js"
 	},
 	"author": "CareEvolution",
 	"license": "Apache-2.0",

@@ -12,6 +12,8 @@ from orchestrate._internal.identity.local_hashing import (
     HashDemographicResponse,
 )
 
+pytestmark = pytest.mark.e2e
+
 load_dotenv(override=True)
 
 _TEST_API = IdentityApi()

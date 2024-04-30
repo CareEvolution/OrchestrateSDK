@@ -3,6 +3,9 @@ from orchestrate._internal.identity.demographic import (
     demographic_from_dict,
     Demographic,
 )
+import pytest
+
+pytestmark = pytest.mark.e2e
 
 
 def test_demographic_to_dict_should_camel_case():
