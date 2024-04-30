@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      max-parallel: ${{ inputs.suite == 'e2e' && 1 || 4 }}
+      max-parallel: ${{ (inputs.suite || 'default') == 'e2e' && 1 || 4 }}
       matrix:
         node-version: ["18", "20"]
     steps:
@@ -59,18 +59,13 @@ jobs:
         run: npm ci
       - name: Run Local Hashing
         run: docker run -d -p 7002:7002 -e HASH__KEY=${{ secrets.TESTING_HASH_KEY }} --cap-drop ALL careevolution/bmpi-hashing-service:latest
-      - name: Run Default Tests
-        if: ${{ inputs.suite }}
-        working-directory: typescript
-        shell: pwsh
-        run: npm run test
       - name: Default Tests
-        if: ${{ inputs.suite == 'default' }}
+        if: ${{ (inputs.suite || 'default') == 'default' }}
         working-directory: typescript
         shell: pwsh
         run: npm run test
       - name: E2E Tests
-        if: ${{ inputs.suite == 'e2e' }}
+        if: ${{ (inputs.suite || 'default') == 'e2e' }}
         working-directory: typescript
         shell: pwsh
         run: npm run test:e2e
@@ -82,7 +77,7 @@ jobs:
       - typescript
     strategy:
       fail-fast: true
-      max-parallel: ${{ inputs.suite == 'e2e' && 1 || 4 }}
+      max-parallel: ${{ (inputs.suite || 'default') == 'e2e' && 1 || 4 }}
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
@@ -124,4 +119,4 @@ jobs:
         run: docker run -d -p 7002:7002 -e HASH__KEY=${{ secrets.TESTING_HASH_KEY }} --cap-drop ALL careevolution/bmpi-hashing-service:latest
       - name: Test
         working-directory: python
-        run: poetry run pytest -m "${{ inputs.suite }}"
+        run: poetry run pytest -m "${{ (inputs.suite || 'default') }}"
