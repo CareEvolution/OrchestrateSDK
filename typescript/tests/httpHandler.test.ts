@@ -12,7 +12,7 @@ class OutcomeTestCase {
   id: string;
 }
 
-describe("httpHandler outcomes", () => {
+describe.concurrent("httpHandler outcomes", () => {
   const testCases: OutcomeTestCase[] = [
     {
       contentType: "application/json",

@@ -70,8 +70,8 @@ async function createRandomRecord(): Promise<{ person: Person; identifier: strin
   return { person, identifier };
 }
 
-describe("Identity API addOrUpdateRecord", () => {
-  it("should add a new record", async () => {
+describe("Identity API", () => {
+  it("addOrUpdateRecord should add a new record", async () => {
     const addResponse = await identityApi.addOrUpdateRecord({
       source: defaultSource,
       identifier: Math.random().toString(36).substring(7),
@@ -82,7 +82,7 @@ describe("Identity API addOrUpdateRecord", () => {
     expect(addResponse.matchedPerson.id).toBeDefined();
   });
 
-  it("with url unsafe identifier should add record", async () => {
+  it("addOrUpdateRecord with url unsafe identifier should add record", async () => {
     const addResponse = await identityApi.addOrUpdateRecord({
       source: defaultSource,
       identifier: Math.random().toString(36).substring(7) + "+/=",
@@ -92,10 +92,8 @@ describe("Identity API addOrUpdateRecord", () => {
     expect(addResponse.matchedPerson).toBeDefined();
     expect(addResponse.matchedPerson.id).toBeDefined();
   });
-});
 
-describe("Identity API addOrUpdateBlindedRecord", () => {
-  it("should add a new record", async () => {
+  it("addOrUpdateBlindedRecord should add a new record", async () => {
     const addResponse = await identityApi.addOrUpdateBlindedRecord({
       source: defaultSource,
       identifier: Math.random().toString(36).substring(7),
@@ -106,7 +104,7 @@ describe("Identity API addOrUpdateBlindedRecord", () => {
     expect(addResponse.matchedPerson.id).toBeDefined();
   });
 
-  it("with url unsafe identifier should add record", async () => {
+  it("addOrUpdateBlindedRecord with url unsafe identifier should add record", async () => {
     const addResponse = await identityApi.addOrUpdateBlindedRecord({
       source: defaultSource,
       identifier: Math.random().toString(36).substring(7),
@@ -116,10 +114,8 @@ describe("Identity API addOrUpdateBlindedRecord", () => {
     expect(addResponse.matchedPerson).toBeDefined();
     expect(addResponse.matchedPerson.id).toBeDefined();
   });
-});
 
-describe("Identity API getPersonByRecord", () => {
-  it("should get a person by record", async () => {
+  it("getPersonByRecord should get a person by record", async () => {
     const { person, identifier } = await createRandomRecord();
 
     const getResponse = await identityApi.getPersonByRecord({
@@ -129,10 +125,8 @@ describe("Identity API getPersonByRecord", () => {
 
     expect(getResponse).toEqual(person);
   });
-});
 
-describe("Identity API getPersonByID", () => {
-  it("should get a person by ID", async () => {
+  it("getPersonByID should get a person by ID", async () => {
     const { person } = await createRandomRecord();
 
     const getResponse = await identityApi.getPersonByID({
@@ -141,26 +135,20 @@ describe("Identity API getPersonByID", () => {
 
     expect(getResponse.id).toEqual(person.id);
   });
-});
 
-describe("Identity API matchDemographics", () => {
-  it("should match demographics", async () => {
+  it("matchDemographics should match demographics", async () => {
     const matchResponse = await identityApi.matchDemographics(demographic);
 
     expect(matchResponse).toBeDefined();
   });
-});
 
-describe("Identity API matchBlindedDemographics", () => {
-  it("should match blinded demographics", async () => {
+  it("matchBlindedDemographics should match blinded demographics", async () => {
     const matchResponse = await identityApi.matchBlindedDemographics(blindedDemographic);
 
     expect(matchResponse).toBeDefined();
   });
-});
 
-describe("Identity API deleteRecord", () => {
-  it("should delete a record", async () => {
+  it("deleteRecord should delete a record", async () => {
     const { person, identifier } = await createRandomRecord();
 
     const deleteResponse = await identityApi.deleteRecord({
@@ -170,10 +158,8 @@ describe("Identity API deleteRecord", () => {
 
     expect(deleteResponse.changedPersons.map(changedPerson => changedPerson.id)).toContain(person.id);
   });
-});
 
-describe("Identity API addMatchGuidance", () => {
-  it("should add match guidance", async () => {
+  it("addMatchGuidance should add match guidance", async () => {
     const { person: firstPerson, identifier: firstIdentifier } = await createRandomRecord();
     const { person: secondPerson, identifier: secondIdentifier } = await createRandomRecord();
 
@@ -187,10 +173,8 @@ describe("Identity API addMatchGuidance", () => {
     expect(addMatchGuidanceResponse.changedPersons.map(changedPerson => changedPerson.id)).toContain(firstPerson.id);
     expect(addMatchGuidanceResponse.changedPersons.map(changedPerson => changedPerson.id)).toContain(secondPerson.id);
   });
-});
 
-describe("Identity API removeMatchGuidance", () => {
-  it("should remove match guidance", async () => {
+  it("removeMatchGuidance should remove match guidance", async () => {
     const { person: firstPerson, identifier: firstIdentifier } = await createRandomRecord();
     const { person: secondPerson, identifier: secondIdentifier } = await createRandomRecord();
     const recordOne = { source: defaultSource, identifier: firstIdentifier };

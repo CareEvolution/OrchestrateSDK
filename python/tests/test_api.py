@@ -1,18 +1,13 @@
 from io import BytesIO
 import json
-import os
 from pathlib import Path
 from zipfile import ZipFile
 
 import pytest
 from dotenv import load_dotenv
 from orchestrate import OrchestrateApi
-from requests import HTTPError
 
-from orchestrate._internal.exceptions import (
-    OrchestrateClientError,
-    OrchestrateHttpError,
-)
+from orchestrate._internal.exceptions import OrchestrateHttpError
 from .data import (
     CDA,
     DSTU2_BUNDLE,
@@ -29,6 +24,8 @@ from orchestrate.terminology import (
     ClassifyObservationRequest,
     StandardizeRequest,
 )
+
+pytestmark = [pytest.mark.e2e, pytest.mark.default]
 
 
 def setup_test_api():

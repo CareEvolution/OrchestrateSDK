@@ -10,6 +10,8 @@ jobs:
   test:
     name: Test
     uses: ./.github/workflows/test.yml
+    with:
+      suite: e2e
     secrets:
       ORCHESTRATE_API_KEY: ${{ secrets.ORCHESTRATE_API_KEY }}
       ORCHESTRATE_IDENTITY_API_KEY: ${{ secrets.ORCHESTRATE_IDENTITY_API_KEY }}
