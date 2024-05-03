@@ -94,6 +94,14 @@ export type ConvertFhirR4ToNemsisV35Request = {
 
 export type ConvertFhirR4ToNemsisV35Response = string;
 
+
+export type ConvertFhirR4ToManifestRequest = {
+  content: Bundle;
+};
+
+export type ConvertFhirR4ToManifestResponse = ArrayBuffer;
+
+
 export class ConvertApi {
   private httpHandler: IHttpHandler;
 
@@ -311,6 +319,20 @@ export class ConvertApi {
       "/convert/v1/fhirr4tonemsisv35",
       request.content,
       headers
+    );
+  }
+
+  /**
+   * Generates a tabular report of clinical concepts from a FHIR R4 bundle. With this tabular data, you can easily scan results, run queries, and understand the value of your clinical data.
+   * @param bundle A FHIR R4 Bundle
+   * @returns A ZIP file containing a number of Comma-Separated Value (CSV) files corresponding to clinical concepts (conditions, encounters, etc.).
+   * @link https://rosetta-api.docs.careevolution.com/insight/fhir_manifest.html
+   */
+  fhirR4ToManifest(request: ConvertFhirR4ToManifestRequest): Promise<ConvertFhirR4ToManifestResponse> {
+    return this.httpHandler.post<Bundle, ArrayBuffer>(
+      "/convert/v1/fhirr4tomanifest",
+      request.content,
+      { "Accept": "application/zip" }
     );
   }
 }

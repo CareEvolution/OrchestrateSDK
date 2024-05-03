@@ -22,12 +22,6 @@ export type InsightRiskProfileResource = Patient | MeasureReport | Measure | Ris
 
 export type InsightRiskProfileResponse = Bundle<InsightRiskProfileResource>;
 
-export type InsightFhirR4ToManifestRequest = {
-  content: Bundle;
-};
-
-export type InsightFhirR4ToManifestResponse = ArrayBuffer;
-
 export class InsightApi {
   private httpHandler: IHttpHandler;
 
@@ -56,19 +50,5 @@ export class InsightApi {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content);
-  }
-
-  /**
-   * Generates a tabular report of clinical concepts from a FHIR R4 bundle. With this tabular data, you can easily scan results, run queries, and understand the value of your clinical data.
-   * @param bundle A FHIR R4 Bundle
-   * @returns A ZIP file containing a number of Comma-Separated Value (CSV) files corresponding to clinical concepts (conditions, encounters, etc.).
-   * @link https://rosetta-api.docs.careevolution.com/insight/fhir_manifest.html
-   */
-  fhirR4ToManifest(request: InsightFhirR4ToManifestRequest): Promise<InsightFhirR4ToManifestResponse> {
-    return this.httpHandler.post<Bundle, ArrayBuffer>(
-      "/insight/v1/fhirr4tomanifest",
-      request.content,
-      { "Accept": "application/zip" }
-    );
   }
 }

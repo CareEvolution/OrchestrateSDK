@@ -896,8 +896,8 @@ def test_convert_fhir_r4_to_nemsis_v35_should_convert():
     assert "<eOutcome.18" in result
 
 
-def test_insight_fhir_r4_to_manifest_should_have_csvs():
-    result = TEST_API.insight.fhir_r4_to_manifest(content=R4_BUNDLE)
+def test_convert_fhir_r4_to_manifest_should_have_csvs():
+    result = TEST_API.convert.fhir_r4_to_manifest(content=R4_BUNDLE)
 
     assert result is not None
     assert isinstance(result, bytes)
