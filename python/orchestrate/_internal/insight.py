@@ -32,8 +32,6 @@ class InsightBundle(TypedDict):
 
 InsightRiskProfileResponse = InsightBundle
 
-InsightFhirR4ToManifestResponse = bytes
-
 
 class InsightApi:
     def __init__(self, http_handler: HttpHandler) -> None:
@@ -81,33 +79,4 @@ class InsightApi:
             path="/insight/v1/riskprofile",
             body=content,
             parameters=parameters,
-        )
-
-    def fhir_r4_to_manifest(self, content: Bundle) -> InsightFhirR4ToManifestResponse:
-        """
-        Generates a tabular report of clinical concepts from a FHIR R4
-        bundle. With this tabular data, you can easily scan results, run
-        queries, and understand the value of your clinical data.
-
-        ### Parameters
-
-        - `content`: A FHIR R4 bundle
-
-        ### Returns
-
-        A ZIP file containing a number of Comma-Separated Value (CSV)
-        files corresponding to clinical concepts (conditions,
-        encounters, etc.).
-
-        ### Documentation
-
-        <https://orchestrate.docs.careevolution.com/insight/fhir_manifest.html>
-        """
-        headers = {
-            "Accept": "application/zip",
-        }
-        return self.__http_handler.post(
-            path="/insight/v1/fhirr4tomanifest",
-            body=content,
-            headers=headers,
         )

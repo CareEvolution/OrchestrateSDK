@@ -33,6 +33,8 @@ ConvertFhirR4ToNemsisV34Response = str
 
 ConvertFhirR4ToNemsisV35Response = str
 
+ConvertFhirR4ToManifestResponse = bytes
+
 
 def generate_convert_combine_fhir_bundles_request_from_bundles(
     fhir_bundles: list[Bundle],
@@ -400,6 +402,35 @@ class ConvertApi:
         headers = {"Accept": "application/xml"}
         return self.__http_handler.post(
             path="/convert/v1/fhirr4tonemsisv35",
+            body=content,
+            headers=headers,
+        )
+
+    def fhir_r4_to_manifest(self, content: Bundle) -> ConvertFhirR4ToManifestResponse:
+        """
+        Generates a tabular report of clinical concepts from a FHIR R4
+        bundle. With this tabular data, you can easily scan results, run
+        queries, and understand the value of your clinical data.
+
+        ### Parameters
+
+        - `content`: A FHIR R4 bundle
+
+        ### Returns
+
+        A ZIP file containing a number of Comma-Separated Value (CSV)
+        files corresponding to clinical concepts (conditions,
+        encounters, etc.).
+
+        ### Documentation
+
+        <https://orchestrate.docs.careevolution.com/convert/fhir_manifest.html>
+        """
+        headers = {
+            "Accept": "application/zip",
+        }
+        return self.__http_handler.post(
+            path="/convert/v1/fhirr4tomanifest",
             body=content,
             headers=headers,
         )

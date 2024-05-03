@@ -23,6 +23,7 @@ typing-extensions = {version = "^4.0.1", python = "<3.11"}
 black = ">=23.7,<25.0"
 mypy = "^1.4.1"
 notebook = "^7.0.0"
+pytest-xdist = "^3.6.1"
 python-dotenv = "^1.0.0"
 types-requests = "^2.31.0.2"
 
@@ -33,3 +34,10 @@ python-dotenv = "^1.0.0"
 [build-system]
 build-backend = "poetry.core.masonry.api"
 requires = ["poetry-core"]
+
+[tool.pytest.ini_options]
+addopts = "-n 4 -m default"
+markers = [
+  "e2e",
+  "default",
+]
