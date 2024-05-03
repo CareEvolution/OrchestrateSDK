@@ -768,9 +768,9 @@ describe("convert fhir r4 to nemsis v35", () => {
   });
 });
 
-describe("insight fhir r4 to manifest", async () => {
+describe("convert fhir r4 to manifest", async () => {
   it("should return a buffer", async () => {
-    const result = await orchestrate.insight.fhirR4ToManifest({
+    const result = await orchestrate.convert.fhirR4ToManifest({
       content: fhir,
     });
 
