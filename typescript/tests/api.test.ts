@@ -497,7 +497,9 @@ describe("get fhir r4 concept maps", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    expect(result.entry?.[0].resource?.resourceType).toBe("ConceptMap");
+    result.entry?.forEach((entry) => {
+      expect(entry.resource?.resourceType).toBe("ConceptMap");
+    });
   });
 });
 

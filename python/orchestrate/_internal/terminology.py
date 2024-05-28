@@ -328,6 +328,30 @@ class _CodeSystemBundle(TypedDict):
 
 SummarizeFhirR4CodeSystemsResponse = _CodeSystemBundle
 
+
+class ConceptMap(TypedDict):
+    resourceType: Literal["ConceptMap"]
+    id: str
+    name: str
+    status: Literal["active", "draft", "retired"]
+    url: str
+    source: str
+    target: str
+    group: list[dict[str, Any]]
+
+
+class _ConceptMapBundleEntry(TypedDict):
+    resource: ConceptMap
+
+
+class ConceptMapBundle(TypedDict):
+    id: str
+    resourceType: Literal["Bundle"]
+    entry: list[_ConceptMapBundleEntry]
+
+
+GetFhirR4ConceptMapsResponse = ConceptMapBundle
+
 TranslateFhirR4ConceptMapResponse = Parameters
 
 TranslateDomains = Literal[
@@ -1178,7 +1202,7 @@ class TerminologyApi:
         self,
         page_number: Optional[int] = None,
         page_size: Optional[int] = None,
-    ) -> GetFhirR4CodeSystemResponse:
+    ) -> GetFhirR4ConceptMapsResponse:
         """
         Describes available concept maps
 
