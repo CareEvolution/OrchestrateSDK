@@ -690,7 +690,9 @@ def test_get_fhir_r4_concept_maps_should_return_a_bundle():
     assert result is not None
     assert result["resourceType"] == "Bundle"
     assert len(result["entry"]) > 0
-    assert all(entry["resource"]["resourceType"] == "ConceptMap" for entry in result["entry"])
+    assert all(
+        entry["resource"]["resourceType"] == "ConceptMap" for entry in result["entry"]
+    )
 
 
 def test_translate_fhir_r4_concept_map_with_code_should_translate():
