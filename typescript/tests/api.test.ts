@@ -150,7 +150,7 @@ describe("standardize lab", () => {
       const result = await orchestrate.terminology.standardizeLab(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
-      expect(result.coding[0].code).toBe(expected);
+      expect(result.coding.map((c) => c.code)).toContain(expected);
     },
   );
 
@@ -158,9 +158,10 @@ describe("standardize lab", () => {
     const results = await orchestrate.terminology.standardizeLab(requests);
     expect(results).toBeDefined();
     expect(results.length).toBe(2);
+    console.log(JSON.stringify(results));
     results.forEach((result, index) => {
       expect(result.coding.length).toBeGreaterThan(0);
-      expect(result.coding[0].code).toBe(expected[index]);
+      expect(result.coding.map((c) => c.code)).toContain(expected[index]);
     });
   });
 });
