@@ -71,9 +71,9 @@ class InsightApi:
         <https://orchestrate.docs.careevolution.com/insight/risk_profile.html>
         """
         parameters = {
-            "hccVersion": hcc_version,
-            "periodEndDate": period_end_date,
-            "raSegment": ra_segment,
+            "hcc_version": hcc_version,
+            "period_end_date": period_end_date,
+            "ra_segment": ra_segment,
         }
         return self.__http_handler.post(
             path="/insight/v1/riskprofile",
