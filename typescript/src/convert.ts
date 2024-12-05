@@ -4,6 +4,8 @@ import { IHttpHandler } from "./httpHandler.js";
 export type ConvertHl7ToFhirR4Request = {
   content: string;
   patientID?: string;
+  patientIdentifier?: string;
+  patientIdentifierSystem?: string;
   tz?: string;
 };
 
@@ -12,6 +14,8 @@ export type ConvertHl7ToFhirR4Response = Bundle;
 export type ConvertCdaToFhirR4Request = {
   content: string;
   patientID?: string;
+  patientIdentifier?: string;
+  patientIdentifierSystem?: string;
 };
 
 export type ConvertCdaToFhirR4Response = Bundle;
@@ -39,6 +43,8 @@ export type ConvertFhirR4ToOmopResponse = ArrayBuffer;
 export type ConvertCombineFhirR4BundlesRequest = {
   content: string;
   patientID?: string;
+  patientIdentifier?: string;
+  patientIdentifierSystem?: string;
 };
 
 export type ConvertFhirDstu2ToFhirR4Request = {
@@ -72,6 +78,8 @@ export type ConvertCombineFhirR4BundlesResponse = Bundle;
 export type ConvertX12ToFhirR4Request = {
   content: string;
   patientID?: string;
+  patientIdentifier?: string;
+  patientIdentifierSystem?: string;
 };
 
 export type ConvertX12ToFhirR4Response = Bundle;
@@ -97,6 +105,7 @@ export type ConvertFhirR4ToNemsisV35Response = string;
 
 export type ConvertFhirR4ToManifestRequest = {
   content: Bundle;
+  delimiter?: string;
 };
 
 export type ConvertFhirR4ToManifestResponse = ArrayBuffer;
@@ -125,6 +134,12 @@ export class ConvertApi {
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
     }
+    if (request.patientIdentifier) {
+      parameters.append("patientIdentifier", request.patientIdentifier);
+    }
+    if (request.patientIdentifierSystem) {
+      parameters.append("patientIdentifierSystem", request.patientIdentifierSystem);
+    }
     if (request.tz) {
       parameters.append("tz", request.tz);
     }
@@ -148,6 +163,12 @@ export class ConvertApi {
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
+    }
+    if (request.patientIdentifier) {
+      parameters.append("patientIdentifier", request.patientIdentifier);
+    }
+    if (request.patientIdentifierSystem) {
+      parameters.append("patientIdentifierSystem", request.patientIdentifierSystem);
     }
     let route = "/convert/v1/cdatofhirr4";
     if (parameters.size) {
@@ -213,6 +234,12 @@ export class ConvertApi {
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
     }
+    if (request.patientIdentifier) {
+      parameters.append("patientIdentifier", request.patientIdentifier);
+    }
+    if (request.patientIdentifierSystem) {
+      parameters.append("patientIdentifierSystem", request.patientIdentifierSystem);
+    }
     let route = "/convert/v1/combinefhirr4bundles";
     if (parameters.size) {
       route += `?${parameters.toString()}`;
@@ -232,6 +259,12 @@ export class ConvertApi {
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
+    }
+    if (request.patientIdentifier) {
+      parameters.append("patientIdentifier", request.patientIdentifier);
+    }
+    if (request.patientIdentifierSystem) {
+      parameters.append("patientIdentifierSystem", request.patientIdentifierSystem);
     }
     let route = "/convert/v1/x12tofhirr4";
     if (parameters.size) {
@@ -329,10 +362,17 @@ export class ConvertApi {
    * @link https://rosetta-api.docs.careevolution.com/insight/fhir_manifest.html
    */
   fhirR4ToManifest(request: ConvertFhirR4ToManifestRequest): Promise<ConvertFhirR4ToManifestResponse> {
-    return this.httpHandler.post<Bundle, ArrayBuffer>(
-      "/convert/v1/fhirr4tomanifest",
-      request.content,
-      { "Accept": "application/zip" }
-    );
+    const headers = {
+      Accept: "application/zip"
+    } as { [key: string]: string; };
+    const parameters = new URLSearchParams();
+    if (request.delimiter) {
+      parameters.append("delimiter", request.delimiter);
+    }
+    let route = "/convert/v1/fhirr4tomanifest";
+    if (parameters.size) {
+      route += `?${parameters.toString()}`;
+    }
+    return this.httpHandler.post<Bundle, ArrayBuffer>(route, request.content, headers);
   }
 }
