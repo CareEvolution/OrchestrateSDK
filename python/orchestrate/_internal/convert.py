@@ -73,6 +73,8 @@ class ConvertApi:
         self,
         content: str,
         patient_id: Optional[str] = None,
+        patient_identifier: Optional[str] = None,
+        patient_identifier_system: Optional[str] = None,
         tz: Optional[str] = None,
     ) -> ConvertHl7ToFhirR4Response:
         """
@@ -82,6 +84,8 @@ class ConvertApi:
 
         - `hl7_message`: The HL7 message(s) to convert
         - `patient_id`: The patient ID to use for the FHIR bundle
+        - `patient_identifier`: A patient identifier to add to identifier list of patient resource in the FHIR bundle. Must be specified along with patient_identifier_system
+        - `patient_identifier_system`: The system providing the patient identifier. Must be specified along with patient_identifier
         - `tz`: Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
 
         ### Returns
@@ -94,6 +98,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "text/plain"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         parameters = {**parameters, **_get_id_dependent_parameters("tz", tz)}
         return self.__http_handler.post(
             path="/convert/v1/hl7tofhirr4",
@@ -106,6 +120,8 @@ class ConvertApi:
         self,
         content: str,
         patient_id: Optional[str] = None,
+        patient_identifier: Optional[str] = None,
+        patient_identifier_system: Optional[str] = None,
     ) -> ConvertCdaToFhirR4Response:
         """
         Converts a CDA document into a FHIR R4 bundle
@@ -114,6 +130,8 @@ class ConvertApi:
 
         - `cda`: The CDA document to convert
         - `patient_id`: The patient ID to use for the FHIR bundle
+        - `patient_identifier`: A patient identifier to add to identifier list of patient resource in the FHIR bundle. Must be specified along with patient_identifier_system
+        - `patient_identifier_system`: The system providing the patient identifier. Must be specified along with patient_identifier
 
         ### Returns
 
@@ -125,6 +143,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "application/xml"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         return self.__http_handler.post(
             path="/convert/v1/cdatofhirr4",
             body=content,
@@ -209,6 +237,8 @@ class ConvertApi:
         self,
         content: str,
         patient_id: Optional[str] = None,
+        patient_identifier: Optional[str] = None,
+        patient_identifier_system: Optional[str] = None,
     ) -> ConvertX12ToFhirR4Response:
         """
         Converts an X12 document into a FHIR R4 bundle
@@ -217,6 +247,8 @@ class ConvertApi:
 
         - `x12_document`: The X12 document to convert
         - `patient_id`: The patient ID to use for the FHIR bundle
+        - `patient_identifier`: A patient identifier to add to identifier list of patient resource in the FHIR bundle. Must be specified along with patient_identifier_system
+        - `patient_identifier_system`: The system providing the patient identifier. Must be specified along with patient_identifier
 
         ### Returns
 
@@ -224,6 +256,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "text/plain"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         return self.__http_handler.post(
             path="/convert/v1/x12tofhirr4",
             body=content,
@@ -235,6 +277,8 @@ class ConvertApi:
         self,
         content: str,
         patient_id: Optional[str] = None,
+        patient_identifier: Optional[str] = None,
+        patient_identifier_system: Optional[str] = None,
     ) -> ConvertCombinedFhirR4BundlesResponse:
         """
         This operation aggregates information retrieved from prior Convert API requests into a single entry.
@@ -243,6 +287,8 @@ class ConvertApi:
 
         - `fhir_bundles`: A newline-delimited JSON list of FHIR R4 Bundles
         - `patient_id`: The patient ID to use for the FHIR bundle
+        - `patient_identifier`: A patient identifier to add to identifier list of patient resource in the FHIR bundle. Must be specified along with patient_identifier_system
+        - `patient_identifier_system`: The system providing the patient identifier. Must be specified along with patient_identifier
 
         ### Returns
 
@@ -254,6 +300,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "application/x-ndjson"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         return self.__http_handler.post(
             path="/convert/v1/combinefhirr4bundles",
             body=content,
@@ -406,7 +462,9 @@ class ConvertApi:
             headers=headers,
         )
 
-    def fhir_r4_to_manifest(self, content: Bundle) -> ConvertFhirR4ToManifestResponse:
+    def fhir_r4_to_manifest(
+        self, content: Bundle, delimiter: Optional[str] = None
+    ) -> ConvertFhirR4ToManifestResponse:
         """
         Generates a tabular report of clinical concepts from a FHIR R4
         bundle. With this tabular data, you can easily scan results, run
@@ -415,6 +473,7 @@ class ConvertApi:
         ### Parameters
 
         - `content`: A FHIR R4 bundle
+        - `delimiter`: The delimiter to use in the CSV files. Allowed delimiters are | or ~ or ^ or ; Default delimiter is ,
 
         ### Returns
 
@@ -429,8 +488,10 @@ class ConvertApi:
         headers = {
             "Accept": "application/zip",
         }
+        parameters = _get_id_dependent_parameters("delimiter", delimiter)
         return self.__http_handler.post(
             path="/convert/v1/fhirr4tomanifest",
             body=content,
             headers=headers,
+            parameters=parameters,
         )

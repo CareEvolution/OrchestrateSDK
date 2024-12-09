@@ -326,6 +326,28 @@ describe("convert hl7 to fhir r4", () => {
     expect(patientResource?.resource?.id).toBe("12/34");
   });
 
+  it("should convert hl7 with patientIdentifierAndSystem", async () => {
+    const result = await orchestrate.convert.hl7ToFhirR4({
+      content: hl7,
+      patientIdentifier: "1234",
+      patientIdentifierSystem: "GoodHealthClinic",
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
+
+    expect(patientResource).toBeDefined();
+    const patient = patientResource?.resource as Patient;
+    expect(patient).toBeDefined();
+
+    expect(
+      patient.identifier?.[0]?.use === "usual" &&
+      patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+      patient.identifier?.[0]?.value === "1234"
+    ).toBe(true);
+  });
+
   it("should convert hl7 with timezone", async () => {
     const result = await orchestrate.convert.hl7ToFhirR4({
       content: hl7,
@@ -376,6 +398,28 @@ describe("convert cda to fhir r4", () => {
     expect(patientResource).toBeDefined();
     expect(patientResource?.resource?.id).toBe("1234");
   });
+});
+
+it("should convert cda with patientIdentifierAndSystem", async () => {
+  const result = await orchestrate.convert.cdaToFhirR4({
+    content: cda,
+    patientIdentifier: "1234",
+    patientIdentifierSystem: "GoodHealthClinic",
+  });
+  expect(result).toBeDefined();
+  expect(result.resourceType).toBe("Bundle");
+  expect(result.entry?.length).toBeGreaterThan(0);
+  const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
+
+  expect(patientResource).toBeDefined();
+  const patient = patientResource?.resource as Patient;
+  expect(patient).toBeDefined();
+
+  expect(
+    patient.identifier?.[0]?.use === "usual" &&
+    patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+    patient.identifier?.[0]?.value === "1234"
+  ).toBe(true);
 });
 
 describe("convert cda to pdf", () => {
@@ -434,6 +478,29 @@ describe("convert x12 to fhir r4", () => {
     expect(patientResource?.resource?.id).toBe("1234");
   });
 });
+
+it("should convert x12 with patientIdentifierAndSystem", async () => {
+  const result = await orchestrate.convert.x12ToFhirR4({
+    content: x12Document,
+    patientIdentifier: "1234",
+    patientIdentifierSystem: "GoodHealthClinic",
+  });
+  expect(result).toBeDefined();
+  expect(result.resourceType).toBe("Bundle");
+  expect(result.entry?.length).toBeGreaterThan(0);
+  const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
+
+  expect(patientResource).toBeDefined();
+  const patient = patientResource?.resource as Patient;
+  expect(patient).toBeDefined();
+
+  expect(
+    patient.identifier?.[0]?.use === "usual" &&
+    patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+    patient.identifier?.[0]?.value === "1234"
+  ).toBe(true);
+});
+
 
 describe("insight risk profile", () => {
   it("should return a bundle", async () => {
@@ -686,6 +753,33 @@ ${JSON.stringify(fhir)}
   });
 });
 
+it("should combine with patientIdentifierAndSystem", async () => {
+  const bundles = `
+${JSON.stringify(fhir)}
+${JSON.stringify(fhir)}
+`;
+
+  const result = await orchestrate.convert.combineFhirR4Bundles({
+    content: bundles,
+    patientIdentifier: "1234",
+    patientIdentifierSystem: "GoodHealthClinic",
+  });
+  expect(result).toBeDefined();
+  expect(result.resourceType).toBe("Bundle");
+  expect(result.entry?.length).toBeGreaterThan(0);
+  const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
+
+  expect(patientResource).toBeDefined();
+  const patient = patientResource?.resource as Patient;
+  expect(patient).toBeDefined();
+
+  expect(
+    patient.identifier?.[0]?.use === "usual" &&
+    patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+    patient.identifier?.[0]?.value === "1234"
+  ).toBe(true);
+});
+
 describe("convert fhir stu3 to fhir r4", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.fhirStu3ToFhirR4({
@@ -775,6 +869,18 @@ describe("convert fhir r4 to manifest", async () => {
   it("should return a buffer", async () => {
     const result = await orchestrate.convert.fhirR4ToManifest({
       content: fhir,
+    });
+
+    expect(result).toBeDefined();
+    console.log(typeof result);
+    const resultIntegers = new Int8Array(result);
+    expect(resultIntegers.slice(0, 4)).toStrictEqual(pkZipMagicNumber);
+  });
+
+  it("should return a buffer when delimiter specified ", async () => {
+    const result = await orchestrate.convert.fhirR4ToManifest({
+      content: fhir,
+      delimiter: "|",
     });
 
     expect(result).toBeDefined();
