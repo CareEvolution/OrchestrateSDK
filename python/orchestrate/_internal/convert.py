@@ -98,8 +98,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "text/plain"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifier", patient_identifier)}
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifierSystem", patient_identifier_system)}
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         parameters = {**parameters, **_get_id_dependent_parameters("tz", tz)}
         return self.__http_handler.post(
             path="/convert/v1/hl7tofhirr4",
@@ -135,8 +143,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "application/xml"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifier", patient_identifier)}
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifierSystem", patient_identifier_system)}
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         return self.__http_handler.post(
             path="/convert/v1/cdatofhirr4",
             body=content,
@@ -240,8 +256,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "text/plain"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifier", patient_identifier)}
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifierSystem", patient_identifier_system)}
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         return self.__http_handler.post(
             path="/convert/v1/x12tofhirr4",
             body=content,
@@ -276,8 +300,16 @@ class ConvertApi:
         """
         headers = {"Content-Type": "application/x-ndjson"}
         parameters = _get_id_dependent_parameters("patientId", patient_id)
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifier", patient_identifier)}
-        parameters = {**parameters, **_get_id_dependent_parameters("patientIdentifierSystem", patient_identifier_system)}
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
         return self.__http_handler.post(
             path="/convert/v1/combinefhirr4bundles",
             body=content,
@@ -431,9 +463,7 @@ class ConvertApi:
         )
 
     def fhir_r4_to_manifest(
-            self, 
-            content: Bundle, 
-            delimiter: Optional[str] = None
+        self, content: Bundle, delimiter: Optional[str] = None
     ) -> ConvertFhirR4ToManifestResponse:
         """
         Generates a tabular report of clinical concepts from a FHIR R4

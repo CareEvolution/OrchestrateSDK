@@ -486,7 +486,11 @@ def test_api_convert_hl7_to_fhir_r4_with_patient_should_convert():
 
 
 def test_api_convert_hl7_to_fhir_r4_with_patient_identifier_and_system_should_convert():
-    result = TEST_API.convert.hl7_to_fhir_r4(content=HL7, patient_identifier="1234", patient_identifier_system="GoodHealthClinic")
+    result = TEST_API.convert.hl7_to_fhir_r4(
+        content=HL7,
+        patient_identifier="1234",
+        patient_identifier_system="GoodHealthClinic",
+    )
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -499,11 +503,11 @@ def test_api_convert_hl7_to_fhir_r4_with_patient_identifier_and_system_should_co
         )
     )
     assert (
-        "identifier" in patient_resource and  
-        len(patient_resource["identifier"]) > 0 and  
-        "GoodHealthClinic" in patient_resource["identifier"][0]["system"] and
-        patient_resource["identifier"][0]["use"] == "usual" and
-        patient_resource["identifier"][0]["value"] == "1234"
+        "identifier" in patient_resource
+        and len(patient_resource["identifier"]) > 0
+        and "GoodHealthClinic" in patient_resource["identifier"][0]["system"]
+        and patient_resource["identifier"][0]["use"] == "usual"
+        and patient_resource["identifier"][0]["value"] == "1234"
     )
 
 
@@ -564,7 +568,11 @@ def test_convert_cda_to_fhir_r4_with_patient_should_convert():
 
 
 def test_convert_cda_to_fhir_r4_with_patient_identifier_and_system_should_convert():
-    result = TEST_API.convert.cda_to_fhir_r4(content=CDA, patient_identifier="1234", patient_identifier_system="GoodHealthClinic")
+    result = TEST_API.convert.cda_to_fhir_r4(
+        content=CDA,
+        patient_identifier="1234",
+        patient_identifier_system="GoodHealthClinic",
+    )
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -577,11 +585,11 @@ def test_convert_cda_to_fhir_r4_with_patient_identifier_and_system_should_conver
         )
     )
     assert (
-        "identifier" in patient_resource and  
-        len(patient_resource["identifier"]) > 0 and  
-        "GoodHealthClinic" in patient_resource["identifier"][0]["system"] and
-        patient_resource["identifier"][0]["use"] == "usual" and
-        patient_resource["identifier"][0]["value"] == "1234"
+        "identifier" in patient_resource
+        and len(patient_resource["identifier"]) > 0
+        and "GoodHealthClinic" in patient_resource["identifier"][0]["system"]
+        and patient_resource["identifier"][0]["use"] == "usual"
+        and patient_resource["identifier"][0]["value"] == "1234"
     )
 
 
@@ -672,7 +680,10 @@ def test_convert_combined_fhir_r4_bundles_with_patient_identifier_and_system_sho
     )
 
     result = TEST_API.convert.combine_fhir_r4_bundles(
-        content=bundles, patient_identifier="1234", patient_identifier_system="GoodHealthClinic")
+        content=bundles,
+        patient_identifier="1234",
+        patient_identifier_system="GoodHealthClinic",
+    )
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -685,11 +696,11 @@ def test_convert_combined_fhir_r4_bundles_with_patient_identifier_and_system_sho
         )
     )
     assert (
-        "identifier" in patient_resource and  
-        len(patient_resource["identifier"]) > 0 and  
-        "GoodHealthClinic" in patient_resource["identifier"][0]["system"] and
-        patient_resource["identifier"][0]["use"] == "usual" and
-        patient_resource["identifier"][0]["value"] == "1234"
+        "identifier" in patient_resource
+        and len(patient_resource["identifier"]) > 0
+        and "GoodHealthClinic" in patient_resource["identifier"][0]["system"]
+        and patient_resource["identifier"][0]["use"] == "usual"
+        and patient_resource["identifier"][0]["value"] == "1234"
     )
 
 
@@ -718,7 +729,11 @@ def test_convert_x12_to_fhir_r4_with_patient_should_return_a_bundle():
 
 
 def test_convert_x12_to_fhir_r4_with_patient_identifier_and_system_should_convert():
-    result = TEST_API.convert.x12_to_fhir_r4(content=X12_DOCUMENT, patient_identifier="1234", patient_identifier_system="GoodHealthClinic")
+    result = TEST_API.convert.x12_to_fhir_r4(
+        content=X12_DOCUMENT,
+        patient_identifier="1234",
+        patient_identifier_system="GoodHealthClinic",
+    )
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -731,11 +746,11 @@ def test_convert_x12_to_fhir_r4_with_patient_identifier_and_system_should_conver
         )
     )
     assert (
-        "identifier" in patient_resource and  
-        len(patient_resource["identifier"]) > 0 and  
-        "GoodHealthClinic" in patient_resource["identifier"][0]["system"] and
-        patient_resource["identifier"][0]["use"] == "usual" and
-        patient_resource["identifier"][0]["value"] == "1234"
+        "identifier" in patient_resource
+        and len(patient_resource["identifier"]) > 0
+        and "GoodHealthClinic" in patient_resource["identifier"][0]["system"]
+        and patient_resource["identifier"][0]["use"] == "usual"
+        and patient_resource["identifier"][0]["value"] == "1234"
     )
 
 
@@ -1014,12 +1029,11 @@ def test_convert_fhir_r4_to_manifest_should_have_csvs():
             file.filename.endswith(".csv") and file.file_size > 0
             for file in zip_file.infolist()
         )
-        #check contents of patients.csv to ensure delimiter is default one
+        # check contents of patients.csv to ensure delimiter is default one
         with zip_file.open("patients.csv") as f:
             content = f.read().decode("utf-8")
             print(content)
             assert "," in content
-
 
 
 def test_convert_fhir_r4_to_manifest__with_delimiter_should_have_csvs_and_expected_delimiter():
@@ -1044,10 +1058,9 @@ def test_convert_fhir_r4_to_manifest__with_delimiter_should_have_csvs_and_expect
             file.filename.endswith(".csv") and file.file_size > 0
             for file in zip_file.infolist()
         )
-    
-        #check contents of patients.csv to ensure delimiter is correct
+
+        # check contents of patients.csv to ensure delimiter is correct
         with zip_file.open("patients.csv") as f:
             content = f.read().decode("utf-8")
             print(content)
             assert "|" in content
-
