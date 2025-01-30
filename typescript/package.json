@@ -23,7 +23,7 @@
 		"prettier": "^3.2.5",
 		"rollup": "^4.0.2",
 		"typescript": "~5.7.2",
-		"vitest": "^2.0.2"
+		"vitest": "^3.0.2"
 	},
 	"keywords": [
 		"Rosetta",
