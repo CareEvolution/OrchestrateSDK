@@ -172,7 +172,7 @@ _ADD_OR_UPDATE_WITH_BLINDED_RECORD_DATA = [
     ["demographic_request"], _ADD_OR_UPDATE_WITH_BLINDED_RECORD_DATA
 )
 def test_add_or_update_blinded_record_with_request_should_add_record(
-    demographic_request: Union[BlindedDemographic, HashDemographicResponse]
+    demographic_request: Union[BlindedDemographic, HashDemographicResponse],
 ) -> None:
     response = _TEST_API.add_or_update_blinded_record(
         _DEFAULT_SOURCE,
