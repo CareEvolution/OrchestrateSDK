@@ -20,7 +20,7 @@ requests = "^2.31.0"
 typing-extensions = {version = "^4.0.1", python = "<3.11"}
 
 [tool.poetry.group.dev.dependencies]
-black = ">=23.7,<25.0"
+black = ">=23.7,<26.0"
 mypy = "^1.4.1"
 notebook = "^7.0.0"
 pytest-xdist = "^3.6.1"
