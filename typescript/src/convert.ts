@@ -16,6 +16,8 @@ export type ConvertCdaToFhirR4Request = {
   patientID?: string;
   patientIdentifier?: string;
   patientIdentifierSystem?: string;
+  includeCdaInTheOutput?: boolean;
+  includeStandardizedCdaInTheOutput?: boolean;
 };
 
 export type ConvertCdaToFhirR4Response = Bundle;
@@ -170,6 +172,13 @@ export class ConvertApi {
     if (request.patientIdentifierSystem) {
       parameters.append("patientIdentifierSystem", request.patientIdentifierSystem);
     }
+    if (request.includeCdaInTheOutput) {
+      parameters.append("includeCdaInTheOutput", request.includeCdaInTheOutput.toString());
+    }
+    if (request.includeStandardizedCdaInTheOutput) {
+      parameters.append("includeStandardizedCdaInTheOutput", request.includeStandardizedCdaInTheOutput.toString());
+    } 
+
     let route = "/convert/v1/cdatofhirr4";
     if (parameters.size) {
       route += `?${parameters.toString()}`;
