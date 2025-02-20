@@ -386,6 +386,46 @@ describe("convert cda to fhir r4", () => {
     expect(result.entry?.length).toBeGreaterThan(0);
   });
 
+  it("should convert cda with includeStandardizedCdaInTheOutput", async () => {
+    const result = await orchestrate.convert.cdaToFhirR4({
+      content: cda,
+      includeStandardizedCdaInTheOutput: true,
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const documentReferences = result.entry?.filter(
+      (entry) => entry.resource?.resourceType === "DocumentReference"
+    );
+    const standardizedCdaDocumentReference = documentReferences?.find(
+      (docRef) =>
+        (docRef.resource)?.type?.coding?.some(
+          (coding) => coding.code === "StandardizedCda"
+        )
+    );
+    expect(standardizedCdaDocumentReference).toBeDefined();
+  });
+
+  it("should convert cda with includeCdaInTheOutput", async () => {
+    const result = await orchestrate.convert.cdaToFhirR4({
+      content: cda,
+      includeCdaInTheOutput: true,
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const documentReferences = result.entry?.filter(
+      (entry) => entry.resource?.resourceType === "DocumentReference"
+    );
+    const standardizedCdaDocumentReference = documentReferences?.find(
+      (docRef) =>
+        (docRef.resource)?.type?.coding?.some(
+          (coding) => coding.code === "Cda"
+        )
+    );
+    expect(standardizedCdaDocumentReference).toBeDefined();
+  });
+
   it("should convert cda with patient", async () => {
     const result = await orchestrate.convert.cdaToFhirR4({
       content: cda,
