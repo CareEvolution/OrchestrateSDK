@@ -121,10 +121,11 @@ export class ConvertApi {
   }
   /**
    * Converts one or more HL7v2 messages into a FHIR R4 bundle
-   * @param request A single or newline-delimited set of HL7v2.7 messages
-   *  - `content` The HL7v2.7 messages to convert
-   *  - `patientID` The patient ID to associate with the clinical data
-   *  - `tz`: Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
+   * @param request The request object with a single or newline-delimited set of HL7v2.7 messages and following properties:
+   * @param request.patientID The patient ID to associate with the clinical data
+   * @param request.patientIdentifier A patient identifier to add to the identifier list of the patient resource in the FHIR bundle. Must be specified along with patientIdentifierSystem
+   * @param request.patientIdentifierSystem The system providing the patient identifier. Must be specified along with patientIdentifier (Optional) 
+   * @param request.tz Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
    * @link https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html
    */
@@ -154,7 +155,12 @@ export class ConvertApi {
 
   /**
    * Converts a CDA document into a FHIR R4 bundle
-   * @param request A single CDA document
+   * @param request The request object with a single CDA document as content and following properties:
+   * @param request.patientID - The patient ID to use for the FHIR bundle (Optional)
+   * @param request.patientIdentifier - A patient identifier to add to the identifier list of the patient resource in the FHIR bundle. Must be specified along with patientIdentifierSystem (Optional)
+   * @param request.patientIdentifierSystem - The system providing the patient identifier. Must be specified along with patientIdentifier (Optional)
+   * @param request.includeCdaInTheOutput - Whether to include the original CDA document in the FHIR bundle. Default is false (Optional)
+   * @param request.includeStandardizedCdaInTheOutput - Whether to include the standardized CDA document in the FHIR bundle. Default is false (Optional)
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the CDA
    * @link https://rosetta-api.docs.careevolution.com/convert/cda_to_fhir.html
    */
@@ -188,7 +194,7 @@ export class ConvertApi {
 
   /**
    * Converts a CDA document into a PDF document
-   * @param request A single CDA document
+   * @param request The request object a single CDA document as content
    * @returns A formatted PDF document suitable for human review
    * @link https://rosetta-api.docs.careevolution.com/convert/cda_to_pdf.html
    */
@@ -259,6 +265,9 @@ export class ConvertApi {
   /**
    * Converts an X12 document into a FHIR R4 bundle.
    * @param request A standard version 5010 X12 document
+   * @param patientID The patient ID to use for the FHIR bundle
+   * @param patientIdentifier A patient identifier to add to the identifier list of the patient resource in the FHIR bundle. Must be specified along with patientIdentifierSystem
+   * @param patientIdentifierSystem The system providing the patient identifier. Must be specified along with patientIdentifier
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the X12 messages
    */
   x12ToFhirR4(request: ConvertX12ToFhirR4Request): Promise<ConvertX12ToFhirR4Response> {

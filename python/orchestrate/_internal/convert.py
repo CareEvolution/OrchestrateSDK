@@ -134,8 +134,8 @@ class ConvertApi:
         - `patient_id`: The patient ID to use for the FHIR bundle
         - `patient_identifier`: A patient identifier to add to identifier list of patient resource in the FHIR bundle. Must be specified along with patient_identifier_system
         - `patient_identifier_system`: The system providing the patient identifier. Must be specified along with patient_identifier
-        - `includeCdaInTheOutput`: Whether to include the original CDA document in the FHIR bundle. Default is false.
-        - `includeStandardizedCdaInTheOutput`: Whether to include the standardized CDA document in the FHIR bundle. Default is false.
+        - `include_cda_in_the_output`: Whether to include the original CDA document in the FHIR bundle. Default is false.
+        - `include_standardized_cda_in_the_output`: Whether to include the standardized CDA document in the FHIR bundle. Default is false.
 
         ### Returns
 
@@ -161,9 +161,9 @@ class ConvertApi:
         if include_cda_in_the_output is not None:
             parameters["includeCdaInTheOutput"] = include_cda_in_the_output
         if include_standardized_cda_in_the_output is not None:
-            parameters["includeStandardizedCdaInTheOutput"] = (
+            parameters["includeStandardizedCdaInTheOutput"] = str(
                 include_standardized_cda_in_the_output
-            )
+            ).lower()
 
         return self.__http_handler.post(
             path="/convert/v1/cdatofhirr4",
