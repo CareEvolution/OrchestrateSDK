@@ -551,10 +551,8 @@ def test_convert_cda_to_fhir_r4_without_patient_should_convert():
     assert len(result["entry"]) > 0
 
 
-def test_convert_cda_to_fhir_r4_with_includeCdaInTheOutput_should_convert():
-    result = TEST_API.convert.cda_to_fhir_r4(
-        content=CDA, include_cda_in_the_output=True
-    )
+def test_convert_cda_to_fhir_r4_with_includeOriginalCda_should_convert():
+    result = TEST_API.convert.cda_to_fhir_r4(content=CDA, include_orginal_cda=True)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"
@@ -575,10 +573,8 @@ def test_convert_cda_to_fhir_r4_with_includeCdaInTheOutput_should_convert():
     assert cda_document_reference is not None
 
 
-def test_convert_cda_to_fhir_r4_with_includeStandardizedCdaInTheOutput_should_convert():
-    result = TEST_API.convert.cda_to_fhir_r4(
-        content=CDA, include_standardized_cda_in_the_output=True
-    )
+def test_convert_cda_to_fhir_r4_with_includeStandardizedCda_should_convert():
+    result = TEST_API.convert.cda_to_fhir_r4(content=CDA, include_standardized_cda=True)
 
     assert result is not None
     assert result["resourceType"] == "Bundle"

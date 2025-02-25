@@ -16,8 +16,8 @@ export type ConvertCdaToFhirR4Request = {
   patientID?: string;
   patientIdentifier?: string;
   patientIdentifierSystem?: string;
-  includeCdaInTheOutput?: boolean;
-  includeStandardizedCdaInTheOutput?: boolean;
+  includeOriginalCda?: boolean;
+  includeStandardizedCda?: boolean;
 };
 
 export type ConvertCdaToFhirR4Response = Bundle;
@@ -159,8 +159,8 @@ export class ConvertApi {
    * @param request.patientID - The patient ID to use for the FHIR bundle (Optional)
    * @param request.patientIdentifier - A patient identifier to add to the identifier list of the patient resource in the FHIR bundle. Must be specified along with patientIdentifierSystem (Optional)
    * @param request.patientIdentifierSystem - The system providing the patient identifier. Must be specified along with patientIdentifier (Optional)
-   * @param request.includeCdaInTheOutput - Whether to include the original CDA document in the FHIR bundle. Default is false (Optional)
-   * @param request.includeStandardizedCdaInTheOutput - Whether to include the standardized CDA document in the FHIR bundle. Default is false (Optional)
+   * @param request.includeOriginalCda - Whether to include the original CDA document in the FHIR bundle. Default is false (Optional)
+   * @param request.includeStandardizedCda - Whether to include the standardized CDA document in the FHIR bundle. Default is false (Optional)
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the CDA
    * @link https://rosetta-api.docs.careevolution.com/convert/cda_to_fhir.html
    */
@@ -178,11 +178,11 @@ export class ConvertApi {
     if (request.patientIdentifierSystem) {
       parameters.append("patientIdentifierSystem", request.patientIdentifierSystem);
     }
-    if (request.includeCdaInTheOutput) {
-      parameters.append("includeCdaInTheOutput", request.includeCdaInTheOutput.toString());
+    if (request.includeOriginalCda) {
+      parameters.append("includeOriginalCda", request.includeOriginalCda.toString());
     }
-    if (request.includeStandardizedCdaInTheOutput) {
-      parameters.append("includeStandardizedCdaInTheOutput", request.includeStandardizedCdaInTheOutput.toString());
+    if (request.includeStandardizedCda) {
+      parameters.append("includeStandardizedCda", request.includeStandardizedCda.toString());
     } 
 
     let route = "/convert/v1/cdatofhirr4";

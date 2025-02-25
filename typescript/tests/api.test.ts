@@ -386,10 +386,10 @@ describe("convert cda to fhir r4", () => {
     expect(result.entry?.length).toBeGreaterThan(0);
   });
 
-  it("should convert cda with includeStandardizedCdaInTheOutput", async () => {
+  it("should convert cda with includeStandardizedCda", async () => {
     const result = await orchestrate.convert.cdaToFhirR4({
       content: cda,
-      includeStandardizedCdaInTheOutput: true,
+      includeStandardizedCda: true,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
@@ -406,10 +406,10 @@ describe("convert cda to fhir r4", () => {
     expect(standardizedCdaDocumentReference).toBeDefined();
   });
 
-  it("should convert cda with includeCdaInTheOutput", async () => {
+  it("should convert cda with includeOriginalCda", async () => {
     const result = await orchestrate.convert.cdaToFhirR4({
       content: cda,
-      includeCdaInTheOutput: true,
+      includeOriginalCda: true,
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
