@@ -551,6 +551,53 @@ def test_convert_cda_to_fhir_r4_without_patient_should_convert():
     assert len(result["entry"]) > 0
 
 
+def test_convert_cda_to_fhir_r4_with_includeOriginalCda_should_convert():
+    result = TEST_API.convert.cda_to_fhir_r4(content=CDA, include_original_cda=True)
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) > 0
+    document_references = [
+        entry["resource"]
+        for entry in result["entry"]
+        if entry["resource"]["resourceType"] == "DocumentReference"
+    ]
+    cda_document_reference = next(
+        (
+            doc_ref
+            for doc_ref in document_references
+            if any(coding["code"] == "Cda" for coding in doc_ref["type"]["coding"])
+        ),
+        None,
+    )
+    assert cda_document_reference is not None
+
+
+def test_convert_cda_to_fhir_r4_with_includeStandardizedCda_should_convert():
+    result = TEST_API.convert.cda_to_fhir_r4(content=CDA, include_standardized_cda=True)
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) > 0
+    document_references = [
+        entry["resource"]
+        for entry in result["entry"]
+        if entry["resource"]["resourceType"] == "DocumentReference"
+    ]
+    cda_document_reference = next(
+        (
+            doc_ref
+            for doc_ref in document_references
+            if any(
+                coding["code"] == "StandardizedCda"
+                for coding in doc_ref["type"]["coding"]
+            )
+        ),
+        None,
+    )
+    assert cda_document_reference is not None
+
+
 def test_convert_cda_to_fhir_r4_with_patient_should_convert():
     result = TEST_API.convert.cda_to_fhir_r4(content=CDA, patient_id="1234")
 
