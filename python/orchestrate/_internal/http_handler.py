@@ -188,14 +188,10 @@ def create_http_handler(
 ) -> HttpHandler:
     additional_headers = _get_additional_headers()
     priority_base_url = _get_priority_base_url(base_url)
-    priority_api_key = _get_priority_from_environment(
-        api_key, _API_KEY_ENVIRONMENT_VARIABLE
-    )
     default_headers = {
         **(additional_headers or {}),
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "x-api-key": priority_api_key if priority_api_key is not None else "",
     }
     priority_api_key = _get_priority_from_environment(
         api_key, _API_KEY_ENVIRONMENT_VARIABLE
