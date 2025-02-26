@@ -704,6 +704,59 @@ def test_convert_combined_fhir_r4_bundles_with_patient_identifier_and_system_sho
     )
 
 
+def test_convert_standardize_fhir_r4_bundle_should_standardize():
+    result = TEST_API.convert.standardize_fhir_r4_bundle(content=R4_BUNDLE)
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) == 1
+
+
+def test_convert_standardize_fhir_r4_bundle_with_person_should_standardize():
+    result = TEST_API.convert.standardize_fhir_r4_bundle(
+        content=R4_BUNDLE, patient_id="1234"
+    )
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) == 1
+    patient_resource = next(
+        (
+            entry["resource"]
+            for entry in result["entry"]
+            if entry["resource"]["resourceType"] == "Patient"
+        )
+    )
+    assert patient_resource["id"] == "1234"
+
+
+def test_convert_standardize_fhir_r4_bundle_with_patient_identifier_and_system_should_standardize():
+
+    result = TEST_API.convert.standardize_fhir_r4_bundle(
+        content=R4_BUNDLE,
+        patient_identifier="1234",
+        patient_identifier_system="GoodHealthClinic",
+    )
+
+    assert result is not None
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) == 1
+    patient_resource = next(
+        (
+            entry["resource"]
+            for entry in result["entry"]
+            if entry["resource"]["resourceType"] == "Patient"
+        )
+    )
+    assert (
+        "identifier" in patient_resource
+        and len(patient_resource["identifier"]) > 0
+        and "GoodHealthClinic" in patient_resource["identifier"][0]["system"]
+        and patient_resource["identifier"][0]["use"] == "usual"
+        and patient_resource["identifier"][0]["value"] == "1234"
+    )
+
+
 def test_convert_x12_to_fhir_r4_should_return_a_bundle():
     result = TEST_API.convert.x12_to_fhir_r4(content=X12_DOCUMENT)
 

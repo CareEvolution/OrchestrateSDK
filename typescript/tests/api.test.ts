@@ -780,6 +780,60 @@ ${JSON.stringify(fhir)}
   ).toBe(true);
 });
 
+describe("convert standardize fhir r4 bundles", () => {
+  it("should standardize fhir bundle", async () => {
+    const bundle = JSON.stringify(fhir);
+
+    const result = await orchestrate.convert.standardizeFhirR4Bundle({
+      content: bundle,
+    });
+
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+  });
+
+  it("should standardize fhir r4 bundle with patient", async () => {
+    const bundle = JSON.stringify(fhir);
+
+    const result = await orchestrate.convert.standardizeFhirR4Bundle({
+      content: bundle,
+      patientID: "1234",
+    });
+
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
+    expect(patientResource).toBeDefined();
+    expect(patientResource?.resource?.id).toBe("1234");
+  });
+});
+
+it("should standardize fhir r4 bundle with patientIdentifierAndSystem", async () => {
+  const bundle = JSON.stringify(fhir);
+
+  const result = await orchestrate.convert.standardizeFhirR4Bundle({
+    content: bundle,
+    patientIdentifier: "1234",
+    patientIdentifierSystem: "GoodHealthClinic",
+  });
+  expect(result).toBeDefined();
+  expect(result.resourceType).toBe("Bundle");
+  expect(result.entry?.length).toBeGreaterThan(0);
+  const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient");
+
+  expect(patientResource).toBeDefined();
+  const patient = patientResource?.resource as Patient;
+  expect(patient).toBeDefined();
+
+  expect(
+    patient.identifier?.[0]?.use === "usual" &&
+    patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+    patient.identifier?.[0]?.value === "1234"
+  ).toBe(true);
+});
+
 describe("convert fhir stu3 to fhir r4", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.fhirStu3ToFhirR4({
