@@ -21,6 +21,8 @@ ConvertX12ToFhirR4Response = Bundle
 
 ConvertCombinedFhirR4BundlesResponse = Bundle
 
+ConvertStandardizeFHIRR4BundleResponse = Bundle
+
 ConvertFhirDstu2ToFhirR4Response = Bundle
 
 ConvertFhirStu3ToFhirR4Response = Bundle
@@ -314,6 +316,48 @@ class ConvertApi:
             path="/convert/v1/combinefhirr4bundles",
             body=content,
             headers=headers,
+            parameters=parameters,
+        )
+
+    def standardize_fhir_r4_bundle(
+        self,
+        content: Bundle,
+        patient_id: Optional[str] = None,
+        patient_identifier: Optional[str] = None,
+        patient_identifier_system: Optional[str] = None,
+    ) -> ConvertStandardizeFHIRR4BundleResponse:
+        """
+        This operation standardizes a FHIR R4 bundle.
+
+        ### Parameters
+
+        - `fhir_bundle`: The FHIR R4 bundle to standardize
+        - `patient_id`: The patient ID to use for the FHIR bundle
+        - `patient_identifier`: A patient identifier to add to identifier list of patient resource in the FHIR bundle. Must be specified along with patient_identifier_system
+        - `patient_identifier_system`: The system providing the patient identifier. Must be specified along with patient_identifier
+
+        ### Returns
+
+        A single FHIR R4 Bundle containing the standardized data from the input.
+
+        ### Documentation
+
+        <https://rosetta-api.docs.careevolution.com/convert/standardize_bundle.html>
+        """
+        parameters = _get_id_dependent_parameters("patientId", patient_id)
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters(
+                "patientIdentifierSystem", patient_identifier_system
+            ),
+        }
+        return self.__http_handler.post(
+            path="/convert/v1/standardizefhirr4bundle",
+            body=content,
             parameters=parameters,
         )
 

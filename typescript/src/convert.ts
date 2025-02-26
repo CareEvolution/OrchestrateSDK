@@ -47,6 +47,13 @@ export type ConvertCombineFhirR4BundlesRequest = {
   patientIdentifierSystem?: string;
 };
 
+export type ConvertStandardizeFhirR4BundleRequest = {
+  content: Bundle;
+  patientID?: string;
+  patientIdentifier?: string;
+  patientIdentifierSystem?: string;
+};
+
 export type ConvertFhirDstu2ToFhirR4Request = {
   content: unknown;
 };
@@ -74,6 +81,8 @@ export function generateConvertCombinedFhirBundlesRequestFromBundles(fhirBundles
 }
 
 export type ConvertCombineFhirR4BundlesResponse = Bundle;
+
+export type ConvertStandardizeFhirR4BundleResponse = Bundle;
 
 export type ConvertX12ToFhirR4Request = {
   content: string;
@@ -245,6 +254,31 @@ export class ConvertApi {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post(route, request.content, headers);
+  }
+
+  
+  /**
+   * This operation aggregates information retrieved from prior Convert API requests into a single entry.
+   * @param request A FHIR R4 Bundle
+   * @returns A single FHIR R4 Bundle containing the standardized data from the input.
+   * @link https://rosetta-api.docs.careevolution.com/convert/standardize_bundle.html
+   */
+  standardizeFhirR4Bundle(request: ConvertStandardizeFhirR4BundleRequest): Promise<ConvertStandardizeFhirR4BundleResponse> {
+    const parameters = new URLSearchParams();
+    if (request.patientID) {
+      parameters.append("patientId", request.patientID);
+    }
+    if (request.patientIdentifier) {
+      parameters.append("patientIdentifier", request.patientIdentifier);
+    }
+    if (request.patientIdentifierSystem) {
+      parameters.append("patientIdentifierSystem", request.patientIdentifierSystem);
+    }
+    let route = "/convert/v1/standardizefhirr4bundle";
+    if (parameters.size) {
+      route += `?${parameters.toString()}`;
+    }
+    return this.httpHandler.post(route, request.content);
   }
 
   /**
