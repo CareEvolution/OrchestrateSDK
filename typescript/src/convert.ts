@@ -1,12 +1,15 @@
 import { Bundle } from "fhir/r4.js";
 import { IHttpHandler } from "./httpHandler.js";
 
+export type ConvertHl7ToFhirR4RequestProcessingHint = "default" | "transcription" | "lab";
+
 export type ConvertHl7ToFhirR4Request = {
   content: string;
   patientID?: string;
   patientIdentifier?: string;
   patientIdentifierSystem?: string;
   tz?: string;
+  processingHint?: ConvertHl7ToFhirR4RequestProcessingHint;
 };
 
 export type ConvertHl7ToFhirR4Response = Bundle;
@@ -124,7 +127,7 @@ export class ConvertApi {
    * @param request The request object with a single or newline-delimited set of HL7v2.7 messages and following properties:
    * @param request.patientID The patient ID to associate with the clinical data
    * @param request.patientIdentifier A patient identifier to add to the identifier list of the patient resource in the FHIR bundle. Must be specified along with patientIdentifierSystem
-   * @param request.patientIdentifierSystem The system providing the patient identifier. Must be specified along with patientIdentifier (Optional) 
+   * @param request.patientIdentifierSystem The system providing the patient identifier. Must be specified along with patientIdentifier (Optional)
    * @param request.tz Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
    * @returns A FHIR R4 Bundle containing the clinical data parsed out of the HL7 messages
    * @link https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html
@@ -145,6 +148,9 @@ export class ConvertApi {
     }
     if (request.tz) {
       parameters.append("tz", request.tz);
+    }
+    if (request.processingHint) {
+      parameters.append("processingHint", request.processingHint);
     }
     let route = "/convert/v1/hl7tofhirr4";
     if (parameters.size) {
@@ -183,7 +189,7 @@ export class ConvertApi {
     }
     if (request.includeStandardizedCda) {
       parameters.append("includeStandardizedCda", request.includeStandardizedCda.toString());
-    } 
+    }
 
     let route = "/convert/v1/cdatofhirr4";
     if (parameters.size) {

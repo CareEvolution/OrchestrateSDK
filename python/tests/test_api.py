@@ -543,6 +543,91 @@ def test_api_convert_hl7_to_fhir_r4_without_timezone_should_presume_utc():
     assert encounter["period"]["start"] == "2014-11-07T14:40:00+00:00"
 
 
+def test_api_convert_hl7_to_fhir_r4_with_lab_processing_hint_should_convert():
+    content = """MSH|^~\&|||||20220309050000||ORU^R01|||2.7
+PID|1||123456||LastName^FirstName|||||||||||||5678
+PV1|1|I||||||||||||||||||||||||||||||||||||||||||20220309050000
+OBR||001CCK612||ABC^AUTOMATED BLOOD COUNT^LAB|||20220309134200|||2222^ORDERED,BY||||20220309134400|Specimen^|10341^Doctor MD^First^F||||W2622||||HE|F|CBC^ABC|^^^^^R|^~^~^|||||||
+NTE|||Lab Report Comment
+OBX|1|ST|^WBC^LAB|1|1.4|K/UL|4.5-11.5|L^LL|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|2|ST|^RBC^LAB|1|3.50|M/UL|4.3-5.9|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|3|ST|^HGB^LAB|1|11.6|GM/DL|13.9-16.3|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|4|ST|^HCT^LAB|1|33.7|%|39-55|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|5|ST|^MCV^LAB|1|96.4|FL|80-100||||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|6|ST|^MCH^LAB|1|33.1|PG|25.4-34.6||||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|7|ST|^MCHC^LAB|1|34.3|GM/DL|30-37||||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|8|ST|^RDW^LAB|1|17.9|%|11.5-14.5|H|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|9|ST|^PLATELETS^LAB|1|125|K/UL|130-400|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+"""
+    hinted_result = TEST_API.convert.hl7_to_fhir_r4(
+        content=content, processing_hint="lab"
+    )
+    unhinted_result = TEST_API.convert.hl7_to_fhir_r4(content=content)
+    default_result = TEST_API.convert.hl7_to_fhir_r4(
+        content=content, processing_hint="default"
+    )
+
+    assert hinted_result is not None
+    assert hinted_result["resourceType"] == "Bundle"
+    assert len(hinted_result["entry"]) > 0
+    observations = [
+        entry["resource"]
+        for entry in hinted_result["entry"]
+        if entry["resource"]["resourceType"] == "Observation"
+    ]
+    assert len(observations) == 9
+    for result in [unhinted_result, default_result]:
+        assert result is not None
+        assert result["resourceType"] == "Bundle"
+        assert len(result["entry"]) > 0
+        result_observations = [
+            entry["resource"]
+            for entry in result["entry"]
+            if entry["resource"]["resourceType"] == "Observation"
+        ]
+        assert len(result_observations) == 0
+
+
+def test_api_convert_hl7_to_fhir_r4_with_transcription_processing_hint_should_convert():
+    content = """MSH|^~\&||TX|||20110706100000||ORU^R01|||2.3
+PID|1||123456||LastName^FirstName||20000101|M||||||||||7890
+PV1|1|I||||||||||||||||||||||||||||||||||||||||||20110706100000
+ORC|RE|^SCM|||||||20110706100000|||010400^DOE MD^JOHN^^^^
+OBR|1|^SCM|001XYZ555^SCM|CH9^CHEST SPECIAL VIEWS|||20110706100000|||||||20110706100000||010400^DOE MD^JOHN^^^^|||||||||P||^^^20110706100000^^R|~~~~||||010400^DOE MD^JOHN|~|^UNKNOWN^TECHNOLOGIST^^^^|010400^DOE MD^JOHN^^^^
+OBX|1|ST|&GDT^^GDT||Line 1||||||F
+OBX|2|ST|&GDT^Label^GDT||Line 2||||||F
+OBX|3|ST|&GDT^&Not a Label^GDT||Line 3||||||F
+OBX|4|ST|Dictation TS|2|Dictated by: Tue Mar 18, 2025  1:06:45 PM EDT [INTERFACE, INCOMING RADIANT IMAGE AVAILABILITY]||||||Final|||||E175762^MILLER^AMANDA^^^^^^PROVID^^^^PROVID^^^^^^^^RT|||||||||
+    """
+    hinted_result = TEST_API.convert.hl7_to_fhir_r4(
+        content=content, processing_hint="transcription"
+    )
+    unhinted_result = TEST_API.convert.hl7_to_fhir_r4(content=content)
+    default_result = TEST_API.convert.hl7_to_fhir_r4(
+        content=content, processing_hint="default"
+    )
+
+    assert hinted_result is not None
+    assert hinted_result["resourceType"] == "Bundle"
+    assert len(hinted_result["entry"]) > 0
+    hinted_binaries = [
+        entry["resource"]
+        for entry in hinted_result["entry"]
+        if entry["resource"]["resourceType"] == "Binary"
+    ]
+    assert len(hinted_binaries) == 1
+    for result in [unhinted_result, default_result]:
+        assert result is not None
+        assert result["resourceType"] == "Bundle"
+        assert len(result["entry"]) > 0
+        result_binaries = [
+            entry["resource"]
+            for entry in result["entry"]
+            if entry["resource"]["resourceType"] == "Binary"
+        ]
+        assert len(result_binaries) == 0
+
+
 def test_convert_cda_to_fhir_r4_without_patient_should_convert():
     result = TEST_API.convert.cda_to_fhir_r4(content=CDA)
 
