@@ -1,7 +1,7 @@
 import { OrchestrateApi } from '../src/api';
 import { hl7, cda, fhir, riskProfileBundle, x12Document, stu3FhirBundle, dstu2FhirBundle, nemsisBundle } from './data';
 import dotenv from 'dotenv';
-import { Bundle, Encounter, Patient } from 'fhir/r4';
+import { Binary, Bundle, BundleEntry, Encounter, Observation, Patient } from 'fhir/r4';
 import {
   ClassifyConditionRequest,
   ClassifyMedicationRequest,
@@ -373,6 +373,95 @@ describe("convert hl7 to fhir r4", () => {
     const encounter = result.entry?.find((entry) => entry.resource?.resourceType === "Encounter")?.resource as Encounter;
     expect(encounter).toBeDefined();
     expect(encounter?.period?.start).toBe("2014-11-07T14:40:00+00:00");
+  });
+
+  const labHl7 = (`
+MSH|^~\&|||||20220309050000||ORU^R01|||2.7
+PID|1||123456||LastName^FirstName|||||||||||||5678
+PV1|1|I||||||||||||||||||||||||||||||||||||||||||20220309050000
+OBR||001CCK612||ABC^AUTOMATED BLOOD COUNT^LAB|||20220309134200|||2222^ORDERED,BY||||20220309134400|Specimen^|10341^Doctor MD^First^F||||W2622||||HE|F|CBC^ABC|^^^^^R|^~^~^|||||||
+NTE|||Lab Report Comment
+OBX|1|ST|^WBC^LAB|1|1.4|K/UL|4.5-11.5|L^LL|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|2|ST|^RBC^LAB|1|3.50|M/UL|4.3-5.9|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|3|ST|^HGB^LAB|1|11.6|GM/DL|13.9-16.3|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|4|ST|^HCT^LAB|1|33.7|%|39-55|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|5|ST|^MCV^LAB|1|96.4|FL|80-100||||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|6|ST|^MCH^LAB|1|33.1|PG|25.4-34.6||||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|7|ST|^MCHC^LAB|1|34.3|GM/DL|30-37||||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|8|ST|^RDW^LAB|1|17.9|%|11.5-14.5|H|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+OBX|9|ST|^PLATELETS^LAB|1|125|K/UL|130-400|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
+`)
+  const transcriptionHl7 = (`
+MSH|^~\&||TX|||20110706100000||ORU^R01|||2.3
+PID|1||123456||LastName^FirstName||20000101|M||||||||||7890
+PV1|1|I||||||||||||||||||||||||||||||||||||||||||20110706100000
+ORC|RE|^SCM|||||||20110706100000|||010400^DOE MD^JOHN^^^^
+OBR|1|^SCM|001XYZ555^SCM|CH9^CHEST SPECIAL VIEWS|||20110706100000|||||||20110706100000||010400^DOE MD^JOHN^^^^|||||||||P||^^^20110706100000^^R|~~~~||||010400^DOE MD^JOHN|~|^UNKNOWN^TECHNOLOGIST^^^^|010400^DOE MD^JOHN^^^^
+OBX|1|ST|&GDT^^GDT||Line 1||||||F
+OBX|2|ST|&GDT^Label^GDT||Line 2||||||F
+OBX|3|ST|&GDT^&Not a Label^GDT||Line 3||||||F
+OBX|4|ST|Dictation TS|2|Dictated by: Tue Mar 18, 2025  1:06:45 PM EDT [INTERFACE, INCOMING RADIANT IMAGE AVAILABILITY]||||||Final|||||E175762^MILLER^AMANDA^^^^^^PROVID^^^^PROVID^^^^^^^^RT|||||||||
+`)
+  it("should convert lab hl7 with hint", async () => {
+    const result = await orchestrate.convert.hl7ToFhirR4({
+      content: labHl7, processingHint: "lab",
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const observations = result.entry?.filter(
+      (entry) => entry.resource?.resourceType === "Observation"
+    ) as BundleEntry<Observation>[];
+    expect(observations.length).toBe(9);
+  });
+
+  it("should convert lab hl7 without hint", async () => {
+    const unhintedResult = await orchestrate.convert.hl7ToFhirR4({
+      content: labHl7,
+    });
+    const defaultResult = await orchestrate.convert.hl7ToFhirR4({
+      content: labHl7, processingHint: "default",
+    });
+    for (const result of [unhintedResult, defaultResult]) {
+      expect(result).toBeDefined();
+      expect(result.resourceType).toBe("Bundle");
+      expect(result.entry?.length).toBeGreaterThan(0);
+      const observations = result.entry?.filter(
+        (entry) => entry.resource?.resourceType === "Observation"
+      ) as BundleEntry<Observation>[];
+      expect(observations.length).toBe(0);
+    }
+  });
+
+  it("should convert transcription hl7", async () => {
+    const result = await orchestrate.convert.hl7ToFhirR4({
+      content: transcriptionHl7, processingHint: "transcription",
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    const binaries = result.entry?.filter(
+      (entry) => entry.resource?.resourceType === "Binary"
+    ) as BundleEntry<Binary>[];
+    expect(binaries.length).toBe(1);
+  });
+
+  it("should convert transcription hl7 without hint", async () => {
+    const unhintedResult = await orchestrate.convert.hl7ToFhirR4({
+      content: transcriptionHl7,
+    });
+    const defaultResult = await orchestrate.convert.hl7ToFhirR4({
+      content: transcriptionHl7, processingHint: "default",
+    });
+    for (const result of [unhintedResult, defaultResult]) {
+      expect(result).toBeDefined();
+      expect(result.resourceType).toBe("Bundle");
+      expect(result.entry?.length).toBeGreaterThan(0);
+      const binaries = result.entry?.filter(
+        (entry) => entry.resource?.resourceType === "Binary"
+      ) as BundleEntry<Binary>[];
+      expect(binaries.length).toBe(0);
+    }
   });
 });
 

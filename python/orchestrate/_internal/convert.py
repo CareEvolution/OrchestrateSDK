@@ -1,5 +1,4 @@
-from typing import Mapping, Optional
-from urllib.parse import quote
+from typing import Literal, Optional
 
 from orchestrate._internal.fhir import Bundle
 from orchestrate._internal.http_handler import HttpHandler
@@ -8,6 +7,8 @@ import json as _json
 from orchestrate._internal.fhir import Bundle as Bundle
 
 ConvertHl7ToFhirR4Response = Bundle
+
+ConvertHl7ToFhirR4RequestProcessingHint = Literal["default", "transcription", "lab"]
 
 ConvertCdaToFhirR4Response = Bundle
 
@@ -76,6 +77,7 @@ class ConvertApi:
         patient_identifier: Optional[str] = None,
         patient_identifier_system: Optional[str] = None,
         tz: Optional[str] = None,
+        processing_hint: Optional[ConvertHl7ToFhirR4RequestProcessingHint] = None,
     ) -> ConvertHl7ToFhirR4Response:
         """
         Converts one or more HL7v2 messages into a FHIR R4 bundle
@@ -87,6 +89,7 @@ class ConvertApi:
         - `patient_identifier`: A patient identifier to add to identifier list of patient resource in the FHIR bundle. Must be specified along with patient_identifier_system
         - `patient_identifier_system`: The system providing the patient identifier. Must be specified along with patient_identifier
         - `tz`: Default timezone for date-times in the HL7 when no timezone offset is present. Must be IANA or Windows timezone name. Defaults to UTC.
+        - `processing_hint`: The processing hint to use for the conversion. Default is "Default". Other options are "Transcription" and "Lab".
 
         ### Returns
 
@@ -97,18 +100,17 @@ class ConvertApi:
         <https://rosetta-api.docs.careevolution.com/convert/hl7_to_fhir.html>
         """
         headers = {"Content-Type": "text/plain"}
-        parameters = _get_id_dependent_parameters("patientId", patient_id)
-        parameters = {
-            **parameters,
-            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        id_parameter_keys = {
+            "patientId": patient_id,
+            "patientIdentifier": patient_identifier,
+            "patientIdentifierSystem": patient_identifier_system,
+            "tz": tz,
+            "processingHint": processing_hint,
         }
-        parameters = {
-            **parameters,
-            **_get_id_dependent_parameters(
-                "patientIdentifierSystem", patient_identifier_system
-            ),
-        }
-        parameters = {**parameters, **_get_id_dependent_parameters("tz", tz)}
+        parameters = {}
+        for key, value in id_parameter_keys.items():
+            parameters.update(_get_id_dependent_parameters(key, value))
+
         return self.__http_handler.post(
             path="/convert/v1/hl7tofhirr4",
             body=content,
