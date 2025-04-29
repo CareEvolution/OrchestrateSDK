@@ -1,4 +1,4 @@
-from typing import Generic, Literal, Optional, TypeVar, TypedDict, Union
+from typing import Literal, Optional, TypedDict
 
 
 class Coding(TypedDict):

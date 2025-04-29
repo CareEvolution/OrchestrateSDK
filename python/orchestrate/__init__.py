@@ -5,6 +5,7 @@ from orchestrate import insight
 from orchestrate import convert
 from orchestrate import exceptions
 from orchestrate import identity
+from orchestrate import fhir
 
 __version__ = __version__
 
@@ -15,4 +16,5 @@ __all__ = [
     "convert",
     "exceptions",
     "identity",
+    "fhir",
 ]
