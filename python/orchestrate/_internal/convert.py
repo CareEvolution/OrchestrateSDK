@@ -475,7 +475,10 @@ class ConvertApi:
         )
 
     def fhir_r4_to_manifest(
-        self, content: Bundle, delimiter: Optional[str] = None, source: Optional[str] = None
+        self,
+        content: Bundle,
+        delimiter: Optional[str] = None,
+        source: Optional[str] = None,
     ) -> ConvertFhirR4ToManifestResponse:
         """
         Generates a tabular report of clinical concepts from a FHIR R4
