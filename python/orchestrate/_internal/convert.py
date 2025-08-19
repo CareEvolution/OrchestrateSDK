@@ -475,7 +475,7 @@ class ConvertApi:
         )
 
     def fhir_r4_to_manifest(
-        self, content: Bundle, delimiter: Optional[str] = None
+        self, content: Bundle, delimiter: Optional[str] = None, source: Optional[str] = None
     ) -> ConvertFhirR4ToManifestResponse:
         """
         Generates a tabular report of clinical concepts from a FHIR R4
@@ -486,6 +486,7 @@ class ConvertApi:
 
         - `content`: A FHIR R4 bundle
         - `delimiter`: The delimiter to use in the CSV files. Allowed delimiters are | or ~ or ^ or ; Default delimiter is ,
+        - `source`: The source of the FHIR R4 bundle to be included in the provenance file
 
         ### Returns
 
@@ -501,6 +502,10 @@ class ConvertApi:
             "Accept": "application/zip",
         }
         parameters = _get_id_dependent_parameters("delimiter", delimiter)
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("source", source),
+        }
         return self.__http_handler.post(
             path="/convert/v1/fhirr4tomanifest",
             body=content,
