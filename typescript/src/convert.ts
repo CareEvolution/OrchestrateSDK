@@ -111,6 +111,7 @@ export type ConvertFhirR4ToNemsisV35Response = string;
 export type ConvertFhirR4ToManifestRequest = {
   content: Bundle;
   delimiter?: string;
+  source?: string;
 };
 
 export type ConvertFhirR4ToManifestResponse = ArrayBuffer;
@@ -392,6 +393,9 @@ export class ConvertApi {
     const parameters = new URLSearchParams();
     if (request.delimiter) {
       parameters.append("delimiter", request.delimiter);
+    }
+    if (request.source) {
+      parameters.append("source", request.source);
     }
     let route = "/convert/v1/fhirr4tomanifest";
     if (parameters.size) {
