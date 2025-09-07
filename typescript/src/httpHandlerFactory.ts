@@ -7,6 +7,8 @@ const additionalHeadersEnvironmentVariable = "ORCHESTRATE_ADDITIONAL_HEADERS";
 const apiKeyEnvironmentVariable = "ORCHESTRATE_API_KEY";
 const identityApiKeyEnvironmentVariable = "ORCHESTRATE_IDENTITY_API_KEY";
 const identityMetricsKeyEnvironmentVariable = "ORCHESTRATE_IDENTITY_METRICS_KEY";
+const timeoutEnvironmentVariable = "ORCHESTRATE_TIMEOUT_MS";
+const defaultTimeoutMs = 120_000;
 
 function getPriorityFromEnvironment(argument: string | undefined, environmentVariable: string): string | undefined {
   return argument || process.env[environmentVariable];
@@ -14,6 +16,11 @@ function getPriorityFromEnvironment(argument: string | undefined, environmentVar
 
 function getPriorityBaseUrl(baseUrl: string | undefined): string {
   return getPriorityFromEnvironment(baseUrl, baseUrlEnvironmentVariable) || "https://api.careevolutionapi.com";
+}
+
+function getPriorityTimeout(timeoutMs: number | undefined): number {
+  const envTimeout = getPriorityFromEnvironment(timeoutMs?.toString(), timeoutEnvironmentVariable);
+  return envTimeout ? parseInt(envTimeout, 10) : (timeoutMs ?? defaultTimeoutMs);
 }
 
 function getAdditionalHeaders(): { [key: string]: string; } | undefined {
@@ -25,10 +32,12 @@ function getAdditionalHeaders(): { [key: string]: string; } | undefined {
 
 export function createHttpHandler(
   apiKey: string | undefined,
-  baseUrl: string | undefined = undefined
+  baseUrl: string | undefined,
+  timeoutMs?: number | undefined,
 ): IHttpHandler {
   const additionalHeaders = getAdditionalHeaders();
   const priorityBaseUrl = getPriorityBaseUrl(baseUrl);
+  const priorityTimeoutMs = getPriorityTimeout(timeoutMs);
   const defaultHeaders = {
     ...additionalHeaders,
     "Content-Type": "application/json",
@@ -41,16 +50,18 @@ export function createHttpHandler(
     defaultHeaders["x-api-key"] = priorityApiKey;
   }
 
-  return new HttpHandler(priorityBaseUrl, defaultHeaders);
+  return new HttpHandler(priorityBaseUrl, defaultHeaders, priorityTimeoutMs);
 }
 
 export function createIdentityHttpHandler(
   apiKey: string | undefined,
   metricsKey: string | undefined,
-  baseUrl: string | undefined
+  baseUrl: string | undefined,
+  timeoutMs?: number | undefined,
 ): IHttpHandler {
   const additionalHeaders = getAdditionalHeaders();
   const priorityUrl = getPriorityFromEnvironment(baseUrl, identityUrlEnvironmentVariable);
+  const priorityTimeoutMs = getPriorityTimeout(timeoutMs);
   const defaultHeaders = {
     ...additionalHeaders,
     "Content-Type": "application/json",
@@ -72,14 +83,16 @@ export function createIdentityHttpHandler(
     defaultHeaders["Authorization"] = `Basic ${headerMetricsKey}`;
   }
 
-  return new HttpHandler(priorityUrl, defaultHeaders);
+  return new HttpHandler(priorityUrl, defaultHeaders, priorityTimeoutMs);
 }
 
 export function createLocalHashingHttpHandler(
-  baseUrl: string | undefined
+  baseUrl: string | undefined,
+  timeoutMs?: number | undefined,
 ): IHttpHandler {
   const additionalHeaders = getAdditionalHeaders();
   const priorityUrl = getPriorityFromEnvironment(baseUrl, identityLocalHashingUrlEnvironmentVariable);
+  const priorityTimeoutMs = getPriorityTimeout(timeoutMs);
   const defaultHeaders = {
     ...additionalHeaders,
     "Content-Type": "application/json",
@@ -90,5 +103,5 @@ export function createLocalHashingHttpHandler(
     throw new Error(`Local hashing URL is required. Specify in the constructor or set '${identityLocalHashingUrlEnvironmentVariable}' environment variable.`);
   }
 
-  return new HttpHandler(priorityUrl, defaultHeaders);
+  return new HttpHandler(priorityUrl, defaultHeaders, priorityTimeoutMs);
 }

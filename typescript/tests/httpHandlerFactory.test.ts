@@ -12,25 +12,33 @@ describe("createHttpHandler full environment", () => {
   });
 
   it("should prefer the environment variables", () => {
-    createHttpHandler(undefined);
+    createHttpHandler(undefined, undefined);
 
-    expect(HttpHandler).toHaveBeenCalledWith("https://env.example.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "env-api-key",
-      "x-custom-header": "custom-value",
-    });
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://env.example.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-api-key": "env-api-key",
+        "x-custom-header": "custom-value",
+      },
+      120_000,
+    );
   });
 
   it("should prefer the api key parameter over the environment variable", () => {
-    createHttpHandler("my-api-key");
+    createHttpHandler("my-api-key", undefined, 30_000);
 
-    expect(HttpHandler).toHaveBeenCalledWith("https://env.example.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "my-api-key",
-      "x-custom-header": "custom-value",
-    });
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://env.example.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-api-key": "my-api-key",
+        "x-custom-header": "custom-value",
+      },
+      30_000,
+    );
   });
 
   afterAll(() => {
@@ -44,23 +52,31 @@ describe("createHttpHandler apiKey environment", () => {
   });
 
   it("should create an HttpHandler with the provided apiKey", () => {
-    createHttpHandler(undefined);
+    createHttpHandler(undefined, undefined);
 
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "env-api-key",
-    });
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://api.careevolutionapi.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-api-key": "env-api-key",
+      },
+      120_000,
+    );
   });
 
   it("should prefer the api key parameter over the environment variable", () => {
-    createHttpHandler("my-api-key");
+    createHttpHandler("my-api-key", undefined);
 
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "my-api-key",
-    });
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://api.careevolutionapi.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-api-key": "my-api-key",
+      },
+      120_000,
+    );
   });
 
   afterAll(() => {
@@ -68,24 +84,70 @@ describe("createHttpHandler apiKey environment", () => {
   });
 });
 
+describe("createHttpHandler timeoutMs environment", () => {
+  beforeAll(() => {
+    vi.stubEnv("ORCHESTRATE_API_KEY", "env-api-key");
+    vi.stubEnv("ORCHESTRATE_TIMEOUT_MS", "1000");
+  });
+
+  it("should create an HttpHandler with the provided timeout", () => {
+    createHttpHandler(undefined, undefined);
+
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://api.careevolutionapi.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-api-key": "env-api-key",
+      },
+      1_000,
+    );
+  });
+
+  it("should prefer the api key parameter over the environment variable", () => {
+    createHttpHandler(undefined, undefined, 2_000);
+
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://api.careevolutionapi.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-api-key": "env-api-key",
+      },
+      2_000,
+    );
+  });
+
+  afterAll(() => {
+    vi.unstubAllEnvs();
+  });
+});
 
 describe("createHttpHandler no environment", () => {
   it("should create an HttpHandler defaulted to api.careevolutionapi.com", () => {
-    createHttpHandler(undefined);
+    createHttpHandler(undefined, undefined);
 
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    });
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://api.careevolutionapi.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      120_000,
+    );
   });
 
   it("should create an HttpHandler with the provided apiKey", () => {
-    createHttpHandler("my-api-key");
+    createHttpHandler("my-api-key", undefined);
 
-    expect(HttpHandler).toHaveBeenCalledWith("https://api.careevolutionapi.com", {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      "x-api-key": "my-api-key",
-    });
+    expect(HttpHandler).toHaveBeenCalledWith(
+      "https://api.careevolutionapi.com",
+      {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "x-api-key": "my-api-key",
+      },
+      120_000,
+    );
   });
 });

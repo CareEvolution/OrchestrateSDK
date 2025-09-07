@@ -53,6 +53,7 @@ export class HttpHandler implements IHttpHandler {
   constructor(
     private baseUrl: string,
     private defaultHeaders: { [key: string]: string; },
+    private timeoutMs: number,
   ) { }
 
   private mergeHeaders(headers?: { [key: string]: string; }): { [key: string]: string; } {
@@ -80,6 +81,7 @@ export class HttpHandler implements IHttpHandler {
       method: "POST",
       headers: requestHeaders,
       body: preparedBody,
+      signal: this.timeoutMs ? AbortSignal.timeout(this.timeoutMs) : undefined,
     });
     if (!response.ok) {
       await errorFromResponse(response);
@@ -102,6 +104,7 @@ export class HttpHandler implements IHttpHandler {
     const response = await fetch(url, {
       method: "GET",
       headers: requestHeaders,
+      signal: this.timeoutMs ? AbortSignal.timeout(this.timeoutMs) : undefined,
     });
     if (!response.ok) {
       await errorFromResponse(response);

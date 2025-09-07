@@ -96,6 +96,7 @@ export type IdentityApiConfiguration = {
   url?: string | undefined;
   apiKey?: string | undefined;
   metricsKey?: string | undefined;
+  timeoutMs?: number | undefined;
 };
 
 function buildSourceIdentifierRoute(source: string, identifier: string): string {

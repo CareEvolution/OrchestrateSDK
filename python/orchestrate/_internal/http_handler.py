@@ -9,7 +9,6 @@ from orchestrate._internal.exceptions import (
     OrchestrateClientError,
     OrchestrateHttpError,
 )
-from orchestrate._internal.fhir import Bundle
 
 _BASE_URL_ENVIRONMENT_VARIABLE = "ORCHESTRATE_BASE_URL"
 _IDENTITY_URL_ENVIRONMENT_VARIABLE = "ORCHESTRATE_IDENTITY_URL"
@@ -20,6 +19,8 @@ _ADDITIONAL_HEADERS_ENVIRONMENT_VARIABLE = "ORCHESTRATE_ADDITIONAL_HEADERS"
 _API_KEY_ENVIRONMENT_VARIABLE = "ORCHESTRATE_API_KEY"
 _IDENTITY_API_KEY_ENVIRONMENT_VARIABLE = "ORCHESTRATE_IDENTITY_API_KEY"
 _IDENTITY_METRICS_KEY_ENVIRONMENT_VARIABLE = "ORCHESTRATE_IDENTITY_METRICS_KEY"
+_TIMEOUT_MS_ENVIRONMENT_VARIABLE = "ORCHESTRATE_TIMEOUT_MS"
+_TIMEOUT_MS_DEFAULT = 120_000
 
 
 def _get_priority_from_environment(
@@ -35,6 +36,21 @@ def _get_priority_base_url(base_url: Optional[str]) -> str:
         _get_priority_from_environment(base_url, _BASE_URL_ENVIRONMENT_VARIABLE)
         or "https://api.careevolutionapi.com"
     )
+
+
+def _get_priority_timeout_ms(timeout_ms: Optional[int]) -> int:
+    env_timeout = _get_priority_from_environment(
+        str(timeout_ms) if timeout_ms is not None else None,
+        _TIMEOUT_MS_ENVIRONMENT_VARIABLE,
+    )
+    if env_timeout is not None:
+        try:
+            return int(env_timeout)
+        except ValueError:
+            raise ArgumentError(
+                f"Invalid timeout value in environment variable '{_TIMEOUT_MS_ENVIRONMENT_VARIABLE}': {env_timeout}"
+            )
+    return timeout_ms if timeout_ms is not None else _TIMEOUT_MS_DEFAULT
 
 
 def _get_additional_headers() -> Mapping[str, str]:
@@ -112,9 +128,11 @@ class HttpHandler:
         self,
         base_url: str,
         default_headers: dict,
+        timeout_ms: int,
     ) -> None:
         self.base_url = base_url
         self.__default_headers = default_headers
+        self.__timeout_ms = timeout_ms
 
     def __repr__(self) -> str:
         return f"HttpHandler(base_url={self.base_url})"
@@ -141,6 +159,7 @@ class HttpHandler:
             data=prepared_body,
             headers=request_headers,
             params=parameters,
+            timeout=self.__timeout_ms / 1000,
         )
         try:
             response.raise_for_status()
@@ -170,6 +189,7 @@ class HttpHandler:
             url,
             headers=request_headers,
             params=parameters,
+            timeout=self.__timeout_ms / 1000,
         )
         try:
             response.raise_for_status()
@@ -185,9 +205,11 @@ class HttpHandler:
 def create_http_handler(
     api_key: Optional[str] = None,
     base_url: Optional[str] = None,
+    timeout_ms: Optional[int] = None,
 ) -> HttpHandler:
     additional_headers = _get_additional_headers()
     priority_base_url = _get_priority_base_url(base_url)
+    priority_timeout_ms = _get_priority_timeout_ms(timeout_ms)
     default_headers = {
         **(additional_headers or {}),
         "Accept": "application/json",
@@ -202,6 +224,7 @@ def create_http_handler(
     return HttpHandler(
         base_url=priority_base_url,
         default_headers=default_headers,
+        timeout_ms=priority_timeout_ms,
     )
 
 
@@ -209,12 +232,13 @@ def create_identity_http_handler(
     api_key: Optional[str] = None,
     metrics_key: Optional[str] = None,
     base_url: Optional[str] = None,
+    timeout_ms: Optional[int] = None,
 ) -> HttpHandler:
     additional_headers = _get_additional_headers()
     priority_url = _get_priority_from_environment(
         base_url, _IDENTITY_URL_ENVIRONMENT_VARIABLE
     )
-
+    priority_timeout_ms = _get_priority_timeout_ms(timeout_ms)
     default_headers = {
         **(additional_headers or {}),
         "Accept": "application/json",
@@ -241,14 +265,18 @@ def create_identity_http_handler(
     return HttpHandler(
         base_url=priority_url,
         default_headers=default_headers,
+        timeout_ms=priority_timeout_ms,
     )
 
 
-def create_local_hashing_http_handler(base_url: Optional[str] = None) -> HttpHandler:
+def create_local_hashing_http_handler(
+    base_url: Optional[str] = None, timeout_ms: Optional[int] = None
+) -> HttpHandler:
     additional_headers = _get_additional_headers()
     priority_url = _get_priority_from_environment(
         base_url, _IDENTITY_LOCAL_HASHING_URL_ENVIRONMENT_VARIABLE
     )
+    priority_timeout_ms = _get_priority_timeout_ms(timeout_ms)
 
     default_headers = {
         **(additional_headers or {}),
@@ -264,4 +292,5 @@ def create_local_hashing_http_handler(base_url: Optional[str] = None) -> HttpHan
     return HttpHandler(
         base_url=priority_url,
         default_headers=default_headers,
+        timeout_ms=priority_timeout_ms,
     )

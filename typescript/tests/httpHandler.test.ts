@@ -18,7 +18,7 @@ describe.concurrent("httpHandler outcomes", () => {
       contentType: "application/json",
       accept: "application/json",
       route: "/convert/v1/fhirstu3tofhirr4",
-      body: { "resourceType": "Patient" },
+      body: { resourceType: "Patient" },
       expectedMessage: "error: invalid - Expected a Bundle but found a Patient",
       id: "json",
     },
@@ -26,7 +26,7 @@ describe.concurrent("httpHandler outcomes", () => {
       contentType: "application/json",
       accept: "application/xml",
       route: "/convert/v1/fhirstu3tofhirr4",
-      body: { "resourceType": "Patient" },
+      body: { resourceType: "Patient" },
       expectedMessage: "Expected a Bundle but found a Patient",
       id: "xml",
     },
@@ -50,7 +50,7 @@ describe.concurrent("httpHandler outcomes", () => {
       contentType: "application/json",
       accept: "application/zip",
       route: "/convert/v1/fhirr4toomop",
-      body: { "resourceType": "Patient" },
+      body: { resourceType: "Patient" },
       expectedMessage: "Expected a Bundle but found a Patient",
       id: "zip",
     },
@@ -65,9 +65,10 @@ describe.concurrent("httpHandler outcomes", () => {
       Accept: "application/json",
       "x-api-key": environment.ORCHESTRATE_API_KEY,
     },
+    20_000,
   );
 
-  test.each(cases)("should classify single $input.id", async ({ input }: { input: OutcomeTestCase; }) => {
+  test.each(cases)("should classify single $input.id", async ({ input }: { input: OutcomeTestCase }) => {
     const { contentType, accept, route, body, expectedMessage } = input;
 
     expect(async () => {

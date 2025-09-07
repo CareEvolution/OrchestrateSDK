@@ -5,6 +5,7 @@ import { TerminologyApi } from "./terminology.js";
 
 export interface Configuration {
   apiKey?: string;
+  timeoutMs?: number;
 }
 
 export class OrchestrateApi {
@@ -13,7 +14,7 @@ export class OrchestrateApi {
   insight: InsightApi;
 
   constructor(configuration: Configuration | undefined = {}) {
-    const httpHandler = createHttpHandler(configuration.apiKey);
+    const httpHandler = createHttpHandler(configuration.apiKey, undefined, configuration.timeoutMs);
 
     this.terminology = new TerminologyApi(httpHandler);
     this.convert = new ConvertApi(httpHandler);

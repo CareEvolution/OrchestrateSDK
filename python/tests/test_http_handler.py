@@ -36,6 +36,44 @@ def test_api_base_url_unconfigured_should_default(monkeypatch):
     )
 
 
+def test_api_timeout_ms_in_environment_should_use_environment(monkeypatch):
+    mock_http_handler = Mock(HttpHandler)
+    monkeypatch.setattr(
+        "orchestrate._internal.http_handler.HttpHandler", mock_http_handler
+    )
+    monkeypatch.setenv("ORCHESTRATE_TIMEOUT_MS", "45000")
+
+    handler = create_http_handler()
+
+    assert handler is not None
+    assert mock_http_handler.call_args[1]["timeout_ms"] == 45000
+
+
+def test_api_timeout_ms_unconfigured_should_use_default(monkeypatch):
+    mock_http_handler = Mock(HttpHandler)
+    monkeypatch.setattr(
+        "orchestrate._internal.http_handler.HttpHandler", mock_http_handler
+    )
+
+    handler = create_http_handler()
+
+    assert handler is not None
+    assert mock_http_handler.call_args[1]["timeout_ms"] == 120000
+
+
+def test_api_timeout_ms_passed_should_prioritize(monkeypatch):
+    mock_http_handler = Mock(HttpHandler)
+    monkeypatch.setattr(
+        "orchestrate._internal.http_handler.HttpHandler", mock_http_handler
+    )
+    monkeypatch.setenv("ORCHESTRATE_TIMEOUT_MS", "45000")
+
+    handler = create_http_handler(timeout_ms=30000)
+
+    assert handler is not None
+    assert mock_http_handler.call_args[1]["timeout_ms"] == 30000
+
+
 def test_api_api_key_in_environment_should_use_environment(monkeypatch):
     mock_http_handler = Mock(HttpHandler)
     monkeypatch.setattr(
@@ -141,6 +179,7 @@ def test_http_handler_post_bad_request_should_throw_orchestrate_error(
             "Content-Type": "application/json",
             "Accept": "application/json",
         },
+        timeout_ms=60000,
     )
     with pytest.raises(OrchestrateClientError) as exc_info:
         handler.post(

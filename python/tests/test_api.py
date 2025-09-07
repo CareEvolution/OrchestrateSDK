@@ -1,6 +1,7 @@
 from io import BytesIO
 import json
 from pathlib import Path
+from tempfile import TemporaryFile
 from zipfile import ZipFile
 
 import pytest
@@ -1174,7 +1175,7 @@ def test_convert_fhir_r4_to_manifest__with_delimiter_should_have_csvs_and_expect
     assert result is not None
     assert isinstance(result, bytes)
     with ZipFile(BytesIO(result)) as zip_file:
-        with open("output.zip", "wb") as output_file:
+        with TemporaryFile() as output_file:
             output_file.write(result)
 
         assert all(
@@ -1196,3 +1197,9 @@ def test_convert_fhir_r4_to_manifest__with_delimiter_should_have_csvs_and_expect
             content = f.read().decode("utf-8")
             print(content)
             assert "|" in content
+
+
+def test_with_timeout_should_timeout():
+    api = OrchestrateApi(timeout_ms=1)
+    with pytest.raises(Exception):
+        api.convert.hl7_to_fhir_r4(content=HL7)

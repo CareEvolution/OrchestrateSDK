@@ -1,8 +1,7 @@
-from typing import Literal, Optional
+from typing import Literal, Optional, TypedDict, Union
 
 from orchestrate._internal.fhir import Bundle
 from orchestrate._internal.http_handler import HttpHandler
-from typing import Literal, TypedDict, Union
 from orchestrate._internal.fhir import (
     Measure,
     MeasureReport,
