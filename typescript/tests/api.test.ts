@@ -1,7 +1,7 @@
-import { OrchestrateApi } from '../src/api';
-import { hl7, cda, fhir, riskProfileBundle, x12Document, stu3FhirBundle, dstu2FhirBundle, nemsisBundle } from './data';
-import dotenv from 'dotenv';
-import { Binary, Bundle, BundleEntry, Encounter, Observation, Patient } from 'fhir/r4';
+import { OrchestrateApi } from "../src/api";
+import { hl7, cda, fhir, riskProfileBundle, x12Document, stu3FhirBundle, dstu2FhirBundle, nemsisBundle } from "./data";
+import dotenv from "dotenv";
+import { Binary, Bundle, BundleEntry, Encounter, Observation, Patient } from "fhir/r4";
 import {
   ClassifyConditionRequest,
   ClassifyMedicationRequest,
@@ -26,7 +26,7 @@ describe("classify condition", () => {
     },
   ];
   const cases = requests.map((input) => ({ input }));
-  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyConditionRequest; }) => {
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyConditionRequest }) => {
     const result = await orchestrate.terminology.classifyCondition(input);
     expect(result).toBeDefined();
     expect(result.cciAcute).toBeTruthy();
@@ -54,7 +54,7 @@ describe("classify medication", () => {
     },
   ];
   const cases = requests.map((input) => ({ input }));
-  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyMedicationRequest; }) => {
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyMedicationRequest }) => {
     const result = await orchestrate.terminology.classifyMedication(input);
     expect(result).toBeDefined();
     expect(result.rxNormGeneric).toBeTruthy();
@@ -82,7 +82,7 @@ describe("classify observation", () => {
     },
   ];
   const cases = requests.map((input) => ({ input }));
-  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyObservationRequest; }) => {
+  test.each(cases)("should classify single $input", async ({ input }: { input: ClassifyObservationRequest }) => {
     const result = await orchestrate.terminology.classifyObservation(input);
     expect(result).toBeDefined();
     expect(result.loincClass).toBe("MICRO");
@@ -114,7 +114,7 @@ describe("standardize condition", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
       const result = await orchestrate.terminology.standardizeCondition(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -146,7 +146,7 @@ describe("standardize lab", () => {
   const cases = requests.map((input, index) => ({ input, expected: expected[index] }));
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
       const result = await orchestrate.terminology.standardizeLab(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -184,7 +184,7 @@ describe("standardize medication", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
       const result = await orchestrate.terminology.standardizeMedication(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -217,7 +217,7 @@ describe("standardize observation", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
       const result = await orchestrate.terminology.standardizeObservation(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -250,7 +250,7 @@ describe("standardize procedure", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
       const result = await orchestrate.terminology.standardizeProcedure(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -284,7 +284,7 @@ describe("standardize radiology", () => {
 
   test.each(cases)(
     "should standardize single $input",
-    async ({ input, expected }: { input: StandardizeRequest; expected: string; }) => {
+    async ({ input, expected }: { input: StandardizeRequest; expected: string }) => {
       const result = await orchestrate.terminology.standardizeRadiology(input);
       expect(result).toBeDefined();
       expect(result.coding.length).toBeGreaterThan(0);
@@ -343,8 +343,8 @@ describe("convert hl7 to fhir r4", () => {
 
     expect(
       patient.identifier?.[0]?.use === "usual" &&
-      patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
-      patient.identifier?.[0]?.value === "1234"
+        patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+        patient.identifier?.[0]?.value === "1234",
     ).toBe(true);
   });
 
@@ -357,7 +357,8 @@ describe("convert hl7 to fhir r4", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    const encounter = result.entry?.find((entry) => entry.resource?.resourceType === "Encounter")?.resource as Encounter;
+    const encounter = result.entry?.find((entry) => entry.resource?.resourceType === "Encounter")
+      ?.resource as Encounter;
     expect(encounter).toBeDefined();
     expect(encounter?.period?.start).toBe("2014-11-07T14:40:00-05:00");
   });
@@ -370,12 +371,13 @@ describe("convert hl7 to fhir r4", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    const encounter = result.entry?.find((entry) => entry.resource?.resourceType === "Encounter")?.resource as Encounter;
+    const encounter = result.entry?.find((entry) => entry.resource?.resourceType === "Encounter")
+      ?.resource as Encounter;
     expect(encounter).toBeDefined();
     expect(encounter?.period?.start).toBe("2014-11-07T14:40:00+00:00");
   });
 
-  const labHl7 = (`
+  const labHl7 = `
 MSH|^~\&|||||20220309050000||ORU^R01|||2.7
 PID|1||123456||LastName^FirstName|||||||||||||5678
 PV1|1|I||||||||||||||||||||||||||||||||||||||||||20220309050000
@@ -390,8 +392,8 @@ OBX|6|ST|^MCH^LAB|1|33.1|PG|25.4-34.6||||F|||202203091347|R^ROUTINE LAB|2222^ORD
 OBX|7|ST|^MCHC^LAB|1|34.3|GM/DL|30-37||||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
 OBX|8|ST|^RDW^LAB|1|17.9|%|11.5-14.5|H|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
 OBX|9|ST|^PLATELETS^LAB|1|125|K/UL|130-400|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
-`)
-  const transcriptionHl7 = (`
+`;
+  const transcriptionHl7 = `
 MSH|^~\&||TX|||20110706100000||ORU^R01|||2.3
 PID|1||123456||LastName^FirstName||20000101|M||||||||||7890
 PV1|1|I||||||||||||||||||||||||||||||||||||||||||20110706100000
@@ -401,16 +403,17 @@ OBX|1|ST|&GDT^^GDT||Line 1||||||F
 OBX|2|ST|&GDT^Label^GDT||Line 2||||||F
 OBX|3|ST|&GDT^&Not a Label^GDT||Line 3||||||F
 OBX|4|ST|Dictation TS|2|Dictated by: Tue Mar 18, 2025  1:06:45 PM EDT [INTERFACE, INCOMING RADIANT IMAGE AVAILABILITY]||||||Final|||||E175762^MILLER^AMANDA^^^^^^PROVID^^^^PROVID^^^^^^^^RT|||||||||
-`)
+`;
   it("should convert lab hl7 with hint", async () => {
     const result = await orchestrate.convert.hl7ToFhirR4({
-      content: labHl7, processingHint: "lab",
+      content: labHl7,
+      processingHint: "lab",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
     const observations = result.entry?.filter(
-      (entry) => entry.resource?.resourceType === "Observation"
+      (entry) => entry.resource?.resourceType === "Observation",
     ) as BundleEntry<Observation>[];
     expect(observations.length).toBe(9);
   });
@@ -420,14 +423,15 @@ OBX|4|ST|Dictation TS|2|Dictated by: Tue Mar 18, 2025  1:06:45 PM EDT [INTERFACE
       content: labHl7,
     });
     const defaultResult = await orchestrate.convert.hl7ToFhirR4({
-      content: labHl7, processingHint: "default",
+      content: labHl7,
+      processingHint: "default",
     });
     for (const result of [unhintedResult, defaultResult]) {
       expect(result).toBeDefined();
       expect(result.resourceType).toBe("Bundle");
       expect(result.entry?.length).toBeGreaterThan(0);
       const observations = result.entry?.filter(
-        (entry) => entry.resource?.resourceType === "Observation"
+        (entry) => entry.resource?.resourceType === "Observation",
       ) as BundleEntry<Observation>[];
       expect(observations.length).toBe(0);
     }
@@ -435,13 +439,14 @@ OBX|4|ST|Dictation TS|2|Dictated by: Tue Mar 18, 2025  1:06:45 PM EDT [INTERFACE
 
   it("should convert transcription hl7", async () => {
     const result = await orchestrate.convert.hl7ToFhirR4({
-      content: transcriptionHl7, processingHint: "transcription",
+      content: transcriptionHl7,
+      processingHint: "transcription",
     });
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
     const binaries = result.entry?.filter(
-      (entry) => entry.resource?.resourceType === "Binary"
+      (entry) => entry.resource?.resourceType === "Binary",
     ) as BundleEntry<Binary>[];
     expect(binaries.length).toBe(1);
   });
@@ -451,14 +456,15 @@ OBX|4|ST|Dictation TS|2|Dictated by: Tue Mar 18, 2025  1:06:45 PM EDT [INTERFACE
       content: transcriptionHl7,
     });
     const defaultResult = await orchestrate.convert.hl7ToFhirR4({
-      content: transcriptionHl7, processingHint: "default",
+      content: transcriptionHl7,
+      processingHint: "default",
     });
     for (const result of [unhintedResult, defaultResult]) {
       expect(result).toBeDefined();
       expect(result.resourceType).toBe("Bundle");
       expect(result.entry?.length).toBeGreaterThan(0);
       const binaries = result.entry?.filter(
-        (entry) => entry.resource?.resourceType === "Binary"
+        (entry) => entry.resource?.resourceType === "Binary",
       ) as BundleEntry<Binary>[];
       expect(binaries.length).toBe(0);
     }
@@ -483,14 +489,9 @@ describe("convert cda to fhir r4", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    const documentReferences = result.entry?.filter(
-      (entry) => entry.resource?.resourceType === "DocumentReference"
-    );
-    const standardizedCdaDocumentReference = documentReferences?.find(
-      (docRef) =>
-        (docRef.resource)?.type?.coding?.some(
-          (coding) => coding.code === "StandardizedCda"
-        )
+    const documentReferences = result.entry?.filter((entry) => entry.resource?.resourceType === "DocumentReference");
+    const standardizedCdaDocumentReference = documentReferences?.find((docRef) =>
+      docRef.resource?.type?.coding?.some((coding) => coding.code === "StandardizedCda"),
     );
     expect(standardizedCdaDocumentReference).toBeDefined();
   });
@@ -503,14 +504,9 @@ describe("convert cda to fhir r4", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    const documentReferences = result.entry?.filter(
-      (entry) => entry.resource?.resourceType === "DocumentReference"
-    );
-    const standardizedCdaDocumentReference = documentReferences?.find(
-      (docRef) =>
-        (docRef.resource)?.type?.coding?.some(
-          (coding) => coding.code === "Cda"
-        )
+    const documentReferences = result.entry?.filter((entry) => entry.resource?.resourceType === "DocumentReference");
+    const standardizedCdaDocumentReference = documentReferences?.find((docRef) =>
+      docRef.resource?.type?.coding?.some((coding) => coding.code === "Cda"),
     );
     expect(standardizedCdaDocumentReference).toBeDefined();
   });
@@ -546,8 +542,8 @@ it("should convert cda with patientIdentifierAndSystem", async () => {
 
   expect(
     patient.identifier?.[0]?.use === "usual" &&
-    patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
-    patient.identifier?.[0]?.value === "1234"
+      patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+      patient.identifier?.[0]?.value === "1234",
   ).toBe(true);
 });
 
@@ -625,11 +621,10 @@ it("should convert x12 with patientIdentifierAndSystem", async () => {
 
   expect(
     patient.identifier?.[0]?.use === "usual" &&
-    patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
-    patient.identifier?.[0]?.value === "1234"
+      patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+      patient.identifier?.[0]?.value === "1234",
   ).toBe(true);
 });
-
 
 describe("insight risk profile", () => {
   it("should return a bundle", async () => {
@@ -904,21 +899,22 @@ ${JSON.stringify(fhir)}
 
   expect(
     patient.identifier?.[0]?.use === "usual" &&
-    patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
-    patient.identifier?.[0]?.value === "1234"
+      patient.identifier?.[0]?.system?.includes("GoodHealthClinic") &&
+      patient.identifier?.[0]?.value === "1234",
   ).toBe(true);
 });
 
 describe("convert fhir stu3 to fhir r4", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.fhirStu3ToFhirR4({
-      content: stu3FhirBundle
+      content: stu3FhirBundle,
     });
 
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient")?.resource as Patient;
+    const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient")
+      ?.resource as Patient;
     expect(patientResource).toBeDefined();
     const expectedIdentifier = patientResource?.identifier?.find((identifier) => identifier.id === "id3");
     expect(expectedIdentifier).toBeDefined();
@@ -929,13 +925,14 @@ describe("convert fhir stu3 to fhir r4", () => {
 describe("convert fhir dstu2 to fhir r4", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.fhirDstu2ToFhirR4({
-      content: dstu2FhirBundle
+      content: dstu2FhirBundle,
     });
 
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient")?.resource as Patient;
+    const patientResource = result.entry?.find((entry) => entry.resource?.resourceType === "Patient")
+      ?.resource as Patient;
     expect(patientResource).toBeDefined();
     const expectedIdentifier = patientResource?.identifier?.find((identifier) => identifier.id === "id3");
     expect(expectedIdentifier).toBeDefined();
@@ -946,7 +943,7 @@ describe("convert fhir dstu2 to fhir r4", () => {
 describe("convert fhir r4 to health lake", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.fhirR4ToHealthLake({
-      content: fhir
+      content: fhir,
     });
 
     expect(result).toBeDefined();
@@ -962,7 +959,7 @@ describe("convert fhir r4 to health lake", () => {
 describe("convert cda to html", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.cdaToHtml({
-      content: cda
+      content: cda,
     });
 
     expect(result).toBeDefined();
@@ -973,7 +970,7 @@ describe("convert cda to html", () => {
 describe("convert fhir r4 to nemsis v34", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.fhirR4ToNemsisV34({
-      content: nemsisBundle
+      content: nemsisBundle,
     });
 
     expect(result).toBeDefined();
@@ -985,7 +982,7 @@ describe("convert fhir r4 to nemsis v34", () => {
 describe("convert fhir r4 to nemsis v35", () => {
   it("should convert", async () => {
     const result = await orchestrate.convert.fhirR4ToNemsisV35({
-      content: nemsisBundle
+      content: nemsisBundle,
     });
 
     expect(result).toBeDefined();
@@ -1016,5 +1013,16 @@ describe("convert fhir r4 to manifest", async () => {
     console.log(typeof result);
     const resultIntegers = new Int8Array(result);
     expect(resultIntegers.slice(0, 4)).toStrictEqual(pkZipMagicNumber);
+  });
+});
+
+describe("timeout specified", () => {
+  const timeoutApi = new OrchestrateApi({ timeoutMs: 1 });
+  it("should timeout", async () => {
+    await expect(
+      timeoutApi.terminology.getFhirR4CodeSystem({
+        codeSystem: "SNOMED",
+      }),
+    ).rejects.toThrow("timeout");
   });
 });

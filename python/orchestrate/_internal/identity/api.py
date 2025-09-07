@@ -121,9 +121,13 @@ class IdentityApi:
         url: Optional[str] = None,
         api_key: Optional[str] = None,
         metrics_key: Optional[str] = None,
+        timeout_ms: Optional[int] = None,
     ) -> None:
         self.__http_handler = create_identity_http_handler(
-            api_key=api_key, metrics_key=metrics_key, base_url=url
+            api_key=api_key,
+            metrics_key=metrics_key,
+            base_url=url,
+            timeout_ms=timeout_ms,
         )
         self.monitoring = IdentityMonitoringApi(self.__http_handler)
 
@@ -490,7 +494,7 @@ class IdentityApi:
         **kwargs,
     ) -> MatchBlindedDemographicsResponse:
         request = _get_blinded_request(*args, **kwargs)
-        return self.__http_handler.post(f"/mpi/v1/matchBlinded", body=request)
+        return self.__http_handler.post("/mpi/v1/matchBlinded", body=request)
 
     def delete_record(self, source: str, identifier: str) -> DeleteRecordResponse:
         """
