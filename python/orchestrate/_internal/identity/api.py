@@ -138,7 +138,7 @@ class IdentityApi:
     def _http_handler(self) -> HttpHandler:
         """
         Exposes the underlying HttpHandler instance for advanced usage. This is
-        made available to take avdantage of features not yet wrapped in
+        made available to take advantage of features not yet wrapped in
         IdentityApi. This may change without warning.
         """
         return self.__http_handler
