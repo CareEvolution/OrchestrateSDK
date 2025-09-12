@@ -1,6 +1,6 @@
 from typing import Any, Callable, Literal, Optional, TypedDict, Union, overload
 from urllib.parse import quote_plus
-from orchestrate._internal.http_handler import create_identity_http_handler
+from orchestrate._internal.http_handler import HttpHandler, create_identity_http_handler
 from orchestrate._internal.identity.advisories import Advisories
 from orchestrate._internal.identity.demographic import (
     Demographic,
@@ -133,6 +133,15 @@ class IdentityApi:
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(base_url={self.__http_handler.base_url!r})"
+
+    @property
+    def _http_handler(self) -> HttpHandler:
+        """
+        Exposes the underlying HttpHandler instance for advanced usage. This is
+        made available to take advantage of features not yet wrapped in
+        IdentityApi. This may change without warning.
+        """
+        return self.__http_handler
 
     def __demographic_api_method_overload_handler(
         self, *args, **kwargs

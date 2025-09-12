@@ -104,16 +104,24 @@ function buildSourceIdentifierRoute(source: string, identifier: string): string 
 }
 
 export class IdentityApi {
-  private httpHandler: IHttpHandler;
+  /**
+   * Exposes the underlying IHttpHandler instance for advanced usage. This is
+   * made available to take advantage of features not yet wrapped in
+   * OrchestrateApi. This may change without warning.
+   * @deprecated Not a stable API.
+   */
+  public readonly httpHandler: IHttpHandler;
+  private readonly _httpHandler: IHttpHandler;
   public monitoring: IdentityMonitoringApi;
 
   constructor(configuration: IdentityApiConfiguration = {}) {
-    this.httpHandler = createIdentityHttpHandler(configuration.apiKey, configuration.metricsKey, configuration.url);
-    this.monitoring = new IdentityMonitoringApi(this.httpHandler);
+    this._httpHandler = createIdentityHttpHandler(configuration.apiKey, configuration.metricsKey, configuration.url);
+    this.httpHandler = this._httpHandler;
+    this.monitoring = new IdentityMonitoringApi(this._httpHandler);
   }
 
   toString(): string {
-    return `IdentityApi(${this.httpHandler.toString()})`;
+    return `IdentityApi(${this._httpHandler.toString()})`;
   }
 
   /**
@@ -127,7 +135,7 @@ export class IdentityApi {
    */
   public async addOrUpdateRecord(request: AddOrUpdateRecordRequest): Promise<AddOrUpdateRecordResponse> {
     const sourceIdentifierRoute = buildSourceIdentifierRoute(request.source, request.identifier);
-    return this.httpHandler.post(`/mpi/v1/record/${sourceIdentifierRoute}`, request.demographic);
+    return this._httpHandler.post(`/mpi/v1/record/${sourceIdentifierRoute}`, request.demographic);
   }
 
   /**
@@ -146,7 +154,7 @@ export class IdentityApi {
       data: request.blindedDemographic.data,
       version: request.blindedDemographic.version
     };
-    return this.httpHandler.post(`/mpi/v1/blindedRecord/${sourceIdentifierRoute}`, payload);
+    return this._httpHandler.post(`/mpi/v1/blindedRecord/${sourceIdentifierRoute}`, payload);
   }
 
   /**
@@ -159,7 +167,7 @@ export class IdentityApi {
    */
   public async getPersonByRecord(request: GetPersonByRecordRequest): Promise<GetPersonByRecordResponse> {
     const sourceIdentifierRoute = buildSourceIdentifierRoute(request.source, request.identifier);
-    return this.httpHandler.get(`/mpi/v1/record/${sourceIdentifierRoute}`);
+    return this._httpHandler.get(`/mpi/v1/record/${sourceIdentifierRoute}`);
   }
 
   /**
@@ -170,7 +178,7 @@ export class IdentityApi {
    * @link https://orchestrate.docs.careevolution.com/identity/operations/get_person_by_id.html
    */
   public async getPersonByID(request: GetPersonByIDRequest): Promise<GetPersonByIDResponse> {
-    return this.httpHandler.get(`/mpi/v1/person/${encodeURIComponent(request.id)}`);
+    return this._httpHandler.get(`/mpi/v1/person/${encodeURIComponent(request.id)}`);
   }
 
   /**
@@ -180,7 +188,7 @@ export class IdentityApi {
    * @link https://orchestrate.docs.careevolution.com/identity/operations/match_demographics.html
    */
   public async matchDemographics(demographic: MatchDemographicsRequest): Promise<MatchDemographicsResponse> {
-    return this.httpHandler.post("/mpi/v1/match", demographic);
+    return this._httpHandler.post("/mpi/v1/match", demographic);
   }
 
   /**
@@ -190,7 +198,7 @@ export class IdentityApi {
    * @link https://orchestrate.docs.careevolution.com/identity/operations/match_demographics_blinded.html
    */
   public async matchBlindedDemographics(demographic: MatchBlindedDemographicRequest): Promise<MatchBlindedDemographicsResponse> {
-    return this.httpHandler.post("/mpi/v1/matchBlinded", demographic);
+    return this._httpHandler.post("/mpi/v1/matchBlinded", demographic);
   }
 
   /**
@@ -203,7 +211,7 @@ export class IdentityApi {
    */
   public async deleteRecord(request: DeleteRecordRequest): Promise<DeleteRecordResponse> {
     const sourceIdentifierRoute = buildSourceIdentifierRoute(request.source, request.identifier);
-    return this.httpHandler.post(`/mpi/v1/deleteRecord/${sourceIdentifierRoute}`, {});
+    return this._httpHandler.post(`/mpi/v1/deleteRecord/${sourceIdentifierRoute}`, {});
   }
 
   /**
@@ -217,7 +225,7 @@ export class IdentityApi {
    * @link https://orchestrate.docs.careevolution.com/identity/operations/add_guidance.html
    */
   public async addMatchGuidance(request: AddMatchGuidanceRequest): Promise<AddMatchGuidanceResponse> {
-    return this.httpHandler.post(`/mpi/v1/addGuidance`, request);
+    return this._httpHandler.post(`/mpi/v1/addGuidance`, request);
   }
 
   /**
@@ -230,7 +238,7 @@ export class IdentityApi {
    * @link https://orchestrate.docs.careevolution.com/identity/operations/remove_guidance.html
    */
   public async removeMatchGuidance(request: RemoveMatchGuidanceRequest): Promise<RemoveMatchGuidanceResponse> {
-    return this.httpHandler.post(`/mpi/v1/removeGuidance`, request);
+    return this._httpHandler.post(`/mpi/v1/removeGuidance`, request);
   }
 
 
