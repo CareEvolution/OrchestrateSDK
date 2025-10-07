@@ -6,23 +6,70 @@ export interface IHttpHandler {
 }
 
 class OperationalOutcomeIssue {
-  severity: string | undefined;
-  code: string | undefined;
-  diagnostics: string | undefined;
+  severity: string;
+  code: string;
+  diagnostics: string;
+  details: string;
+
+  constructor(severity: string, code: string, diagnostics: string, details: string) {
+    this.severity = severity;
+    this.code = code;
+    this.diagnostics = diagnostics;
+    this.details = details;
+  }
+
+  toString(): string {
+    let s = `${this.severity}: ${this.code}`;
+    const message = [this.details, this.diagnostics]
+      .filter(msg => msg)
+      .join("; ");
+    if (message) {
+      s += ` - ${message}`;
+    }
+    return s;
+  }
+}
+
+function getIssueDetailString(detail: any): string { // eslint-disable-line @typescript-eslint/no-explicit-any
+  if (detail?.text) {
+    return detail.text;
+  }
+  if (detail?.coding && Array.isArray(detail.coding)) {
+    for (const coding of detail.coding) {
+      const codingString = getDetailCodingString(coding);
+      if (codingString) {
+        return codingString;
+      }
+    }
+  }
+  return "";
+}
+
+function getDetailCodingString(coding: any): string { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const parts = [coding?.code, coding?.display].filter(s => s);
+  return parts.join(": ");
 }
 
 async function readJsonOutcomes(responseText: string): Promise<OperationalOutcomeIssue[]> {
   try {
     const json = JSON.parse(responseText);
     if (json.issue) {
-      return json.issue;
+      return json.issue.map((issue: any) => // eslint-disable-line @typescript-eslint/no-explicit-any
+        new OperationalOutcomeIssue(
+          issue.severity || "",
+          issue.code || "",
+          issue.diagnostics || "",
+          getIssueDetailString(issue.details || {})
+        )
+      );
     }
     if (json.type === "https://tools.ietf.org/html/rfc9110#section-15.5.1") {
-      return [{
-        severity: "error",
-        code: json.title,
-        diagnostics: json.detail,
-      }];
+      return [new OperationalOutcomeIssue(
+        "error",
+        json.title || "",
+        json.detail || "",
+        ""
+      )];
     }
     return [];
   }
@@ -34,7 +81,7 @@ async function readJsonOutcomes(responseText: string): Promise<OperationalOutcom
 async function readOperationalOutcomes(responseText: string): Promise<string[]> {
   const outcomes = await readJsonOutcomes(responseText);
   if (outcomes.length > 0) {
-    return outcomes.map((o) => `${o.severity}: ${o.code} - ${o.diagnostics}`);
+    return outcomes.map((o) => o.toString());
   }
   return [responseText];
 }

@@ -65,9 +65,16 @@ class _OperationalOutcomeIssue:
     severity: str
     code: str
     diagnostics: str
+    details: str
 
     def __str__(self) -> str:
-        return f"{self.severity}: {self.code} - {self.diagnostics}"
+        s = f"{self.severity}: {self.code}"
+        message = "; ".join(
+            message for message in [self.details, self.diagnostics] if message
+        )
+        if message:
+            s += f" - {message}"
+        return s
 
 
 def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcomeIssue]:
@@ -79,6 +86,7 @@ def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcome
                     issue.get("severity", ""),
                     issue.get("code", ""),
                     issue.get("diagnostics", ""),
+                    _get_issue_detail_string(issue.get("details", {})),
                 )
                 for issue in json_response["issue"]
             ]
@@ -91,12 +99,27 @@ def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcome
                     severity="error",
                     code=json_response.get("title", ""),
                     diagnostics=json_response.get("detail", ""),
+                    details="",
                 )
             ]
     except Exception:
         pass
 
     return []
+
+
+def _get_issue_detail_string(detail: dict) -> str:
+    if "text" in detail:
+        return detail["text"]
+    return next(
+        (_get_detail_coding_string(coding) for coding in detail.get("coding", [])), ""
+    )
+
+
+def _get_detail_coding_string(coding: dict) -> str:
+    return ": ".join(
+        s for s in [coding.get("code", ""), coding.get("display", "")] if s
+    )
 
 
 def _read_operational_outcomes(response: requests.Response) -> list[str]:

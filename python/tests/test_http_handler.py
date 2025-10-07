@@ -157,6 +157,14 @@ _OUTCOME_POST_TEST_DATA = [
         "Expected a Bundle but found a Patient",
         id="zip",
     ),
+    pytest.param(
+        "application/hl7-v2+er7",
+        "application/json",
+        "/convert/v1/hl7tofhirr4",
+        "MSH|^~\&||CHOA|||20251006103053||ADT^A40|156753805|P|2.5.1|InsertSequenceNumberHere",
+        "Message type 'ADT^A40' is not supported",
+        id="hl7",
+    ),
 ]
 
 
