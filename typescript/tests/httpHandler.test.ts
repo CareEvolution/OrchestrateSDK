@@ -54,6 +54,14 @@ describe.concurrent("httpHandler outcomes", () => {
       expectedMessage: "Expected a Bundle but found a Patient",
       id: "zip",
     },
+    {
+      contentType: "application/hl7-v2+er7",
+      accept: "application/json",
+      route: "/convert/v1/hl7tofhirr4",
+      body: "MSH|^~\&||CHOA|||20251006103053||ADT^A40|156753805|P|2.5.1|InsertSequenceNumberHere",
+      expectedMessage: "Message type 'ADT^A40' is not supported",
+      id: "hl7",
+    },
   ];
   const cases = testCases.map((input) => ({ input }));
 
@@ -71,7 +79,7 @@ describe.concurrent("httpHandler outcomes", () => {
   test.each(cases)("should classify single $input.id", async ({ input }: { input: OutcomeTestCase }) => {
     const { contentType, accept, route, body, expectedMessage } = input;
 
-    expect(async () => {
+    await expect(async () => {
       await handler.post(route, body, { "Content-Type": contentType, Accept: accept });
     }).rejects.toThrowError(expectedMessage);
   });
