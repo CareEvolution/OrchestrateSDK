@@ -303,6 +303,16 @@ describe("standardize radiology", () => {
   });
 });
 
+describe("standardize bundle", () => {
+  it("should standardize bundle", async () => {
+    const result = await orchestrate.terminology.standardizeBundle(fhir);
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry).toBeDefined();
+    expect(result.entry!.length).toBeGreaterThan(0);
+  });
+});
+
 describe("convert hl7 to fhir r4", () => {
   it("should convert hl7", async () => {
     const result = await orchestrate.convert.hl7ToFhirR4({

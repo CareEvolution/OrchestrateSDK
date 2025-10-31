@@ -12,6 +12,7 @@ else:
     from typing import Literal, TypedDict, NotRequired
 
 from orchestrate._internal.fhir import (
+    Bundle,
     CodeableConcept,
     CodeSystem,
     Coding,
@@ -187,6 +188,8 @@ StandardizeProcedureResponse = StandardizeResponse
 StandardizeLabResponse = StandardizeResponse
 
 StandardizeRadiologyResponse = StandardizeResponse
+
+StandardizeBundleResponse = Bundle
 
 CodeSystems = Literal[
     "ICD-10-CM",
@@ -1148,6 +1151,30 @@ class TerminologyApi:
         url = "/terminology/v1/standardize/radiology"
         overload_handler = self._handle_batch_overloaded_request(*args, **kwargs)
         return overload_handler(url)
+
+    def standardize_bundle(
+        self,
+        bundle: Bundle,
+    ) -> StandardizeBundleResponse:
+        """
+        Standardize a FHIR R4 Bundle containing resources with coded elements
+
+        ### Parameters
+
+        - `bundle`: A FHIR R4 Bundle resource containing resources to be standardized
+
+        ### Returns
+
+        A FHIR R4 Bundle with standardized codes
+
+        ### Documentation
+
+        TO BE DETERMINED
+        """
+        return self.__http_handler.post(
+            path="/terminology/v1/standardize/fhir/r4",
+            body=bundle,
+        )
 
     def get_fhir_r4_code_system(
         self,

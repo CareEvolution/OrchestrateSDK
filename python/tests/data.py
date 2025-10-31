@@ -1,6 +1,3 @@
-from orchestrate._internal.fhir import Bundle
-
-
 R4_BUNDLE = {
     "resourceType": "Bundle",
     "type": "batch-response",

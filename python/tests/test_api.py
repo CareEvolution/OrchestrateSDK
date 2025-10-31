@@ -462,6 +462,15 @@ def test_api_standardize_radiology_should_standardize_batch() -> None:
     assert any(coding["code"] == expected[1] for coding in response[1]["coding"])
 
 
+def test_api_standardize_bundle_should_standardize():
+    response = TEST_API.terminology.standardize_bundle(bundle=R4_BUNDLE)
+
+    assert response is not None
+    assert response["resourceType"] == "Bundle"
+    assert "entry" in response
+    assert len(response["entry"]) > 0
+
+
 def test_api_convert_hl7_to_fhir_r4_without_patient_should_convert():
     result = TEST_API.convert.hl7_to_fhir_r4(content=HL7)
 
