@@ -64,6 +64,8 @@ export type StandardizeLabResponse = StandardizeResponse;
 
 export type StandardizeRadiologyResponse = StandardizeResponse;
 
+export type StandardizeBundleResponse = Bundle;
+
 export type ClassifyRequest = Coding;
 
 const classifyConditionSystems = [
@@ -597,6 +599,16 @@ export class TerminologyApi {
     request: StandardizeRequest | StandardizeRequest[],
   ): Promise<StandardizeRadiologyResponse | StandardizeRadiologyResponse[]> {
     return this.handleBatchOverload("/terminology/v1/standardize/radiology", request);
+  }
+
+  /**
+   * Standardize a FHIR R4 Bundle containing resources with coded elements
+   * @param bundle A FHIR R4 Bundle resource containing resources to be standardized
+   * @returns A FHIR R4 Bundle with uplifted codes
+   * @link TO BE DETERMINED
+   */
+  standardizeBundle(bundle: Bundle): Promise<StandardizeBundleResponse> {
+    return this.httpHandler.post("/terminology/v1/standardize/fhir/r4", bundle);
   }
 
   /**
