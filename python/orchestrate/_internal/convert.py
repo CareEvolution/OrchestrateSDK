@@ -493,7 +493,7 @@ class ConvertApi:
         - `delimiter`: The delimiter to use in the CSV files. Allowed delimiters are | or ~ or ^ or ; Default delimiter is ,
         - `source`: The source of the FHIR R4 bundle to be included in the provenance file
         - `patient_identifier`: The identifier to use as patient.identifier in patient manifest. If this is not provided, the default identifier from the patient resource in bundle is used
-        - `setting`: This is a pre-coordinated value to allow an API user to control manifest output in terms of the columns included in a specific manifest file or the order of the columns. If not provided, expect the default manifest output, as documented
+        - `setting`: Allows an API user to control the manifest output. Contact support for available options
 
         ### Returns
 
