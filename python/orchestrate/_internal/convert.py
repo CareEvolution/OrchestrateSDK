@@ -479,6 +479,8 @@ class ConvertApi:
         content: Bundle,
         delimiter: Optional[str] = None,
         source: Optional[str] = None,
+        patient_identifier: Optional[str] = None,
+        setting: Optional[str] = None,
     ) -> ConvertFhirR4ToManifestResponse:
         """
         Generates a tabular report of clinical concepts from a FHIR R4
@@ -490,6 +492,8 @@ class ConvertApi:
         - `content`: A FHIR R4 bundle
         - `delimiter`: The delimiter to use in the CSV files. Allowed delimiters are | or ~ or ^ or ; Default delimiter is ,
         - `source`: The source of the FHIR R4 bundle to be included in the provenance file
+        - `patient_identifier`: The identifier to use as patient.identifier in patient manifest. If this is not provided, the default identifier from the patient resource in bundle is used
+        - `setting`: Allows an API user to control the manifest output. Contact support for available options
 
         ### Returns
 
@@ -508,6 +512,14 @@ class ConvertApi:
         parameters = {
             **parameters,
             **_get_id_dependent_parameters("source", source),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("patientIdentifier", patient_identifier),
+        }
+        parameters = {
+            **parameters,
+            **_get_id_dependent_parameters("setting", setting),
         }
         return self.__http_handler.post(
             path="/convert/v1/fhirr4tomanifest",

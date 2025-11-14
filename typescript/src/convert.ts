@@ -112,6 +112,8 @@ export type ConvertFhirR4ToManifestRequest = {
   content: Bundle;
   delimiter?: string;
   source?: string;
+  patientIdentifier?: string;
+  setting?: string;
 };
 
 export type ConvertFhirR4ToManifestResponse = ArrayBuffer;
@@ -396,6 +398,12 @@ export class ConvertApi {
     }
     if (request.source) {
       parameters.append("source", request.source);
+    }
+    if (request.patientIdentifier) {
+      parameters.append("patientIdentifier", request.patientIdentifier);
+    }
+    if (request.setting) {
+      parameters.append("setting", request.setting);
     }
     let route = "/convert/v1/fhirr4tomanifest";
     if (parameters.size) {
