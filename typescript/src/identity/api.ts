@@ -6,7 +6,7 @@ import { IdentityMonitoringApi } from "./monitoring.js";
 
 export type PersonStatus = {
   code: "Active" | "Retired";
-  supercededBy: string[];
+  supersededBy: string[];
 };
 
 export type Record = {

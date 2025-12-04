@@ -12,7 +12,7 @@ from orchestrate._internal.identity.monitoring import IdentityMonitoringApi
 
 class PersonStatus(TypedDict):
     code: Literal["Active", "Retired"]
-    supercededBy: list[str]
+    supersededBy: list[str]
 
 
 class Record(TypedDict):
