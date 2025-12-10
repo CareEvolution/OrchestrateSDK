@@ -6,6 +6,10 @@ on:
       - "*"
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   test:
     name: Test
@@ -58,6 +62,7 @@ jobs:
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
+          registry-url: "https://registry.npmjs.org"
       - name: Install dependencies
         working-directory: typescript
         run: npm install
@@ -80,8 +85,7 @@ jobs:
         if: needs.version.outputs.target == 'prod'
         working-directory: typescript
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
-          npm publish --access public
+          npm publish --provenance --access public
           echo "Published `${{ needs.version.outputs.version }}` to NPM." >> $GITHUB_STEP_SUMMARY
 
   python:
