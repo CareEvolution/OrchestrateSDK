@@ -17,7 +17,7 @@
 	"license": "Apache-2.0",
 	"homepage": "https://rosetta-api.docs.careevolution.com/",
 	"devDependencies": {
-		"@types/node": "^24.7.2",
+		"@types/node": "^25.0.2",
 		"@typescript-eslint/eslint-plugin": "^8.0.0",
 		"dotenv": "^17.2.3",
 		"prettier": "^3.2.5",
