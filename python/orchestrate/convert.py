@@ -13,6 +13,9 @@ from orchestrate._internal.convert import (
     ConvertFhirR4ToNemsisV34Response,
     ConvertFhirR4ToNemsisV35Response,
     ConvertFhirR4ToManifestResponse,
+    ConvertEntitiesToFhirR4Response,
+    ConvertTextToEntitiesResponse,
+    ConvertPdfToTextResponse,
     generate_convert_combine_fhir_bundles_request_from_bundles,
 )
 
@@ -31,5 +34,8 @@ __all__ = [
     "ConvertFhirR4ToNemsisV34Response",
     "ConvertFhirR4ToNemsisV35Response",
     "ConvertFhirR4ToManifestResponse",
+    "ConvertEntitiesToFhirR4Response",
+    "ConvertTextToEntitiesResponse",
+    "ConvertPdfToTextResponse",
     "generate_convert_combine_fhir_bundles_request_from_bundles",
 ]

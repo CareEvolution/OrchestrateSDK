@@ -1212,3 +1212,187 @@ def test_with_timeout_should_timeout():
     api = OrchestrateApi(timeout_ms=1)
     with pytest.raises(Exception):
         api.convert.hl7_to_fhir_r4(content=HL7)
+
+
+def test_convert_entities_to_fhir_r4_should_convert():
+    entities = {
+        "patient": {
+            "name": "John Doe",
+            "dateOfBirth": "1980-01-01",
+            "gender": "male",
+        },
+        "conditions": [
+            {
+                "name": "Chest Pain",
+                "code": "29857009",
+                "codeSystem": "http://snomed.info/sct",
+                "onsetDateTime": "2024-01-15",
+            }
+        ],
+        "medications": [
+            {
+                "name": "Aspirin",
+                "code": "1191",
+                "codeSystem": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            }
+        ],
+    }
+
+    result = TEST_API.convert.entities_to_fhir_r4(entities=entities)
+    assert result is not None
+    assert isinstance(result, dict), f"Expected dict, got {type(result)}"
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) > 0
+
+
+def test_convert_text_to_entities_should_extract():
+    text = """
+    Patient: John Doe, 65 year old male
+    Chief Complaint: Chest pain
+    
+    History of Present Illness:
+    Patient presents with chest pain that started 2 hours ago. Pain is described as crushing 
+    and radiates to left arm. Patient has history of hypertension and takes lisinopril 10mg daily.
+    
+    Physical Exam:
+    BP: 145/90, HR: 88, RR: 16, Temp: 98.6F
+    
+    Assessment and Plan:
+    1. Chest pain - rule out myocardial infarction
+    2. Hypertension - continue lisinopril
+    """
+
+    result = TEST_API.convert.text_to_entities(text=text)
+    assert result is not None
+    assert isinstance(result, dict), f"Expected dict, got {type(result)}"
+    assert "noteContext" in result
+    assert "patient" in result
+    assert "conditions" in result
+    assert "medications" in result
+    assert "vitals" in result
+    # Check that at least some entities were extracted
+    assert (
+        len(result.get("conditions", []))
+        + len(result.get("medications", []))
+        + len(result.get("vitals", []))
+        > 0
+    )
+
+
+def test_convert_text_to_entities_with_entity_type_filter_should_extract_only_specified():
+    text = """
+    Patient has diabetes mellitus type 2 and hypertension.
+    Current medications: metformin 500mg twice daily, lisinopril 10mg daily.
+    Blood pressure: 130/85 mmHg
+    """
+
+    # Only extract conditions
+    result = TEST_API.convert.text_to_entities(text=text, entity_type="condition")
+
+    assert result is not None
+    assert isinstance(result, dict), f"Expected dict, got {type(result)}"
+    assert "conditions" in result
+    # When filtering for only conditions, other entity lists should be empty or not extracted
+    if "medications" in result:
+        assert len(result["medications"]) == 0
+
+
+def test_convert_text_to_entities_with_no_consolidation_should_extract():
+    text = """
+    Patient presents with fever and cough. Diagnosed with pneumonia.
+    Prescribed amoxicillin 500mg three times daily.
+    """
+
+    result = TEST_API.convert.text_to_entities(text=text, no_consolidation=True)
+
+    assert result is not None
+    assert isinstance(result, dict), f"Expected dict, got {type(result)}"
+    assert "conditions" in result or "medications" in result
+
+
+def test_convert_pdf_to_text_should_extract_text():
+    # Create a simple PDF for testing
+    # Note: In a real test, you would use an actual PDF file or create one with a library
+    # For this example, we'll create a minimal valid PDF structure
+    pdf_content = b"""%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [0 0 612 792]
+/Contents 5 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+5 0 obj
+<<
+/Length 44
+>>
+stream
+BT
+/F1 12 Tf
+100 700 Td
+(Test Document) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000262 00000 n
+0000000341 00000 n
+trailer
+<<
+/Size 6
+/Root 1 0 R
+>>
+startxref
+435
+%%EOF
+"""
+
+    result = TEST_API.convert.pdf_to_text(
+        file_content=pdf_content, filename="test.pdf"
+    )
+
+    assert result is not None
+    assert isinstance(result, list)
+    assert len(result) > 0
+    # Check that "Test Document" appears in at least one of the extracted text strings
+    assert any("Test Document" in text for text in result)
+
+
+def test_convert_pdf_to_text_with_invalid_filename_should_raise():
+    pdf_content = b"%PDF-1.4\n"
+
+    with pytest.raises(ValueError) as exc_info:
+        TEST_API.convert.pdf_to_text(file_content=pdf_content, filename="test.txt")
+
+    assert "must end with .pdf" in str(exc_info.value)

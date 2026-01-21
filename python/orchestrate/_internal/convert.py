@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Any, Literal, Optional, TypedDict
 
 from orchestrate._internal.fhir import Bundle
 from orchestrate._internal.http_handler import HttpHandler
@@ -35,6 +35,28 @@ ConvertFhirR4ToNemsisV34Response = str
 ConvertFhirR4ToNemsisV35Response = str
 
 ConvertFhirR4ToManifestResponse = bytes
+
+ConvertEntitiesToFhirR4Response = Bundle
+
+
+class ConvertTextToEntitiesResponse(TypedDict, total=False):
+    """Response from text-to-entities conversion containing extracted medical entities."""
+
+    noteContext: str
+    patient: dict[str, Any]
+    conditions: list[dict[str, Any]]
+    encounters: list[dict[str, Any]]
+    medications: list[dict[str, Any]]
+    procedures: list[dict[str, Any]]
+    observations: list[dict[str, Any]]
+    vitals: list[dict[str, Any]]
+    socialSubstances: list[dict[str, Any]]
+    allergyIntolerances: list[dict[str, Any]]
+    errors: list[dict[str, Any]]
+    usage: Optional[dict[str, Any]]
+
+
+ConvertPdfToTextResponse = list[str]
 
 
 def generate_convert_combine_fhir_bundles_request_from_bundles(
@@ -526,4 +548,94 @@ class ConvertApi:
             body=content,
             headers=headers,
             parameters=parameters,
+        )
+
+    def entities_to_fhir_r4(
+        self,
+        entities: dict[str, Any],
+    ) -> ConvertEntitiesToFhirR4Response:
+        """
+        Converts extracted medical entities into a FHIR R4 bundle.
+
+        ### Parameters
+
+        - `entities`: A dictionary containing extracted medical entities from clinical text
+
+        ### Returns
+
+        A FHIR R4 Bundle containing the entities converted to FHIR resources
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        return self.__http_handler.post(
+            path="/convert/v1/entitiestofhir",
+            body=entities,
+            headers=headers,
+        )
+
+    def text_to_entities(
+        self,
+        text: str,
+        entity_type: Optional[str] = None,
+        no_consolidation: bool = False,
+        seed: Optional[int] = None,
+    ) -> ConvertTextToEntitiesResponse:
+        """
+        Extracts medical entities from clinical text using natural language processing.
+
+        ### Parameters
+
+        - `text`: The clinical text to extract entities from
+        - `entity_type`: Comma-separated list of entity types to extract. Options include: condition, encounter, medication, procedure, observation, vital, social-substance, allergy-intolerance. If not specified, all entity types are extracted.
+        - `no_consolidation`: If True, disables entity consolidation
+        - `seed`: Optional seed for reproducible results
+
+        ### Returns
+
+        A dictionary containing extracted medical entities organized by type (conditions, medications, procedures, etc.)
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        body = {"text": text}
+        if seed is not None:
+            body["seed"] = seed
+
+        parameters = {}
+        if entity_type is not None:
+            parameters["entityType"] = entity_type
+        if no_consolidation:
+            parameters["noconsolidation"] = "true"
+
+        return self.__http_handler.post(
+            path="/convert/v1/texttoentities",
+            body=body,
+            headers=headers,
+            parameters=parameters if parameters else None,
+        )
+
+    def pdf_to_text(
+        self,
+        file_content: bytes,
+        filename: str = "document.pdf",
+    ) -> ConvertPdfToTextResponse:
+        """
+        Extracts text from a PDF document.
+
+        ### Parameters
+
+        - `file_content`: The PDF file content as bytes
+        - `filename`: The filename for the PDF (must end with .pdf)
+
+        ### Returns
+
+        A dictionary containing the extracted text and page information
+        """
+        if not filename.endswith(".pdf"):
+            raise ValueError("Filename must end with .pdf")
+        headers = {"Content-Type": "application/pdf", "Accept": "application/json"}
+        files = {"file": (filename, file_content, "application/pdf")}
+
+        return self.__http_handler.post(
+            path="/convert/v1/pdftotext",
+            body=None,
+            files=files,
+            headers=headers,
         )

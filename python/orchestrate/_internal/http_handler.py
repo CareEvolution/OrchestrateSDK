@@ -168,22 +168,42 @@ class HttpHandler:
     def post(
         self,
         path: str,
-        body: Union[str, Mapping[Any, Any], bytes],
+        body: Union[str, Mapping[Any, Any], bytes, None] = None,
         headers: Optional[dict[str, str]] = None,
         parameters: Optional[Mapping[str, Optional[str]]] = None,
+        files: Optional[dict[str, tuple[str, bytes, str]]] = None,
     ) -> Any:
         request_headers = self.__merge_headers(headers)
 
-        prepared_body = _prepare_body(body)
         url = f"{self.base_url}{path}"
 
-        response = requests.post(
-            url,
-            data=prepared_body,
-            headers=request_headers,
-            params=parameters,
-            timeout=self.__timeout_ms / 1000,
-        )
+        # Handle multipart file uploads
+        if files is not None:
+            # Remove Content-Type header to let requests set it with boundary
+            request_headers = {
+                k: v for k, v in request_headers.items() if k.lower() != "content-type"
+            }
+            response = requests.post(
+                url,
+                files=files,
+                headers=request_headers,
+                params=parameters,
+                timeout=self.__timeout_ms / 1000,
+            )
+        else:
+            # Regular request with body
+            if body is None:
+                raise ValueError("Either 'body' or 'files' must be provided")
+            prepared_body = _prepare_body(body)
+            
+            response = requests.post(
+                url,
+                data=prepared_body,
+                headers=request_headers,
+                params=parameters,
+                timeout=self.__timeout_ms / 1000,
+            )
+
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as http_error:
