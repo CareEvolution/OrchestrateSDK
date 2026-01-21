@@ -80,7 +80,7 @@ jobs:
       fail-fast: true
       max-parallel: ${{ (inputs.suite || 'default') == 'e2e' && 1 || 4 }}
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Install Python
@@ -91,7 +91,6 @@ jobs:
       - name: Remove Non-Default Lock File
         working-directory: python
         id: remove-lock
-        if: matrix.python-version != '3.9'
         run: rm ./poetry.lock
       - name: Install Poetry
         run: |
