@@ -1378,9 +1378,7 @@ startxref
 %%EOF
 """
 
-    result = TEST_API.convert.pdf_to_text(
-        file_content=pdf_content, filename="test.pdf"
-    )
+    result = TEST_API.convert.pdf_to_text(file_content=pdf_content, filename="test.pdf")
 
     assert result is not None
     assert isinstance(result, list)

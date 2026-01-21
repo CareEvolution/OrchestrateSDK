@@ -195,7 +195,7 @@ class HttpHandler:
             if body is None:
                 raise ValueError("Either 'body' or 'files' must be provided")
             prepared_body = _prepare_body(body)
-            
+
             response = requests.post(
                 url,
                 data=prepared_body,
