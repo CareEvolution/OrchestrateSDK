@@ -118,6 +118,42 @@ export type ConvertFhirR4ToManifestRequest = {
 
 export type ConvertFhirR4ToManifestResponse = ArrayBuffer;
 
+export type ConvertTextToEntitiesRequest = {
+  text: string;
+  entityType?: string;
+  noConsolidation?: boolean;
+  seed?: number;
+};
+
+export type ConvertTextToEntitiesResponse = {
+  noteContext?: string;
+  patient?: Record<string, any>;
+  conditions?: Array<Record<string, any>>;
+  encounters?: Array<Record<string, any>>;
+  medications?: Array<Record<string, any>>;
+  procedures?: Array<Record<string, any>>;
+  observations?: Array<Record<string, any>>;
+  vitals?: Array<Record<string, any>>;
+  socialSubstances?: Array<Record<string, any>>;
+  allergyIntolerances?: Array<Record<string, any>>;
+  errors?: Array<Record<string, any>>;
+  usage?: Record<string, any>;
+};
+
+export type ConvertEntitiesToFhirR4Request = {
+  entities: Record<string, any>;
+  setting?: string;
+};
+
+export type ConvertEntitiesToFhirR4Response = Bundle;
+
+export type ConvertPdfToTextRequest = {
+  fileContent: ArrayBuffer | Blob;
+  filename?: string;
+};
+
+export type ConvertPdfToTextResponse = string[];
+
 
 export class ConvertApi {
   private httpHandler: IHttpHandler;
@@ -410,5 +446,87 @@ export class ConvertApi {
       route += `?${parameters.toString()}`;
     }
     return this.httpHandler.post<Bundle, ArrayBuffer>(route, request.content, headers);
+  }
+
+  /**
+   * Extracts medical entities from clinical text using NLP.
+   * @param request The request object with text and optional parameters
+   * @param request.text Clinical text to extract entities from
+   * @param request.entityType Optional filter to extract only specific entity types (e.g., "condition", "medication")
+   * @param request.noConsolidation If true, returns raw entities without consolidation
+   * @param request.seed Optional seed for reproducible results
+   * @returns Extracted medical entities organized by type
+   */
+  textToEntities(request: ConvertTextToEntitiesRequest): Promise<ConvertTextToEntitiesResponse> {
+    const parameters = new URLSearchParams();
+    if (request.entityType) {
+      parameters.append("entityType", request.entityType);
+    }
+    if (request.noConsolidation !== undefined) {
+      parameters.append("noconsolidation", request.noConsolidation.toString());
+    }
+    if (request.seed !== undefined) {
+      parameters.append("seed", request.seed.toString());
+    }
+    let route = "/convert/v1/texttoentities";
+    if (parameters.size) {
+      route += `?${parameters.toString()}`;
+    }
+    return this.httpHandler.post(route, { text: request.text });
+  }
+
+  /**
+   * Converts extracted medical entities into a FHIR R4 bundle.
+   * @param request The request object with entities and optional setting
+   * @param request.entities The extracted entities object (typically from textToEntities)
+   * @param request.setting Optional clinical setting context (e.g., "inpatient", "outpatient")
+   * @returns A FHIR R4 Bundle containing the entities as FHIR resources
+   */
+  entitiesToFhirR4(request: ConvertEntitiesToFhirR4Request): Promise<ConvertEntitiesToFhirR4Response> {
+    const parameters = new URLSearchParams();
+    if (request.setting) {
+      parameters.append("setting", request.setting);
+    }
+    let route = "/convert/v1/entitiestofhir";
+    if (parameters.size) {
+      route += `?${parameters.toString()}`;
+    }
+    return this.httpHandler.post(route, request.entities);
+  }
+
+  /**
+   * Extracts text from PDF documents.
+   * @param request The request object with PDF file content
+   * @param request.fileContent The PDF file as ArrayBuffer or Blob
+   * @param request.filename Optional filename (must end with .pdf)
+   * @returns An array of strings, each representing extracted text from the PDF
+   */
+  async pdfToText(request: ConvertPdfToTextRequest): Promise<ConvertPdfToTextResponse> {
+    const filename = request.filename || "document.pdf";
+    if (!filename.endsWith(".pdf")) {
+      throw new Error("Filename must end with .pdf");
+    }
+
+    const formData = new FormData();
+    const blob = request.fileContent instanceof Blob 
+      ? request.fileContent 
+      : new Blob([request.fileContent], { type: "application/pdf" });
+    formData.append("file", blob, filename);
+
+    // For multipart/form-data, we need to let the browser set the Content-Type header
+    // (including the boundary), so we pass undefined headers and let fetch handle it
+    const url = this.httpHandler.toString() + "/convert/v1/pdftotext";
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const responseText = await response.text();
+      throw new Error(`PDF to text conversion failed: ${responseText}`);
+    }
+
+    // The response.json() result is of type unknown by default, need to type-cast or assert.
+    return await response.json() as ConvertPdfToTextResponse;
   }
 }

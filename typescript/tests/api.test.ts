@@ -1026,6 +1026,214 @@ describe("convert fhir r4 to manifest", async () => {
   });
 });
 
+describe("convert text to entities", () => {
+  const clinicalText = `
+    Patient: John Doe, 65 year old male
+    Chief Complaint: Chest pain
+    
+    History of Present Illness:
+    Patient presents with chest pain that started 2 hours ago. Pain is described as crushing 
+    and radiates to left arm. Patient has history of hypertension and takes lisinopril 10mg daily.
+    
+    Physical Exam:
+    BP: 145/90, HR: 88, RR: 16, Temp: 98.6F
+    
+    Assessment and Plan:
+    1. Chest pain - rule out myocardial infarction
+    2. Hypertension - continue lisinopril
+  `;
+
+  it("should extract entities from text", async () => {
+    const result = await orchestrate.convert.textToEntities({ text: clinicalText });
+    expect(result).toBeDefined();
+    expect(result.noteContext).toBeDefined();
+    expect(result.patient).toBeDefined();
+    expect(result.conditions).toBeDefined();
+    expect(result.medications).toBeDefined();
+    expect(result.vitals).toBeDefined();
+    // Check that at least some entities were extracted
+    const entityCount = 
+      (result.conditions?.length || 0) +
+      (result.medications?.length || 0) +
+      (result.vitals?.length || 0);
+    expect(entityCount).toBeGreaterThan(0);
+  });
+
+  it("should filter by entity type", async () => {
+    const result = await orchestrate.convert.textToEntities({
+      text: clinicalText,
+      entityType: "condition",
+    });
+    expect(result).toBeDefined();
+    expect(result.conditions).toBeDefined();
+    // When filtering for only conditions, other entity lists should be empty or undefined
+    if (result.medications) {
+      expect(result.medications.length).toBe(0);
+    }
+  });
+
+  it("should support no consolidation option", async () => {
+    const result = await orchestrate.convert.textToEntities({
+      text: clinicalText,
+      noConsolidation: true,
+    });
+    expect(result).toBeDefined();
+  });
+});
+
+describe("convert entities to fhir r4", () => {
+  it("should convert entities to FHIR bundle", async () => {
+    const entities = {
+      patient: {
+        name: "John Doe",
+        dateOfBirth: "1980-01-01",
+        gender: "male",
+      },
+      conditions: [
+        {
+          name: "Chest Pain",
+          code: "29857009",
+          codeSystem: "http://snomed.info/sct",
+          onsetDateTime: "2024-01-15",
+        },
+      ],
+      medications: [
+        {
+          name: "Aspirin",
+          code: "1191",
+          codeSystem: "http://www.nlm.nih.gov/research/umls/rxnorm",
+        },
+      ],
+    };
+
+    const result = await orchestrate.convert.entitiesToFhirR4({ entities });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry).toBeDefined();
+    expect(result.entry!.length).toBeGreaterThan(0);
+  });
+
+  it("should convert entities with setting", async () => {
+    const entities = {
+      patient: {
+        name: "Jane Smith",
+        dateOfBirth: "1990-05-15",
+        gender: "female",
+      },
+      conditions: [
+        {
+          name: "Hypertension",
+          code: "38341003",
+          codeSystem: "http://snomed.info/sct",
+        },
+      ],
+    };
+
+    const result = await orchestrate.convert.entitiesToFhirR4({
+      entities,
+      setting: "inpatient",
+    });
+    expect(result).toBeDefined();
+    expect(result.resourceType).toBe("Bundle");
+  });
+});
+
+describe("convert pdf to text", () => {
+  // Create a minimal valid PDF for testing
+  const pdfContent = `%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [0 0 612 792]
+/Contents 5 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+5 0 obj
+<<
+/Length 44
+>>
+stream
+BT
+/F1 12 Tf
+100 700 Td
+(Test Document) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000262 00000 n
+0000000341 00000 n
+trailer
+<<
+/Size 6
+/Root 1 0 R
+>>
+startxref
+435
+%%EOF
+`;
+
+  it("should extract text from PDF", async () => {
+    const encoder = new TextEncoder();
+    const pdfBuffer = encoder.encode(pdfContent).buffer;
+
+    const result = await orchestrate.convert.pdfToText({
+      fileContent: pdfBuffer,
+      filename: "test.pdf",
+    });
+
+    expect(result).toBeDefined();
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+    // Check that "Test Document" appears in the extracted text
+    const hasTestDocument = result.some((text) => text.includes("Test Document"));
+    expect(hasTestDocument).toBe(true);
+  });
+
+  it("should reject invalid filename", async () => {
+    const encoder = new TextEncoder();
+    const pdfBuffer = encoder.encode(pdfContent).buffer;
+
+    await expect(
+      orchestrate.convert.pdfToText({
+        fileContent: pdfBuffer,
+        filename: "test.txt",
+      })
+    ).rejects.toThrow("must end with .pdf");
+  });
+});
+
 describe("timeout specified", () => {
   const timeoutApi = new OrchestrateApi({ timeoutMs: 1 });
   it("should timeout", async () => {
