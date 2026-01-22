@@ -120,7 +120,15 @@ export class HttpHandler implements IHttpHandler {
     headers?: { [key: string]: string; },
   ): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    const requestHeaders = this.mergeHeaders(headers);
+    let requestHeaders = this.mergeHeaders(headers);
+
+    // For FormData, we need to let the browser set Content-Type with the boundary
+    // Remove Content-Type header if body is FormData
+    const isFormData = body instanceof FormData;
+    if (isFormData) {
+      const { "Content-Type": _, ...headersWithoutContentType } = requestHeaders;
+      requestHeaders = headersWithoutContentType;
+    }
 
     const preparedBody = requestHeaders["Content-Type"] === "application/json" ? JSON.stringify(body) : body;
     const url = this.baseUrl + path;

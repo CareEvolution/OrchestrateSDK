@@ -513,20 +513,6 @@ export class ConvertApi {
       : new Blob([request.fileContent], { type: "application/pdf" });
     formData.append("file", blob, filename);
 
-    // For multipart/form-data, we need to let the browser set the Content-Type header
-    // (including the boundary), so we pass undefined headers and let fetch handle it
-    const url = this.httpHandler.toString() + "/convert/v1/pdftotext";
-    const response = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const responseText = await response.text();
-      throw new Error(`PDF to text conversion failed: ${responseText}`);
-    }
-
-    // The response.json() result is of type unknown by default, need to type-cast or assert.
-    return await response.json() as ConvertPdfToTextResponse;
+    return this.httpHandler.post("/convert/v1/pdftotext", formData);
   }
 }
