@@ -452,7 +452,7 @@ export class ConvertApi {
    * Extracts medical entities from clinical text using NLP.
    * @param request The request object with text and optional parameters
    * @param request.text Clinical text to extract entities from
-   * @param request.entityType Optional filter to extract only specific entity types (e.g., "condition", "medication")
+   * @param request.entityType Optional comma-separated list of entity types to extract (e.g., "condition,medication,vital"). Options: condition, encounter, medication, procedure, observation, vital, social-substance, allergy-intolerance. If not specified, all types are extracted.
    * @param request.noConsolidation If true, returns raw entities without consolidation
    * @param request.seed Optional seed for reproducible results
    * @returns Extracted medical entities organized by type
