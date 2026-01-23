@@ -73,15 +73,7 @@ jobs:
         run: npm run build
       - name: Set Version
         working-directory: typescript
-        shell: bash
-        run: |
-          # Strip local version identifier (anything after +) as npm/PyPI don't allow it
-          VERSION="${{ needs.version.outputs.version }}"
-          # Remove everything after + (including the +)
-          CLEAN_VERSION="${VERSION%%+*}"
-          echo "Original version: $VERSION"
-          echo "Clean version: $CLEAN_VERSION"
-          npm version "$CLEAN_VERSION"
+        run: npm version ${{ needs.version.outputs.version }}
 
       - name: Deploy Proget
         working-directory: typescript
@@ -89,7 +81,7 @@ jobs:
         run: |
           npm config set @careevolution:registry=https://proget.careevolution.com/npm/npm/
           npm config set //proget.careevolution.com/npm/npm/:_authToken ${{ secrets.PROGET_TOKEN }}
-          npm publish --tag dev
+          npm publish
           echo "Published `${{ needs.version.outputs.version }}` to internal NPM." >> $GITHUB_STEP_SUMMARY
       - name: Deploy NPM
         if: needs.version.outputs.target == 'prod'
@@ -113,7 +105,7 @@ jobs:
         id: setup-python
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
-          python-version: "3.13"
+          python-version: "3.9"
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python -
@@ -125,15 +117,7 @@ jobs:
         run: poetry install --no-interaction --only "main"
       - name: Assign Version
         working-directory: python
-        shell: bash
-        run: |
-          # Strip local version identifier (anything after +) as PyPI doesn't allow it
-          VERSION="${{ needs.version.outputs.version }}"
-          # Remove everything after + (including the +)
-          CLEAN_VERSION="${VERSION%%+*}"
-          echo "Original version: $VERSION"
-          echo "Clean version: $CLEAN_VERSION"
-          poetry version "$CLEAN_VERSION"
+        run: poetry version ${{ needs.version.outputs.version }}
       - name: Configure Pypi Tokens
         shell: pwsh
         run: |
