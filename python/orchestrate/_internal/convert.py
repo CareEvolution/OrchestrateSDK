@@ -630,7 +630,7 @@ class ConvertApi:
 
         ### Returns
 
-        A dictionary containing the extracted text and page information
+        A list of strings, where each string represents the extracted text from the PDF
         """
         if not filename.endswith(".pdf"):
             raise ValueError("Filename must end with .pdf")
