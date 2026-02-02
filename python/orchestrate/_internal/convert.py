@@ -553,6 +553,7 @@ class ConvertApi:
     def entities_to_fhir_r4(
         self,
         entities: dict[str, Any],
+        setting: Optional[str] = None,
     ) -> ConvertEntitiesToFhirR4Response:
         """
         Converts extracted medical entities into a FHIR R4 bundle.
@@ -560,16 +561,19 @@ class ConvertApi:
         ### Parameters
 
         - `entities`: A dictionary containing extracted medical entities from clinical text
+        - `setting`: Optional clinical setting context (e.g., "inpatient", "outpatient", "emergency")
 
         ### Returns
 
         A FHIR R4 Bundle containing the entities converted to FHIR resources
         """
         headers = {"Content-Type": "application/json", "Accept": "application/json"}
+        parameters = _get_id_dependent_parameters("setting", setting)
         return self.__http_handler.post(
             path="/convert/v1/entitiestofhir",
             body=entities,
             headers=headers,
+            parameters=parameters if parameters else None,
         )
 
     def text_to_entities(
