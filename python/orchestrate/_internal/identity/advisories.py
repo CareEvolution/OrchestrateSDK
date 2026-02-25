@@ -1,6 +1,5 @@
 from typing import Any, TypedDict
 
-
 InvalidDemographicField = dict[str, Any]
 
 
