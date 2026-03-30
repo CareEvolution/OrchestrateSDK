@@ -206,7 +206,7 @@ jobs:
         working-directory: dotnet
         run: |
           dotnet nuget push ./artifacts/*.nupkg \
-            --source https://api.nuget.org/v3/index.json \
-            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://proget.careevolution.com/nuget/nuget/ \
+            --api-key ${{ secrets.PROGET_TOKEN }} \
             --skip-duplicate
           echo "Published `${{ needs.version.outputs.version }}` to NuGet.org." >> $GITHUB_STEP_SUMMARY
