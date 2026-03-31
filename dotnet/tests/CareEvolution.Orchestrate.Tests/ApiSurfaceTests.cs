@@ -195,6 +195,31 @@ public sealed class ApiSurfaceTests
     }
 
     [Fact]
+    public async Task GetFhirR4CodeSystemShouldEscapePathSegment()
+    {
+        var handler = new FakeHttpMessageHandler(
+            (_, _) =>
+                Task.FromResult(
+                    FakeResponses.Json("""{"resourceType":"CodeSystem","concept":[]}""")
+                )
+        );
+        using var httpClient = new HttpClient(handler);
+        using var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+        );
+
+        _ = await api.Terminology.GetFhirR4CodeSystemAsync(
+            new GetFhirR4CodeSystemRequest { CodeSystem = "SNOMED/CT Demo" }
+        );
+
+        Assert.Equal(
+            "https://api.example.com/terminology/v1/fhir/r4/codesystem/SNOMED%2FCT%20Demo",
+            handler.LastRequest!.RequestUri!.AbsoluteUri
+        );
+    }
+
+    [Fact]
     public void CombinedFhirBundleFactoryShouldGenerateNdjson()
     {
         var request = ConvertRequestFactory.GenerateConvertCombinedFhirBundlesRequestFromBundles(

@@ -320,7 +320,7 @@ public sealed class TerminologyApi : ITerminologyApi
     )
     {
         var route = RouteBuilder.Build(
-            $"/terminology/v1/fhir/r4/codesystem/{request.CodeSystem}",
+            $"/terminology/v1/fhir/r4/codesystem/{RouteBuilder.Escape(request.CodeSystem)}",
             [
                 new KeyValuePair<string, string?>("page.num", request.PageNumber?.ToString()),
                 new KeyValuePair<string, string?>("_count", request.PageSize?.ToString()),
