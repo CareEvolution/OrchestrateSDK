@@ -49,6 +49,32 @@ public sealed class ConfigurationTests
     }
 
     [Fact]
+    public async Task OrchestrateApiShouldTreatWhitespaceBaseUrlAsMissing()
+    {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?> { ["ORCHESTRATE_BASE_URL"] = "https://env.example.com" }
+        );
+
+        var handler = new FakeHttpMessageHandler(
+            (_, _) => Task.FromResult(FakeResponses.Json("""{"coding":[]}"""))
+        );
+        using var httpClient = new HttpClient(handler);
+        using var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions { BaseUrl = "   " }
+        );
+
+        await api.Terminology.StandardizeConditionAsync(
+            new StandardizeRequest { Code = "123", System = "SNOMED" }
+        );
+
+        Assert.Equal(
+            "https://env.example.com/terminology/v1/standardize/condition",
+            handler.LastRequest!.RequestUri!.ToString()
+        );
+    }
+
+    [Fact]
     public void OrchestrateApiShouldThrowForInvalidTimeoutEnvironmentVariable()
     {
         using var environment = new EnvironmentVariableScope(

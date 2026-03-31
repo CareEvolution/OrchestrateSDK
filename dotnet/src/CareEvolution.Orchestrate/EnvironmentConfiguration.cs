@@ -19,7 +19,8 @@ internal static class EnvironmentConfiguration
     public static ResolvedConfiguration Resolve(OrchestrateClientOptions? options)
     {
         return new ResolvedConfiguration(
-            BaseUrl: GetPriority(options?.BaseUrl, BaseUrlEnvironmentVariable) ?? DefaultBaseUrl,
+            BaseUrl: GetPriorityOrMissing(options?.BaseUrl, BaseUrlEnvironmentVariable)
+                ?? DefaultBaseUrl,
             TimeoutMs: GetTimeout(options?.TimeoutMs),
             AdditionalHeaders: GetAdditionalHeaders(),
             ApiKey: GetPriority(options?.ApiKey, ApiKeyEnvironmentVariable)
@@ -68,6 +69,17 @@ internal static class EnvironmentConfiguration
     private static string? GetPriority(string? explicitValue, string environmentVariable)
     {
         return explicitValue ?? Environment.GetEnvironmentVariable(environmentVariable);
+    }
+
+    private static string? GetPriorityOrMissing(string? explicitValue, string environmentVariable)
+    {
+        if (!string.IsNullOrWhiteSpace(explicitValue))
+        {
+            return explicitValue;
+        }
+
+        var environmentValue = Environment.GetEnvironmentVariable(environmentVariable);
+        return string.IsNullOrWhiteSpace(environmentValue) ? null : environmentValue;
     }
 
     private static int GetTimeout(int? explicitTimeoutMs)
