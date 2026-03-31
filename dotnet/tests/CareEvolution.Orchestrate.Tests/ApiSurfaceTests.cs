@@ -113,6 +113,27 @@ public sealed class ApiSurfaceTests
         Assert.Equal("text/html", handler.LastRequest!.Headers["Accept"].Single());
     }
 
+    [Theory]
+    [InlineData("https://api.example.com", "/custom/v1/ping", "https://api.example.com/custom/v1/ping")]
+    [InlineData("https://api.example.com/", "custom/v1/ping", "https://api.example.com/custom/v1/ping")]
+    [InlineData("https://api.example.com/", "/custom/v1/ping", "https://api.example.com/custom/v1/ping")]
+    public async Task AdvancedTransportShouldNormalizeBaseUrlAndPath(
+        string baseUrl,
+        string path,
+        string expectedUrl
+    )
+    {
+        var handler = new FakeHttpMessageHandler(
+            (_, _) => Task.FromResult(FakeResponses.Json("""{"message":"ok"}"""))
+        );
+        using var httpClient = new HttpClient(handler);
+        var api = new OrchestrateApi(httpClient, new OrchestrateClientOptions { BaseUrl = baseUrl });
+
+        _ = await api.HttpHandler.GetJsonAsync<TransportProbeResponse>(path);
+
+        Assert.Equal(expectedUrl, handler.LastRequest!.RequestUri!.AbsoluteUri);
+    }
+
     [Fact]
     public void AddOrchestrateApiShouldRegisterIOrchestrateApi()
     {
