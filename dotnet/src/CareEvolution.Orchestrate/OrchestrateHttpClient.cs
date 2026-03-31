@@ -419,7 +419,7 @@ internal sealed class OrchestrateHttpClient(
             var root = JsonNode.Parse(responseText)?.AsObject();
             if (root is null)
             {
-                return [];
+                return [responseText];
             }
 
             if (
@@ -427,7 +427,7 @@ internal sealed class OrchestrateHttpClient(
                 && issueNode is JsonArray issuesArray
             )
             {
-                return [];
+                return [responseText];
             }
 
             if (
@@ -442,7 +442,7 @@ internal sealed class OrchestrateHttpClient(
         }
         catch
         {
-            return [];
+            return [responseText];
         }
 
         return [];

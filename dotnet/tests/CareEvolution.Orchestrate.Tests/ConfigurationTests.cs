@@ -275,4 +275,34 @@ public sealed class ConfigurationTests
         Assert.NotNull(exception.OperationOutcome);
         Assert.Single(exception.OperationOutcome!.Issue);
     }
+
+    [Fact]
+    public async Task MalformedJsonHttpErrorsShouldPreserveRawResponseText()
+    {
+        const string responseText = """{"oops":""";
+        var handler = new FakeHttpMessageHandler(
+            (_, _) => Task.FromResult(FakeResponses.Text(responseText, "application/json", HttpStatusCode.BadRequest))
+        );
+
+        using var httpClient = new HttpClient(handler);
+        var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
+        );
+
+        var exception = await Assert.ThrowsAsync<OrchestrateClientException>(() =>
+            api.Terminology.StandardizeConditionAsync(
+                new StandardizeRequest { Code = "123", System = "SNOMED" }
+            )
+        );
+
+        Assert.Equal(responseText, exception.ResponseText);
+        Assert.Contains(responseText, exception.Issues);
+        Assert.Contains(responseText, exception.Message);
+        Assert.Null(exception.OperationOutcome);
+    }
 }
