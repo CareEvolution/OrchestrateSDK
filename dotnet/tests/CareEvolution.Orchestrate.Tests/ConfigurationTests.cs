@@ -89,6 +89,72 @@ public sealed class ConfigurationTests
     }
 
     [Fact]
+    public void OrchestrateApiShouldRequireExactlyOneAuthenticationHeader()
+    {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_API_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
+
+        using var httpClient = new HttpClient(
+            new FakeHttpMessageHandler((_, _) => throw new NotImplementedException())
+        );
+        var exception = Assert.Throws<ArgumentException>(() => new OrchestrateApi(httpClient));
+
+        Assert.Contains("Exactly one authentication header", exception.Message);
+    }
+
+    [Fact]
+    public void OrchestrateApiShouldThrowWhenBothAuthenticationHeadersAreConfigured()
+    {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_API_KEY"] = "env-api-key",
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = """{"Authorization":"Bearer token"}""",
+            }
+        );
+
+        using var httpClient = new HttpClient(
+            new FakeHttpMessageHandler((_, _) => throw new NotImplementedException())
+        );
+        var exception = Assert.Throws<ArgumentException>(() => new OrchestrateApi(httpClient));
+
+        Assert.Contains("Exactly one authentication header", exception.Message);
+    }
+
+    [Fact]
+    public async Task OrchestrateApiShouldAllowAuthorizationFromAdditionalHeaders()
+    {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_API_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = """{"Authorization":"Bearer token"}""",
+            }
+        );
+
+        var handler = new FakeHttpMessageHandler(
+            (_, _) => Task.FromResult(FakeResponses.Json("""{"coding":[]}"""))
+        );
+        using var httpClient = new HttpClient(handler);
+        var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+        );
+
+        await api.Terminology.StandardizeConditionAsync(
+            new StandardizeRequest { Code = "123", System = "SNOMED" }
+        );
+
+        Assert.Equal("Bearer token", handler.LastRequest!.Headers["Authorization"].Single());
+        Assert.False(handler.LastRequest.Headers.ContainsKey("x-api-key"));
+    }
+
+    [Fact]
     public void IdentityApiShouldRequireUrl()
     {
         using var environment = new EnvironmentVariableScope(
@@ -116,6 +182,7 @@ public sealed class ConfigurationTests
             new Dictionary<string, string?>
             {
                 ["ORCHESTRATE_IDENTITY_URL"] = "https://identity.example.com",
+                ["ORCHESTRATE_IDENTITY_API_KEY"] = null,
             }
         );
 
@@ -135,13 +202,54 @@ public sealed class ConfigurationTests
     }
 
     [Fact]
+    public void IdentityApiShouldRequireExactlyOneAuthenticationHeader()
+    {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_IDENTITY_URL"] = "https://identity.example.com",
+                ["ORCHESTRATE_IDENTITY_API_KEY"] = null,
+                ["ORCHESTRATE_IDENTITY_METRICS_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
+
+        using var httpClient = new HttpClient(
+            new FakeHttpMessageHandler((_, _) => throw new NotImplementedException())
+        );
+        var exception = Assert.Throws<ArgumentException>(() => new IdentityApi(httpClient));
+
+        Assert.Contains("Exactly one authentication header", exception.Message);
+    }
+
+    [Fact]
+    public void IdentityApiShouldThrowWhenBothAuthenticationHeadersAreConfigured()
+    {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_IDENTITY_URL"] = "https://identity.example.com",
+                ["ORCHESTRATE_IDENTITY_API_KEY"] = "identity-api-key",
+                ["ORCHESTRATE_IDENTITY_METRICS_KEY"] = "metrics-key",
+            }
+        );
+
+        using var httpClient = new HttpClient(
+            new FakeHttpMessageHandler((_, _) => throw new NotImplementedException())
+        );
+        var exception = Assert.Throws<ArgumentException>(() => new IdentityApi(httpClient));
+
+        Assert.Contains("Exactly one authentication header", exception.Message);
+    }
+
+    [Fact]
     public async Task HttpErrorsShouldBeConvertedToOrchestrateClientExceptions()
     {
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
                 Task.FromResult(
                     FakeResponses.Json(
-                        """{"issue":[{"severity":"error","code":"invalid","diagnostics":"Expected a Bundle but found a Patient"}]}""",
+                        """{"resourceType":"OperationOutcome","issue":[{"severity":"error","code":"invalid","diagnostics":"Expected a Bundle but found a Patient"}]}""",
                         HttpStatusCode.BadRequest
                     )
                 )
@@ -164,5 +272,7 @@ public sealed class ConfigurationTests
             exception.Message
         );
         Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
+        Assert.NotNull(exception.OperationOutcome);
+        Assert.Single(exception.OperationOutcome!.Issue);
     }
 }

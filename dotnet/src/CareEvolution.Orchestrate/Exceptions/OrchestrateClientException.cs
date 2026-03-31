@@ -1,4 +1,5 @@
 using System.Net;
+using Hl7.Fhir.Model;
 
 namespace CareEvolution.Orchestrate.Exceptions;
 
@@ -8,7 +9,8 @@ namespace CareEvolution.Orchestrate.Exceptions;
 public sealed class OrchestrateClientException(
     string responseText,
     IReadOnlyList<string> issues,
-    HttpStatusCode statusCode
+    HttpStatusCode statusCode,
+    OperationOutcome? operationOutcome = null
 )
     : OrchestrateHttpException(
         issues.Count > 0 ? $"\n  * {string.Join(" \n  * ", issues)}" : responseText,
@@ -18,4 +20,6 @@ public sealed class OrchestrateClientException(
     public string ResponseText { get; } = responseText;
 
     public IReadOnlyList<string> Issues { get; } = issues;
+
+    public OperationOutcome? OperationOutcome { get; } = operationOutcome;
 }

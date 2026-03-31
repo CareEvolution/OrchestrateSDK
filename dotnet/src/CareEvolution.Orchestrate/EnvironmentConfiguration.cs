@@ -18,13 +18,16 @@ internal static class EnvironmentConfiguration
 
     public static ResolvedConfiguration Resolve(OrchestrateClientOptions? options)
     {
-        return new ResolvedConfiguration(
+        var additionalHeaders = GetAdditionalHeaders();
+        var configuration = new ResolvedConfiguration(
             BaseUrl: GetPriorityOrMissing(options?.BaseUrl, BaseUrlEnvironmentVariable)
                 ?? DefaultBaseUrl,
             TimeoutMs: GetTimeout(options?.TimeoutMs),
-            AdditionalHeaders: GetAdditionalHeaders(),
+            AdditionalHeaders: additionalHeaders,
             ApiKey: GetPriority(options?.ApiKey, ApiKeyEnvironmentVariable)
         );
+        ValidateExactlyOneAuthenticationHeader(configuration);
+        return configuration;
     }
 
     public static ResolvedConfiguration Resolve(IdentityApiOptions? options)
@@ -38,15 +41,18 @@ internal static class EnvironmentConfiguration
         }
 
         var metricsKey = GetPriority(options?.MetricsKey, IdentityMetricsKeyEnvironmentVariable);
-        return new ResolvedConfiguration(
+        var additionalHeaders = GetAdditionalHeaders();
+        var configuration = new ResolvedConfiguration(
             BaseUrl: url,
             TimeoutMs: GetTimeout(options?.TimeoutMs),
-            AdditionalHeaders: GetAdditionalHeaders(),
+            AdditionalHeaders: additionalHeaders,
             ApiKey: GetPriority(options?.ApiKey, IdentityApiKeyEnvironmentVariable),
             Authorization: string.IsNullOrWhiteSpace(metricsKey)
                 ? null
                 : $"Basic {NormalizeBasicCredential(metricsKey)}"
         );
+        ValidateExactlyOneAuthenticationHeader(configuration);
+        return configuration;
     }
 
     public static ResolvedConfiguration Resolve(LocalHashingApiOptions? options)
@@ -146,4 +152,26 @@ internal static class EnvironmentConfiguration
 
         return normalized;
     }
+
+    private static void ValidateExactlyOneAuthenticationHeader(ResolvedConfiguration configuration)
+    {
+        var hasApiKey = HasConfiguredValue(configuration.ApiKey)
+            || HasConfiguredHeader(configuration.AdditionalHeaders, "x-api-key");
+        var hasAuthorization = HasConfiguredValue(configuration.Authorization)
+            || HasConfiguredHeader(configuration.AdditionalHeaders, "Authorization");
+
+        if (hasApiKey == hasAuthorization)
+        {
+            throw new ArgumentException(
+                "Exactly one authentication header must be configured: either 'x-api-key' or 'Authorization'."
+            );
+        }
+    }
+
+    private static bool HasConfiguredHeader(
+        IReadOnlyDictionary<string, string> headers,
+        string headerName
+    ) => headers.TryGetValue(headerName, out var value) && HasConfiguredValue(value);
+
+    private static bool HasConfiguredValue(string? value) => !string.IsNullOrWhiteSpace(value);
 }

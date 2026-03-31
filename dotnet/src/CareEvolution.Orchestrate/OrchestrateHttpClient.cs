@@ -339,19 +339,77 @@ internal sealed class OrchestrateHttpClient(
         var responseText = await response
             .Content.ReadAsStringAsync(cancellationToken)
             .ConfigureAwait(false);
-        var issues = ReadOperationalOutcomes(responseText);
+        var operationOutcome = TryParseOperationOutcome(responseText);
+        var issues = ReadOperationalOutcomes(responseText, operationOutcome);
         if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 600)
         {
-            return new OrchestrateClientException(responseText, issues, response.StatusCode);
+            return new OrchestrateClientException(
+                responseText,
+                issues,
+                response.StatusCode,
+                operationOutcome
+            );
         }
 
         return new OrchestrateHttpException(responseText, response.StatusCode);
     }
 
-    private static IReadOnlyList<string> ReadOperationalOutcomes(string responseText)
+    private static IReadOnlyList<string> ReadOperationalOutcomes(
+        string responseText,
+        Hl7.Fhir.Model.OperationOutcome? operationOutcome
+    )
     {
+        var fhirOutcomes = ReadFhirOutcomes(operationOutcome);
+        if (fhirOutcomes.Count > 0)
+        {
+            return fhirOutcomes;
+        }
+
         var outcomes = ReadJsonOutcomes(responseText);
         return outcomes.Count > 0 ? outcomes : [responseText];
+    }
+
+    private static Hl7.Fhir.Model.OperationOutcome? TryParseOperationOutcome(string responseText)
+    {
+        if (!responseText.Contains("\"resourceType\"", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        try
+        {
+            return FhirJsonParser.Parse<Hl7.Fhir.Model.OperationOutcome>(responseText);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static List<string> ReadFhirOutcomes(Hl7.Fhir.Model.OperationOutcome? operationOutcome)
+    {
+        if (operationOutcome?.Issue is null || operationOutcome.Issue.Count == 0)
+        {
+            return [];
+        }
+
+        return operationOutcome
+            .Issue.Select(issue =>
+            {
+                var severity = issue.Severity?.ToString()?.ToLowerInvariant() ?? string.Empty;
+                var code = issue.Code?.ToString()?.ToLowerInvariant() ?? string.Empty;
+                var diagnostics = issue.Diagnostics ?? string.Empty;
+                var details = GetIssueDetailString(issue.Details);
+                var prefix = $"{severity}: {code}";
+                var message = string.Join(
+                    "; ",
+                    new[] { details, diagnostics }.Where(static value =>
+                        !string.IsNullOrWhiteSpace(value)
+                    )
+                );
+                return string.IsNullOrWhiteSpace(message) ? prefix : $"{prefix} - {message}";
+            })
+            .ToList();
     }
 
     private static List<string> ReadJsonOutcomes(string responseText)
@@ -369,26 +427,7 @@ internal sealed class OrchestrateHttpClient(
                 && issueNode is JsonArray issuesArray
             )
             {
-                return issuesArray
-                    .OfType<JsonObject>()
-                    .Select(issue =>
-                    {
-                        var severity = issue["severity"]?.GetValue<string>() ?? string.Empty;
-                        var code = issue["code"]?.GetValue<string>() ?? string.Empty;
-                        var diagnostics = issue["diagnostics"]?.GetValue<string>() ?? string.Empty;
-                        var details = GetIssueDetailString(issue["details"]);
-                        var prefix = $"{severity}: {code}";
-                        var message = string.Join(
-                            "; ",
-                            new[] { details, diagnostics }.Where(static value =>
-                                !string.IsNullOrWhiteSpace(value)
-                            )
-                        );
-                        return string.IsNullOrWhiteSpace(message)
-                            ? prefix
-                            : $"{prefix} - {message}";
-                    })
-                    .ToList();
+                return [];
             }
 
             if (
@@ -409,24 +448,24 @@ internal sealed class OrchestrateHttpClient(
         return [];
     }
 
-    private static string GetIssueDetailString(JsonNode? detailNode)
+    private static string GetIssueDetailString(Hl7.Fhir.Model.CodeableConcept? detail)
     {
-        if (detailNode is not JsonObject detailObject)
+        if (detail is null)
         {
             return string.Empty;
         }
 
-        if (detailObject["text"]?.GetValue<string>() is { Length: > 0 } text)
+        if (!string.IsNullOrWhiteSpace(detail.Text))
         {
-            return text;
+            return detail.Text;
         }
 
-        if (detailObject["coding"] is JsonArray codingArray)
+        if (detail.Coding is not null)
         {
-            foreach (var codingNode in codingArray.OfType<JsonObject>())
+            foreach (var coding in detail.Coding)
             {
-                var code = codingNode["code"]?.GetValue<string>();
-                var display = codingNode["display"]?.GetValue<string>();
+                var code = coding.Code;
+                var display = coding.Display;
                 var joined = string.Join(
                     ": ",
                     new[] { code, display }.Where(static value => !string.IsNullOrWhiteSpace(value))
