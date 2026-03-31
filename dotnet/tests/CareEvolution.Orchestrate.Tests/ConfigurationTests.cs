@@ -73,6 +73,8 @@ public sealed class ConfigurationTests
     [Theory]
     [InlineData("metrics-key", "Basic metrics-key")]
     [InlineData("Basic metrics-key", "Basic metrics-key")]
+    [InlineData("basic metrics-key", "Basic metrics-key")]
+    [InlineData("  Basic   metrics-key  ", "Basic metrics-key")]
     public async Task IdentityApiShouldNormalizeMetricsKey(
         string rawMetricsKey,
         string expectedAuthorization

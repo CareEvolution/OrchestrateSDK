@@ -44,7 +44,7 @@ internal static class EnvironmentConfiguration
             ApiKey: GetPriority(options?.ApiKey, IdentityApiKeyEnvironmentVariable),
             Authorization: string.IsNullOrWhiteSpace(metricsKey)
                 ? null
-                : $"Basic {metricsKey.Replace("Basic ", string.Empty, StringComparison.Ordinal)}"
+                : $"Basic {NormalizeBasicCredential(metricsKey)}"
         );
     }
 
@@ -117,5 +117,21 @@ internal static class EnvironmentConfiguration
         }
 
         return headers;
+    }
+
+    private static string NormalizeBasicCredential(string metricsKey)
+    {
+        var normalized = metricsKey.Trim();
+        const string prefix = "Basic";
+        if (
+            normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            && normalized.Length > prefix.Length
+            && char.IsWhiteSpace(normalized[prefix.Length])
+        )
+        {
+            normalized = normalized[(prefix.Length + 1)..].TrimStart();
+        }
+
+        return normalized;
     }
 }
