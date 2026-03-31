@@ -328,7 +328,7 @@ public sealed class ConvertApi : IConvertApi
         CancellationToken cancellationToken
     )
     {
-        using var httpContent = new StringContent(content);
+        var httpContent = new StringContent(content);
         httpContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(
             contentType
         );
