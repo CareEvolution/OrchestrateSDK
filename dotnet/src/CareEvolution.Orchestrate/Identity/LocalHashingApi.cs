@@ -2,17 +2,12 @@ using System.ComponentModel;
 
 namespace CareEvolution.Orchestrate.Identity;
 
-public sealed class LocalHashingApi : IDisposable
+public sealed class LocalHashingApi(HttpClient httpClient, LocalHashingApiOptions? options = null)
 {
-    private readonly OrchestrateHttpClient _http;
-
-    public LocalHashingApi(LocalHashingApiOptions? options = null)
-        : this(httpClient: null, options) { }
-
-    public LocalHashingApi(HttpClient? httpClient, LocalHashingApiOptions? options = null)
-    {
-        _http = new OrchestrateHttpClient(EnvironmentConfiguration.Resolve(options), httpClient);
-    }
+    private readonly OrchestrateHttpClient _http = new(
+        EnvironmentConfiguration.Resolve(options),
+        httpClient
+    );
 
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     public IOrchestrateHttpClient Transport => _http;
@@ -23,6 +18,4 @@ public sealed class LocalHashingApi : IDisposable
         Demographic demographic,
         CancellationToken cancellationToken = default
     ) => _http.PostJsonAsync<HashDemographicResponse>("/hash", demographic, cancellationToken);
-
-    public void Dispose() => _http.Dispose();
 }

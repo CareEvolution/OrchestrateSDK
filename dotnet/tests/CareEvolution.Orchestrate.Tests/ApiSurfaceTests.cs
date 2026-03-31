@@ -14,7 +14,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"items":[{"coding":[]}]}"""))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -39,7 +39,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Json("{}"))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -72,7 +72,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"message":"ok"}"""))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -96,7 +96,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Text("<html></html>", "text/html"))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -126,7 +126,7 @@ public sealed class ApiSurfaceTests
         });
 
         using var serviceProvider = services.BuildServiceProvider();
-        using var api = serviceProvider.GetRequiredService<IOrchestrateApi>();
+        var api = serviceProvider.GetRequiredService<IOrchestrateApi>();
         var options = serviceProvider
             .GetRequiredService<IOptions<OrchestrateClientOptions>>()
             .Value;
@@ -149,7 +149,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Bytes(expected, "application/pdf"))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -169,7 +169,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Json("{}"))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -204,7 +204,7 @@ public sealed class ApiSurfaceTests
                 )
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -248,7 +248,7 @@ public sealed class ApiSurfaceTests
                 )
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -275,7 +275,7 @@ public sealed class ApiSurfaceTests
                 )
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -317,7 +317,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Bytes([80, 75, 3, 4], "application/zip"))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
@@ -343,7 +343,7 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Text("<EMSDataSet />", "application/xml"))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );

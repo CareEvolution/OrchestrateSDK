@@ -2,9 +2,10 @@ using CareEvolution.Orchestrate.Tests.Helpers;
 
 namespace CareEvolution.Orchestrate.Tests;
 
-public sealed class LiveIdentityApiTests
+public sealed class LiveIdentityApiTests : IDisposable
 {
-    private static readonly IdentityApi Api = LiveClients.CreateIdentityApi();
+    private readonly HttpClient _httpClient = new();
+    private readonly IdentityApi _api;
     private const string DefaultSource = "source";
 
     private static readonly Demographic Demographic = new()
@@ -21,10 +22,15 @@ public sealed class LiveIdentityApiTests
         Version = 1,
     };
 
+    public LiveIdentityApiTests()
+    {
+        _api = LiveClients.CreateIdentityApi(_httpClient);
+    }
+
     [LiveFact(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
     public async Task AddOrUpdateRecordShouldAddRecord()
     {
-        var response = await Api.AddOrUpdateRecordAsync(
+        var response = await _api.AddOrUpdateRecordAsync(
             new AddOrUpdateRecordRequest
             {
                 Source = DefaultSource,
@@ -39,7 +45,7 @@ public sealed class LiveIdentityApiTests
     [LiveFact(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
     public async Task AddOrUpdateRecordWithUrlUnsafeIdentifierShouldAddRecord()
     {
-        var response = await Api.AddOrUpdateRecordAsync(
+        var response = await _api.AddOrUpdateRecordAsync(
             new AddOrUpdateRecordRequest
             {
                 Source = DefaultSource,
@@ -54,7 +60,7 @@ public sealed class LiveIdentityApiTests
     [LiveFact(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
     public async Task AddOrUpdateBlindedRecordShouldAddRecord()
     {
-        var response = await Api.AddOrUpdateBlindedRecordAsync(
+        var response = await _api.AddOrUpdateBlindedRecordAsync(
             new AddOrUpdateBlindedRecordRequest
             {
                 Source = DefaultSource,
@@ -69,7 +75,7 @@ public sealed class LiveIdentityApiTests
     [LiveFact(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
     public async Task AddOrUpdateBlindedRecordWithUrlUnsafeIdentifierShouldAddRecord()
     {
-        var response = await Api.AddOrUpdateBlindedRecordAsync(
+        var response = await _api.AddOrUpdateBlindedRecordAsync(
             new AddOrUpdateBlindedRecordRequest
             {
                 Source = DefaultSource,
@@ -85,7 +91,7 @@ public sealed class LiveIdentityApiTests
     public async Task GetPersonByRecordShouldMatch()
     {
         var (person, identifier) = await CreateRandomRecordAsync();
-        var response = await Api.GetPersonByRecordAsync(
+        var response = await _api.GetPersonByRecordAsync(
             new CareEvolution.Orchestrate.Identity.Record
             {
                 Source = DefaultSource,
@@ -99,14 +105,14 @@ public sealed class LiveIdentityApiTests
     public async Task GetPersonByIdShouldMatch()
     {
         var (person, _) = await CreateRandomRecordAsync();
-        var response = await Api.GetPersonByIdAsync(new GetPersonByIdRequest { Id = person.Id });
+        var response = await _api.GetPersonByIdAsync(new GetPersonByIdRequest { Id = person.Id });
         Assert.Equal(person.Id, response.Id);
     }
 
     [LiveFact(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
     public async Task MatchDemographicsShouldMatch()
     {
-        var response = await Api.MatchDemographicsAsync(Demographic);
+        var response = await _api.MatchDemographicsAsync(Demographic);
         Assert.NotNull(response);
         Assert.NotNull(response.MatchingPersons);
     }
@@ -114,7 +120,7 @@ public sealed class LiveIdentityApiTests
     [LiveFact(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
     public async Task MatchBlindedDemographicsShouldMatch()
     {
-        var response = await Api.MatchBlindedDemographicsAsync(BlindedDemographic);
+        var response = await _api.MatchBlindedDemographicsAsync(BlindedDemographic);
         Assert.NotNull(response);
         Assert.NotNull(response.MatchingPersons);
     }
@@ -123,7 +129,7 @@ public sealed class LiveIdentityApiTests
     public async Task DeleteRecordShouldDelete()
     {
         var (person, identifier) = await CreateRandomRecordAsync();
-        var response = await Api.DeleteRecordAsync(
+        var response = await _api.DeleteRecordAsync(
             new CareEvolution.Orchestrate.Identity.Record
             {
                 Source = DefaultSource,
@@ -144,7 +150,7 @@ public sealed class LiveIdentityApiTests
         var (firstPerson, firstIdentifier) = await CreateRandomRecordAsync();
         var (secondPerson, secondIdentifier) = await CreateRandomRecordAsync();
 
-        var response = await Api.AddMatchGuidanceAsync(
+        var response = await _api.AddMatchGuidanceAsync(
             new AddMatchGuidanceRequest
             {
                 RecordOne = new CareEvolution.Orchestrate.Identity.Record
@@ -184,7 +190,7 @@ public sealed class LiveIdentityApiTests
             Identifier = secondIdentifier,
         };
 
-        await Api.AddMatchGuidanceAsync(
+        await _api.AddMatchGuidanceAsync(
             new AddMatchGuidanceRequest
             {
                 RecordOne = recordOne,
@@ -194,7 +200,7 @@ public sealed class LiveIdentityApiTests
             }
         );
 
-        var response = await Api.RemoveMatchGuidanceAsync(
+        var response = await _api.RemoveMatchGuidanceAsync(
             new MatchGuidanceRequest
             {
                 RecordOne = recordOne,
@@ -217,7 +223,7 @@ public sealed class LiveIdentityApiTests
     public async Task MonitoringIdentifierMetricsShouldHaveMetrics()
     {
         await CreateRandomRecordAsync();
-        var response = await Api.Monitoring.IdentifierMetricsAsync();
+        var response = await _api.Monitoring.IdentifierMetricsAsync();
 
         Assert.False(string.IsNullOrWhiteSpace(response.Refreshed));
         Assert.True(response.TotalRecordCount > 0);
@@ -238,7 +244,7 @@ public sealed class LiveIdentityApiTests
         await CreateRandomRecordAsync();
         await CreateRandomRecordAsync();
 
-        var response = await Api.Monitoring.OverlapMetricsAsync();
+        var response = await _api.Monitoring.OverlapMetricsAsync();
         Assert.NotNull(response.DatasourceOverlapRecords);
         Assert.Contains(
             response.DatasourceOverlapRecords,
@@ -251,10 +257,10 @@ public sealed class LiveIdentityApiTests
         Assert.True(response.DatasourceOverlapRecords[0].OverlapCount > 0);
     }
 
-    private static async Task<(Person Person, string Identifier)> CreateRandomRecordAsync()
+    private async Task<(Person Person, string Identifier)> CreateRandomRecordAsync()
     {
         var identifier = Guid.NewGuid().ToString();
-        var response = await Api.AddOrUpdateRecordAsync(
+        var response = await _api.AddOrUpdateRecordAsync(
             new AddOrUpdateRecordRequest
             {
                 Source = DefaultSource,
@@ -263,5 +269,10 @@ public sealed class LiveIdentityApiTests
             }
         );
         return (response.MatchedPerson!, identifier);
+    }
+
+    public void Dispose()
+    {
+        _httpClient.Dispose();
     }
 }

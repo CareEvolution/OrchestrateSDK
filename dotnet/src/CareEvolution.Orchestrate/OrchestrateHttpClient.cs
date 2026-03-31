@@ -12,7 +12,7 @@ namespace CareEvolution.Orchestrate;
 
 internal sealed class OrchestrateHttpClient(
     ResolvedConfiguration configuration,
-    HttpClient? httpClient = null
+    HttpClient httpClient
 ) : IOrchestrateHttpClient
 {
     private static readonly FhirJsonFastParser FhirJsonParser = CreateFhirJsonParser();
@@ -24,8 +24,7 @@ internal sealed class OrchestrateHttpClient(
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
     };
 
-    private readonly HttpClient _httpClient = httpClient ?? new HttpClient();
-    private readonly bool _disposeHttpClient = httpClient is null;
+    private readonly HttpClient _httpClient = httpClient;
     private readonly ResolvedConfiguration _configuration = configuration;
 
     public HttpClient HttpClient => _httpClient;
@@ -444,9 +443,6 @@ internal sealed class OrchestrateHttpClient(
 
     public void Dispose()
     {
-        if (_disposeHttpClient)
-        {
-            _httpClient.Dispose();
-        }
+        _httpClient.Dispose();
     }
 }

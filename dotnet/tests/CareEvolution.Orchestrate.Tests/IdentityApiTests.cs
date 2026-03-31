@@ -16,7 +16,7 @@ public sealed class IdentityApiTests
                 )
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new IdentityApi(
+        var api = new IdentityApi(
             httpClient,
             new IdentityApiOptions { Url = "https://identity.example.com" }
         );
@@ -55,7 +55,7 @@ public sealed class IdentityApiTests
                 )
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new IdentityApi(
+        var api = new IdentityApi(
             httpClient,
             new IdentityApiOptions { Url = "https://identity.example.com" }
         );
@@ -84,7 +84,7 @@ public sealed class IdentityApiTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"changedPersons":[]}"""))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new IdentityApi(
+        var api = new IdentityApi(
             httpClient,
             new IdentityApiOptions { Url = "https://identity.example.com" }
         );
@@ -112,7 +112,7 @@ public sealed class IdentityApiTests
                 )
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new IdentityApi(
+        var api = new IdentityApi(
             httpClient,
             new IdentityApiOptions { Url = "https://identity.example.com" }
         );
@@ -145,7 +145,7 @@ public sealed class IdentityApiTests
                 )
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new LocalHashingApi(httpClient);
+        var api = new LocalHashingApi(httpClient);
 
         var response = await api.HashAsync(new Demographic { FirstName = "John" });
 

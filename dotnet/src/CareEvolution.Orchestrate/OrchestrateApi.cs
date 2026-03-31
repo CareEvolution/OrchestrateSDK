@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace CareEvolution.Orchestrate;
 
-public interface IOrchestrateApi : IDisposable
+public interface IOrchestrateApi
 {
     ITerminologyApi Terminology { get; }
     IConvertApi Convert { get; }
@@ -14,10 +14,7 @@ public sealed class OrchestrateApi : IOrchestrateApi
 {
     private readonly OrchestrateHttpClient _http;
 
-    public OrchestrateApi(OrchestrateClientOptions? options = null)
-        : this(httpClient: null, options) { }
-
-    public OrchestrateApi(HttpClient? httpClient, OrchestrateClientOptions? options = null)
+    public OrchestrateApi(HttpClient httpClient, OrchestrateClientOptions? options = null)
     {
         _http = new OrchestrateHttpClient(EnvironmentConfiguration.Resolve(options), httpClient);
         Terminology = new TerminologyApi(_http);
@@ -33,6 +30,4 @@ public sealed class OrchestrateApi : IOrchestrateApi
 
     [EditorBrowsable(EditorBrowsableState.Advanced)]
     public IOrchestrateHttpClient HttpHandler => _http;
-
-    public void Dispose() => _http.Dispose();
 }

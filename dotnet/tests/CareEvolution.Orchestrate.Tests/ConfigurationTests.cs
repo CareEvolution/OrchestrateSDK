@@ -24,7 +24,7 @@ public sealed class ConfigurationTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"coding":[]}"""))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions
             {
@@ -59,7 +59,7 @@ public sealed class ConfigurationTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"coding":[]}"""))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "   " }
         );
@@ -81,7 +81,10 @@ public sealed class ConfigurationTests
             new Dictionary<string, string?> { ["ORCHESTRATE_TIMEOUT_MS"] = "not-a-number" }
         );
 
-        var exception = Assert.Throws<ArgumentException>(() => new OrchestrateApi());
+        using var httpClient = new HttpClient(
+            new FakeHttpMessageHandler((_, _) => throw new NotImplementedException())
+        );
+        var exception = Assert.Throws<ArgumentException>(() => new OrchestrateApi(httpClient));
         Assert.Contains("ORCHESTRATE_TIMEOUT_MS", exception.Message);
     }
 
@@ -92,7 +95,10 @@ public sealed class ConfigurationTests
             new Dictionary<string, string?> { ["ORCHESTRATE_IDENTITY_URL"] = null }
         );
 
-        var exception = Assert.Throws<ArgumentException>(() => new IdentityApi());
+        using var httpClient = new HttpClient(
+            new FakeHttpMessageHandler((_, _) => throw new NotImplementedException())
+        );
+        var exception = Assert.Throws<ArgumentException>(() => new IdentityApi(httpClient));
         Assert.Contains("Identity URL is required", exception.Message);
     }
 
@@ -117,7 +123,7 @@ public sealed class ConfigurationTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"datasourceOverlapRecords":[]}"""))
         );
         using var httpClient = new HttpClient(handler);
-        using var api = new IdentityApi(
+        var api = new IdentityApi(
             httpClient,
             new IdentityApiOptions { MetricsKey = rawMetricsKey }
         );
@@ -142,7 +148,7 @@ public sealed class ConfigurationTests
         );
 
         using var httpClient = new HttpClient(handler);
-        using var api = new OrchestrateApi(
+        var api = new OrchestrateApi(
             httpClient,
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );

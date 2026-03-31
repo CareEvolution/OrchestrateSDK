@@ -4,11 +4,12 @@ using CareEvolution.Orchestrate.Tests.Helpers;
 
 namespace CareEvolution.Orchestrate.Tests;
 
-public sealed class LiveApiTests
+public sealed class LiveApiTests : IDisposable
 {
     private static readonly byte[] PdfMagicNumber = [37, 80, 68, 70];
     private static readonly byte[] PkZipMagicNumber = [80, 75, 3, 4];
-    private static readonly OrchestrateApi Api = LiveClients.CreateOrchestrateApi();
+    private readonly HttpClient _httpClient = new();
+    private readonly OrchestrateApi _api;
     private static readonly ClassifyConditionRequest[] ClassifyConditionRequestItems =
     [
         new ClassifyConditionRequest
@@ -145,11 +146,16 @@ public sealed class LiveApiTests
             { StandardizeRadiologyCases[1].Request, StandardizeRadiologyCases[1].ExpectedCode },
         };
 
+    public LiveApiTests()
+    {
+        _api = LiveClients.CreateOrchestrateApi(_httpClient);
+    }
+
     [LiveTheory(LiveTestEnvironment.OrchestrateApiKey)]
     [MemberData(nameof(ClassifyConditionRequests))]
     public async Task ClassifyConditionShouldClassifySingleRequest(ClassifyConditionRequest request)
     {
-        var result = await Api.Terminology.ClassifyConditionAsync(request);
+        var result = await _api.Terminology.ClassifyConditionAsync(request);
         Assert.NotNull(result);
         Assert.True(result.CciAcute);
     }
@@ -157,7 +163,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ClassifyConditionShouldClassifyBatch()
     {
-        var results = await Api.Terminology.ClassifyConditionAsync(ClassifyConditionRequestItems);
+        var results = await _api.Terminology.ClassifyConditionAsync(ClassifyConditionRequestItems);
         Assert.Equal(2, results.Count);
         Assert.All(results, result => Assert.True(result.CciAcute));
     }
@@ -168,14 +174,14 @@ public sealed class LiveApiTests
         ClassifyMedicationRequest request
     )
     {
-        var result = await Api.Terminology.ClassifyMedicationAsync(request);
+        var result = await _api.Terminology.ClassifyMedicationAsync(request);
         Assert.True(result.RxNormGeneric);
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ClassifyMedicationShouldClassifyBatch()
     {
-        var results = await Api.Terminology.ClassifyMedicationAsync(ClassifyMedicationRequestItems);
+        var results = await _api.Terminology.ClassifyMedicationAsync(ClassifyMedicationRequestItems);
         Assert.Equal(2, results.Count);
         Assert.All(results, result => Assert.True(result.RxNormGeneric));
     }
@@ -186,14 +192,14 @@ public sealed class LiveApiTests
         ClassifyObservationRequest request
     )
     {
-        var result = await Api.Terminology.ClassifyObservationAsync(request);
+        var result = await _api.Terminology.ClassifyObservationAsync(request);
         Assert.Equal("MICRO", result.LoincClass);
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ClassifyObservationShouldClassifyBatch()
     {
-        var results = await Api.Terminology.ClassifyObservationAsync(
+        var results = await _api.Terminology.ClassifyObservationAsync(
             ClassifyObservationRequestItems
         );
         Assert.Equal(2, results.Count);
@@ -207,7 +213,7 @@ public sealed class LiveApiTests
         string expectedCode
     )
     {
-        var result = await Api.Terminology.StandardizeConditionAsync(request);
+        var result = await _api.Terminology.StandardizeConditionAsync(request);
         Assert.Contains(result.Coding, coding => coding.Code == expectedCode);
     }
 
@@ -216,7 +222,7 @@ public sealed class LiveApiTests
     {
         var requests = StandardizeConditionCases.Select(row => row.Request).ToList();
         var expected = StandardizeConditionCases.Select(row => row.ExpectedCode).ToList();
-        var results = await Api.Terminology.StandardizeConditionAsync(requests);
+        var results = await _api.Terminology.StandardizeConditionAsync(requests);
         Assert.Equal(3, results.Count);
         for (var index = 0; index < results.Count; index++)
         {
@@ -231,7 +237,7 @@ public sealed class LiveApiTests
         string expectedCode
     )
     {
-        var result = await Api.Terminology.StandardizeLabAsync(request);
+        var result = await _api.Terminology.StandardizeLabAsync(request);
         Assert.Contains(result.Coding, coding => coding.Code == expectedCode);
     }
 
@@ -240,7 +246,7 @@ public sealed class LiveApiTests
     {
         var requests = StandardizeLabCases.Select(row => row.Request).ToList();
         var expected = StandardizeLabCases.Select(row => row.ExpectedCode).ToList();
-        var results = await Api.Terminology.StandardizeLabAsync(requests);
+        var results = await _api.Terminology.StandardizeLabAsync(requests);
         Assert.Equal(2, results.Count);
         for (var index = 0; index < results.Count; index++)
         {
@@ -255,7 +261,7 @@ public sealed class LiveApiTests
         string expectedCode
     )
     {
-        var result = await Api.Terminology.StandardizeMedicationAsync(request);
+        var result = await _api.Terminology.StandardizeMedicationAsync(request);
         Assert.Contains(result.Coding, coding => coding.Code == expectedCode);
     }
 
@@ -264,7 +270,7 @@ public sealed class LiveApiTests
     {
         var requests = StandardizeMedicationCases.Select(row => row.Request).ToList();
         var expected = StandardizeMedicationCases.Select(row => row.ExpectedCode).ToList();
-        var results = await Api.Terminology.StandardizeMedicationAsync(requests);
+        var results = await _api.Terminology.StandardizeMedicationAsync(requests);
         Assert.Equal(3, results.Count);
         for (var index = 0; index < results.Count; index++)
         {
@@ -279,7 +285,7 @@ public sealed class LiveApiTests
         string expectedCode
     )
     {
-        var result = await Api.Terminology.StandardizeObservationAsync(request);
+        var result = await _api.Terminology.StandardizeObservationAsync(request);
         Assert.Contains(result.Coding, coding => coding.Code == expectedCode);
     }
 
@@ -288,7 +294,7 @@ public sealed class LiveApiTests
     {
         var requests = StandardizeObservationCases.Select(row => row.Request).ToList();
         var expected = StandardizeObservationCases.Select(row => row.ExpectedCode).ToList();
-        var results = await Api.Terminology.StandardizeObservationAsync(requests);
+        var results = await _api.Terminology.StandardizeObservationAsync(requests);
         Assert.Equal(2, results.Count);
         for (var index = 0; index < results.Count; index++)
         {
@@ -303,7 +309,7 @@ public sealed class LiveApiTests
         string expectedCode
     )
     {
-        var result = await Api.Terminology.StandardizeProcedureAsync(request);
+        var result = await _api.Terminology.StandardizeProcedureAsync(request);
         Assert.Contains(result.Coding, coding => coding.Code == expectedCode);
     }
 
@@ -312,7 +318,7 @@ public sealed class LiveApiTests
     {
         var requests = StandardizeProcedureCases.Select(row => row.Request).ToList();
         var expected = StandardizeProcedureCases.Select(row => row.ExpectedCode).ToList();
-        var results = await Api.Terminology.StandardizeProcedureAsync(requests);
+        var results = await _api.Terminology.StandardizeProcedureAsync(requests);
         Assert.Equal(2, results.Count);
         for (var index = 0; index < results.Count; index++)
         {
@@ -327,7 +333,7 @@ public sealed class LiveApiTests
         string expectedCode
     )
     {
-        var result = await Api.Terminology.StandardizeRadiologyAsync(request);
+        var result = await _api.Terminology.StandardizeRadiologyAsync(request);
         Assert.Contains(result.Coding, coding => coding.Code == expectedCode);
     }
 
@@ -336,7 +342,7 @@ public sealed class LiveApiTests
     {
         var requests = StandardizeRadiologyCases.Select(row => row.Request).ToList();
         var expected = StandardizeRadiologyCases.Select(row => row.ExpectedCode).ToList();
-        var results = await Api.Terminology.StandardizeRadiologyAsync(requests);
+        var results = await _api.Terminology.StandardizeRadiologyAsync(requests);
         Assert.Equal(2, results.Count);
         for (var index = 0; index < results.Count; index++)
         {
@@ -347,7 +353,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task StandardizeBundleShouldStandardize()
     {
-        var result = await Api.Terminology.StandardizeBundleAsync(LiveTestData.R4Bundle);
+        var result = await _api.Terminology.StandardizeBundleAsync(LiveTestData.R4Bundle);
         Assert.NotNull(result.Entry);
         Assert.NotEmpty(result.Entry);
     }
@@ -355,7 +361,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertHl7ToFhirR4WithoutPatientShouldConvert()
     {
-        var result = await Api.Convert.Hl7ToFhirR4Async(
+        var result = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = LiveTestData.Hl7 }
         );
         Assert.NotNull(result.Entry);
@@ -365,7 +371,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertHl7ToFhirR4WithPatientShouldConvert()
     {
-        var result = await Api.Convert.Hl7ToFhirR4Async(
+        var result = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = LiveTestData.Hl7, PatientId = "12/34" }
         );
         var patient = GetEntryResourceByType<Hl7.Fhir.Model.R4.Patient>(
@@ -378,7 +384,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertHl7ToFhirR4WithPatientIdentifierAndSystemShouldConvert()
     {
-        var result = await Api.Convert.Hl7ToFhirR4Async(
+        var result = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request
             {
                 Content = LiveTestData.Hl7,
@@ -403,7 +409,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertHl7ToFhirR4WithTimezoneShouldConvert()
     {
-        var result = await Api.Convert.Hl7ToFhirR4Async(
+        var result = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = LiveTestData.Hl7, Tz = "America/New_York" }
         );
         var encounter = GetEntryResourceByType<Hl7.Fhir.Model.R4.Encounter>(
@@ -416,7 +422,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertHl7ToFhirR4WithoutTimezoneShouldPresumeUtc()
     {
-        var result = await Api.Convert.Hl7ToFhirR4Async(
+        var result = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = LiveTestData.Hl7 }
         );
         var encounter = GetEntryResourceByType<Hl7.Fhir.Model.R4.Encounter>(
@@ -446,13 +452,13 @@ public sealed class LiveApiTests
             OBX|9|ST|^PLATELETS^LAB|1|125|K/UL|130-400|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
             """;
 
-        var hintedResult = await Api.Convert.Hl7ToFhirR4Async(
+        var hintedResult = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = content, ProcessingHint = "lab" }
         );
-        var unhintedResult = await Api.Convert.Hl7ToFhirR4Async(
+        var unhintedResult = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = content }
         );
-        var defaultResult = await Api.Convert.Hl7ToFhirR4Async(
+        var defaultResult = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = content, ProcessingHint = "default" }
         );
 
@@ -476,13 +482,13 @@ public sealed class LiveApiTests
             OBX|4|ST|Dictation TS|2|Dictated by: Tue Mar 18, 2025  1:06:45 PM EDT [INTERFACE, INCOMING RADIANT IMAGE AVAILABILITY]||||||Final|||||E175762^MILLER^AMANDA^^^^^^PROVID^^^^PROVID^^^^^^^^RT|||||||||
             """;
 
-        var hintedResult = await Api.Convert.Hl7ToFhirR4Async(
+        var hintedResult = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = content, ProcessingHint = "transcription" }
         );
-        var unhintedResult = await Api.Convert.Hl7ToFhirR4Async(
+        var unhintedResult = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = content }
         );
-        var defaultResult = await Api.Convert.Hl7ToFhirR4Async(
+        var defaultResult = await _api.Convert.Hl7ToFhirR4Async(
             new ConvertHl7ToFhirR4Request { Content = content, ProcessingHint = "default" }
         );
 
@@ -494,7 +500,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToFhirR4WithoutPatientShouldConvert()
     {
-        var result = await Api.Convert.CdaToFhirR4Async(
+        var result = await _api.Convert.CdaToFhirR4Async(
             new ConvertCdaToFhirR4Request { Content = LiveTestData.Cda }
         );
         Assert.NotEmpty(result.Entry);
@@ -503,7 +509,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToFhirR4WithIncludeOriginalCdaShouldConvert()
     {
-        var result = await Api.Convert.CdaToFhirR4Async(
+        var result = await _api.Convert.CdaToFhirR4Async(
             new ConvertCdaToFhirR4Request { Content = LiveTestData.Cda, IncludeOriginalCda = true }
         );
         Assert.Contains(
@@ -518,7 +524,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToFhirR4WithIncludeStandardizedCdaShouldConvert()
     {
-        var result = await Api.Convert.CdaToFhirR4Async(
+        var result = await _api.Convert.CdaToFhirR4Async(
             new ConvertCdaToFhirR4Request
             {
                 Content = LiveTestData.Cda,
@@ -537,7 +543,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToFhirR4WithPatientShouldConvert()
     {
-        var result = await Api.Convert.CdaToFhirR4Async(
+        var result = await _api.Convert.CdaToFhirR4Async(
             new ConvertCdaToFhirR4Request { Content = LiveTestData.Cda, PatientId = "1234" }
         );
         var patient = GetEntryResourceByType<Hl7.Fhir.Model.R4.Patient>(
@@ -550,7 +556,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToFhirR4WithPatientIdentifierAndSystemShouldConvert()
     {
-        var result = await Api.Convert.CdaToFhirR4Async(
+        var result = await _api.Convert.CdaToFhirR4Async(
             new ConvertCdaToFhirR4Request
             {
                 Content = LiveTestData.Cda,
@@ -575,7 +581,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToPdfShouldConvert()
     {
-        var result = await Api.Convert.CdaToPdfAsync(
+        var result = await _api.Convert.CdaToPdfAsync(
             new ConvertCdaToPdfRequest { Content = LiveTestData.Cda }
         );
         Assert.Equal(PdfMagicNumber, result.Take(4).ToArray());
@@ -584,7 +590,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirR4ToCdaShouldConvert()
     {
-        var result = await Api.Convert.FhirR4ToCdaAsync(
+        var result = await _api.Convert.FhirR4ToCdaAsync(
             new ConvertFhirR4ToCdaRequest { Content = LiveTestData.R4Bundle }
         );
         Assert.StartsWith("<?xml", result, StringComparison.Ordinal);
@@ -593,7 +599,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirR4ToOmopShouldConvert()
     {
-        var result = await Api.Convert.FhirR4ToOmopAsync(
+        var result = await _api.Convert.FhirR4ToOmopAsync(
             new ConvertFhirR4ToOmopRequest { Content = LiveTestData.R4Bundle }
         );
         Assert.Equal(PkZipMagicNumber, result.Take(4).ToArray());
@@ -604,7 +610,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task InsightRiskProfileShouldReturnBundle()
     {
-        var result = await Api.Insight.RiskProfileAsync(
+        var result = await _api.Insight.RiskProfileAsync(
             new InsightRiskProfileRequest
             {
                 Content = LiveTestData.RiskProfileBundle,
@@ -619,7 +625,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCombinedFhirR4BundlesShouldCombine()
     {
-        var result = await Api.Convert.CombineFhirR4BundlesAsync(
+        var result = await _api.Convert.CombineFhirR4BundlesAsync(
             ConvertRequestFactory.GenerateConvertCombinedFhirBundlesRequestFromBundles([
                 LiveTestData.R4Bundle,
                 LiveTestData.R4Bundle,
@@ -631,7 +637,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCombinedFhirR4BundlesWithPatientShouldCombine()
     {
-        var result = await Api.Convert.CombineFhirR4BundlesAsync(
+        var result = await _api.Convert.CombineFhirR4BundlesAsync(
             ConvertRequestFactory.GenerateConvertCombinedFhirBundlesRequestFromBundles(
                 [LiveTestData.R4Bundle, LiveTestData.R4Bundle],
                 "1234"
@@ -655,7 +661,7 @@ public sealed class LiveApiTests
         request.PatientIdentifier = "1234";
         request.PatientIdentifierSystem = "GoodHealthClinic";
 
-        var result = await Api.Convert.CombineFhirR4BundlesAsync(request);
+        var result = await _api.Convert.CombineFhirR4BundlesAsync(request);
         Assert.Equal(2, result.Entry.Count);
         var patient = GetEntryResourceByType<Hl7.Fhir.Model.R4.Patient>(
             result,
@@ -674,7 +680,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertX12ToFhirR4ShouldReturnBundle()
     {
-        var result = await Api.Convert.X12ToFhirR4Async(
+        var result = await _api.Convert.X12ToFhirR4Async(
             new ConvertX12ToFhirR4Request { Content = LiveTestData.X12Document }
         );
         Assert.NotEmpty(result.Entry);
@@ -683,7 +689,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertX12ToFhirR4WithPatientShouldReturnBundle()
     {
-        var result = await Api.Convert.X12ToFhirR4Async(
+        var result = await _api.Convert.X12ToFhirR4Async(
             new ConvertX12ToFhirR4Request
             {
                 Content = LiveTestData.X12Document,
@@ -700,7 +706,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertX12ToFhirR4WithPatientIdentifierAndSystemShouldConvert()
     {
-        var result = await Api.Convert.X12ToFhirR4Async(
+        var result = await _api.Convert.X12ToFhirR4Async(
             new ConvertX12ToFhirR4Request
             {
                 Content = LiveTestData.X12Document,
@@ -725,7 +731,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4CodeSystemShouldReturnCodeSystem()
     {
-        var result = await Api.Terminology.GetFhirR4CodeSystemAsync(
+        var result = await _api.Terminology.GetFhirR4CodeSystemAsync(
             new GetFhirR4CodeSystemRequest { CodeSystem = "SNOMED" }
         );
         Assert.NotEmpty(result.Concept);
@@ -734,7 +740,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4CodeSystemWithPageShouldReturnCodeSystem()
     {
-        var result = await Api.Terminology.GetFhirR4CodeSystemAsync(
+        var result = await _api.Terminology.GetFhirR4CodeSystemAsync(
             new GetFhirR4CodeSystemRequest
             {
                 CodeSystem = "SNOMED",
@@ -748,7 +754,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4CodeSystemWithSearchShouldReturnCodeSystem()
     {
-        var result = await Api.Terminology.GetFhirR4CodeSystemAsync(
+        var result = await _api.Terminology.GetFhirR4CodeSystemAsync(
             new GetFhirR4CodeSystemRequest
             {
                 CodeSystem = "ICD-10-CM",
@@ -763,14 +769,14 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task SummarizeFhirR4CodeSystemsShouldReturnBundle()
     {
-        var result = await Api.Terminology.SummarizeFhirR4CodeSystemsAsync();
+        var result = await _api.Terminology.SummarizeFhirR4CodeSystemsAsync();
         Assert.NotEmpty(result.Entry);
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ConceptMapsShouldReturnBundle()
     {
-        var result = await Api.Terminology.GetFhirR4ConceptMapsAsync();
+        var result = await _api.Terminology.GetFhirR4ConceptMapsAsync();
         Assert.NotEmpty(result.Entry);
         Assert.All(
             result.Entry,
@@ -782,7 +788,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task TranslateFhirR4ConceptMapWithCodeShouldTranslate()
     {
-        var result = await Api.Terminology.TranslateFhirR4ConceptMapAsync(
+        var result = await _api.Terminology.TranslateFhirR4ConceptMapAsync(
             new TranslateFhirR4ConceptMapRequest { Code = "119981000146107" }
         );
         Assert.NotEmpty(result.Parameter);
@@ -791,7 +797,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task TranslateFhirR4ConceptMapWithCodeAndDomainShouldTranslate()
     {
-        var result = await Api.Terminology.TranslateFhirR4ConceptMapAsync(
+        var result = await _api.Terminology.TranslateFhirR4ConceptMapAsync(
             new TranslateFhirR4ConceptMapRequest { Code = "119981000146107", Domain = "Condition" }
         );
         Assert.NotEmpty(result.Parameter);
@@ -800,7 +806,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task SummarizeFhirR4ValueSetScopeShouldReturnBundle()
     {
-        var result = await Api.Terminology.SummarizeFhirR4ValueSetScopeAsync(
+        var result = await _api.Terminology.SummarizeFhirR4ValueSetScopeAsync(
             new SummarizeFhirR4ValueSetScopeRequest { Scope = "http://loinc.org" }
         );
         Assert.NotEmpty(result.Entry);
@@ -810,7 +816,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ValueSetShouldReturnValueSet()
     {
-        var result = await Api.Terminology.GetFhirR4ValueSetAsync(
+        var result = await _api.Terminology.GetFhirR4ValueSetAsync(
             new GetFhirR4ValueSetRequest
             {
                 Id = "00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2",
@@ -823,7 +829,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task SummarizeFhirR4ValueSetShouldReturnValueSet()
     {
-        var result = await Api.Terminology.SummarizeFhirR4ValueSetAsync(
+        var result = await _api.Terminology.SummarizeFhirR4ValueSetAsync(
             new SummarizeFhirR4ValueSetRequest
             {
                 Id = "00987FA2EDADBD0E43DA59E171B80F99DBF832C69904489EE6F9E6450925E5A2",
@@ -835,7 +841,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ValueSetScopesShouldReturnValueSet()
     {
-        var result = await Api.Terminology.GetFhirR4ValueSetScopesAsync();
+        var result = await _api.Terminology.GetFhirR4ValueSetScopesAsync();
         Assert.NotNull(result.Compose?.Include);
         Assert.NotEmpty(result.Compose.Include);
     }
@@ -844,7 +850,7 @@ public sealed class LiveApiTests
     public async Task GetFhirR4ValueSetsByScopeWithoutPaginationShouldRaise()
     {
         await Assert.ThrowsAsync<OrchestrateClientException>(() =>
-            Api.Terminology.GetFhirR4ValueSetsByScopeAsync(
+            _api.Terminology.GetFhirR4ValueSetsByScopeAsync(
                 new GetFhirR4ValueSetsByScopeRequest { Scope = "http://loinc.org" }
             )
         );
@@ -853,7 +859,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ValueSetsByScopeWithPageAndScopeShouldReturnBundle()
     {
-        var result = await Api.Terminology.GetFhirR4ValueSetsByScopeAsync(
+        var result = await _api.Terminology.GetFhirR4ValueSetsByScopeAsync(
             new GetFhirR4ValueSetsByScopeRequest
             {
                 Scope = "http://loinc.org",
@@ -867,7 +873,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ValueSetsByScopeWithPageAndNameShouldReturnBundle()
     {
-        var result = await Api.Terminology.GetFhirR4ValueSetsByScopeAsync(
+        var result = await _api.Terminology.GetFhirR4ValueSetsByScopeAsync(
             new GetFhirR4ValueSetsByScopeRequest
             {
                 Name = "LP7839-6",
@@ -881,7 +887,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ValueSetsByScopeWithPageNameAndScopeShouldReturnBundle()
     {
-        var result = await Api.Terminology.GetFhirR4ValueSetsByScopeAsync(
+        var result = await _api.Terminology.GetFhirR4ValueSetsByScopeAsync(
             new GetFhirR4ValueSetsByScopeRequest
             {
                 Name = "LP7839-6",
@@ -896,7 +902,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ValueSetsByScopeWithJustPageShouldReturnBundle()
     {
-        var result = await Api.Terminology.GetFhirR4ValueSetsByScopeAsync(
+        var result = await _api.Terminology.GetFhirR4ValueSetsByScopeAsync(
             new GetFhirR4ValueSetsByScopeRequest { PageNumber = 0, PageSize = 2 }
         );
         Assert.NotEmpty(result.Entry);
@@ -905,7 +911,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task SummarizeFhirR4CodeSystemShouldReturnCodeSystem()
     {
-        var result = await Api.Terminology.SummarizeFhirR4CodeSystemAsync(
+        var result = await _api.Terminology.SummarizeFhirR4CodeSystemAsync(
             new SummarizeFhirR4CodeSystemRequest { CodeSystem = "SNOMED" }
         );
         Assert.True(result.Count > 0);
@@ -931,14 +937,14 @@ public sealed class LiveApiTests
             ],
         };
 
-        var result = await Api.Terminology.GetAllFhirR4ValueSetsForCodesAsync(parameters);
+        var result = await _api.Terminology.GetAllFhirR4ValueSetsForCodesAsync(parameters);
         Assert.NotEmpty(result.Parameter);
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirDstu2ToFhirR4ShouldConvert()
     {
-        var result = await Api.Convert.FhirDstu2ToFhirR4Async(
+        var result = await _api.Convert.FhirDstu2ToFhirR4Async(
             new ConvertFhirDstu2ToFhirR4Request { Content = LiveTestData.Dstu2Bundle }
         );
         var patient = GetEntryResourceByType<Hl7.Fhir.Model.R4.Patient>(
@@ -954,7 +960,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirStu3ToFhirR4ShouldConvert()
     {
-        var result = await Api.Convert.FhirStu3ToFhirR4Async(
+        var result = await _api.Convert.FhirStu3ToFhirR4Async(
             new ConvertFhirStu3ToFhirR4Request { Content = LiveTestData.Stu3Bundle }
         );
         var patient = GetEntryResourceByType<Hl7.Fhir.Model.R4.Patient>(
@@ -970,7 +976,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirR4ToHealthLakeShouldConvert()
     {
-        var result = await Api.Convert.FhirR4ToHealthLakeAsync(
+        var result = await _api.Convert.FhirR4ToHealthLakeAsync(
             new ConvertFhirR4ToHealthLakeRequest { Content = LiveTestData.R4Bundle }
         );
         Assert.Equal(Hl7.Fhir.Model.BundleType.Collection, result.Type);
@@ -981,7 +987,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToHtmlShouldConvert()
     {
-        var result = await Api.Convert.CdaToHtmlAsync(
+        var result = await _api.Convert.CdaToHtmlAsync(
             new ConvertCdaToHtmlRequest { Content = LiveTestData.Cda }
         );
         Assert.StartsWith("<html", result, StringComparison.Ordinal);
@@ -990,7 +996,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertCdaToFhirR4AlternativeEncodingShouldSendBytes()
     {
-        var result = await Api.Convert.CdaToFhirR4Async(
+        var result = await _api.Convert.CdaToFhirR4Async(
             new ConvertCdaToFhirR4Request { Content = LiveTestData.EncodingCda }
         );
         Assert.NotEmpty(result.Entry);
@@ -999,7 +1005,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirR4ToNemsisV34ShouldConvert()
     {
-        var result = await Api.Convert.FhirR4ToNemsisV34Async(
+        var result = await _api.Convert.FhirR4ToNemsisV34Async(
             new ConvertFhirR4ToNemsisV34Request { Content = LiveTestData.NemsisBundle }
         );
         Assert.Contains("<EMSDataSet", result, StringComparison.Ordinal);
@@ -1009,7 +1015,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirR4ToNemsisV35ShouldConvert()
     {
-        var result = await Api.Convert.FhirR4ToNemsisV35Async(
+        var result = await _api.Convert.FhirR4ToNemsisV35Async(
             new ConvertFhirR4ToNemsisV35Request { Content = LiveTestData.NemsisBundle }
         );
         Assert.Contains("<EMSDataSet", result, StringComparison.Ordinal);
@@ -1019,7 +1025,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirR4ToManifestShouldHaveCsvs()
     {
-        var result = await Api.Convert.FhirR4ToManifestAsync(
+        var result = await _api.Convert.FhirR4ToManifestAsync(
             new ConvertFhirR4ToManifestRequest { Content = LiveTestData.R4Bundle }
         );
         Assert.Equal(PkZipMagicNumber, result.Take(4).ToArray());
@@ -1047,7 +1053,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ConvertFhirR4ToManifestWithDelimiterShouldHaveCsvsAndExpectedDelimiter()
     {
-        var result = await Api.Convert.FhirR4ToManifestAsync(
+        var result = await _api.Convert.FhirR4ToManifestAsync(
             new ConvertFhirR4ToManifestRequest { Content = LiveTestData.R4Bundle, Delimiter = "|" }
         );
 
@@ -1060,7 +1066,8 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task WithTimeoutShouldTimeout()
     {
-        using var timeoutApi = new OrchestrateApi(new OrchestrateClientOptions { TimeoutMs = 1 });
+        using var httpClient = new HttpClient();
+        var timeoutApi = new OrchestrateApi(httpClient, new OrchestrateClientOptions { TimeoutMs = 1 });
         await Assert.ThrowsAnyAsync<Exception>(() =>
             timeoutApi.Convert.Hl7ToFhirR4Async(
                 new ConvertHl7ToFhirR4Request { Content = LiveTestData.Hl7 }
@@ -1080,5 +1087,10 @@ public sealed class LiveApiTests
         return bundle.Entry.First(entry => entry.Resource?.ResourceType == resourceType).Resource
                 as TResource
             ?? throw new InvalidOperationException($"Expected resource type '{resourceType}'.");
+    }
+
+    public void Dispose()
+    {
+        _httpClient.Dispose();
     }
 }

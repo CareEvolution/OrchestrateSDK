@@ -2,14 +2,11 @@ using System.ComponentModel;
 
 namespace CareEvolution.Orchestrate.Identity;
 
-public sealed class IdentityApi : IDisposable
+public sealed class IdentityApi
 {
     private readonly OrchestrateHttpClient _http;
 
-    public IdentityApi(IdentityApiOptions? options = null)
-        : this(httpClient: null, options) { }
-
-    public IdentityApi(HttpClient? httpClient, IdentityApiOptions? options = null)
+    public IdentityApi(HttpClient httpClient, IdentityApiOptions? options = null)
     {
         _http = new OrchestrateHttpClient(EnvironmentConfiguration.Resolve(options), httpClient);
         Monitoring = new IdentityMonitoringApi(_http);
@@ -105,8 +102,6 @@ public sealed class IdentityApi : IDisposable
             request,
             cancellationToken
         );
-
-    public void Dispose() => _http.Dispose();
 
     private static string BuildSourceIdentifierRoute(string source, string identifier) =>
         $"{RouteBuilder.Escape(source)}/{RouteBuilder.Escape(identifier)}";
