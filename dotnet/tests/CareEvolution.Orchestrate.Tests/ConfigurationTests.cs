@@ -59,10 +59,7 @@ public sealed class ConfigurationTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"coding":[]}"""))
         );
         using var httpClient = new HttpClient(handler);
-        var api = new OrchestrateApi(
-            httpClient,
-            new OrchestrateClientOptions { BaseUrl = "   " }
-        );
+        var api = new OrchestrateApi(httpClient, new OrchestrateClientOptions { BaseUrl = "   " });
 
         await api.Terminology.StandardizeConditionAsync(
             new StandardizeRequest { Code = "123", System = "SNOMED" }
@@ -281,7 +278,10 @@ public sealed class ConfigurationTests
     {
         const string responseText = """{"oops":""";
         var handler = new FakeHttpMessageHandler(
-            (_, _) => Task.FromResult(FakeResponses.Text(responseText, "application/json", HttpStatusCode.BadRequest))
+            (_, _) =>
+                Task.FromResult(
+                    FakeResponses.Text(responseText, "application/json", HttpStatusCode.BadRequest)
+                )
         );
 
         using var httpClient = new HttpClient(handler);

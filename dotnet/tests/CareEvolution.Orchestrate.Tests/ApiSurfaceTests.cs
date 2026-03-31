@@ -114,9 +114,21 @@ public sealed class ApiSurfaceTests
     }
 
     [Theory]
-    [InlineData("https://api.example.com", "/custom/v1/ping", "https://api.example.com/custom/v1/ping")]
-    [InlineData("https://api.example.com/", "custom/v1/ping", "https://api.example.com/custom/v1/ping")]
-    [InlineData("https://api.example.com/", "/custom/v1/ping", "https://api.example.com/custom/v1/ping")]
+    [InlineData(
+        "https://api.example.com",
+        "/custom/v1/ping",
+        "https://api.example.com/custom/v1/ping"
+    )]
+    [InlineData(
+        "https://api.example.com/",
+        "custom/v1/ping",
+        "https://api.example.com/custom/v1/ping"
+    )]
+    [InlineData(
+        "https://api.example.com/",
+        "/custom/v1/ping",
+        "https://api.example.com/custom/v1/ping"
+    )]
     public async Task AdvancedTransportShouldNormalizeBaseUrlAndPath(
         string baseUrl,
         string path,
@@ -127,7 +139,10 @@ public sealed class ApiSurfaceTests
             (_, _) => Task.FromResult(FakeResponses.Json("""{"message":"ok"}"""))
         );
         using var httpClient = new HttpClient(handler);
-        var api = new OrchestrateApi(httpClient, new OrchestrateClientOptions { BaseUrl = baseUrl });
+        var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions { BaseUrl = baseUrl }
+        );
 
         _ = await api.HttpHandler.GetJsonAsync<TransportProbeResponse>(path);
 

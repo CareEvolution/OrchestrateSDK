@@ -181,7 +181,9 @@ public sealed class LiveApiTests : IDisposable
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task ClassifyMedicationShouldClassifyBatch()
     {
-        var results = await _api.Terminology.ClassifyMedicationAsync(ClassifyMedicationRequestItems);
+        var results = await _api.Terminology.ClassifyMedicationAsync(
+            ClassifyMedicationRequestItems
+        );
         Assert.Equal(2, results.Count);
         Assert.All(results, result => Assert.True(result.RxNormGeneric));
     }
@@ -1067,7 +1069,10 @@ public sealed class LiveApiTests : IDisposable
     public async Task WithTimeoutShouldTimeout()
     {
         using var httpClient = new HttpClient();
-        var timeoutApi = new OrchestrateApi(httpClient, new OrchestrateClientOptions { TimeoutMs = 1 });
+        var timeoutApi = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions { TimeoutMs = 1 }
+        );
         await Assert.ThrowsAnyAsync<Exception>(() =>
             timeoutApi.Convert.Hl7ToFhirR4Async(
                 new ConvertHl7ToFhirR4Request { Content = LiveTestData.Hl7 }

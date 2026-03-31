@@ -155,9 +155,11 @@ internal static class EnvironmentConfiguration
 
     private static void ValidateExactlyOneAuthenticationHeader(ResolvedConfiguration configuration)
     {
-        var hasApiKey = HasConfiguredValue(configuration.ApiKey)
+        var hasApiKey =
+            HasConfiguredValue(configuration.ApiKey)
             || HasConfiguredHeader(configuration.AdditionalHeaders, "x-api-key");
-        var hasAuthorization = HasConfiguredValue(configuration.Authorization)
+        var hasAuthorization =
+            HasConfiguredValue(configuration.Authorization)
             || HasConfiguredHeader(configuration.AdditionalHeaders, "Authorization");
 
         if (hasApiKey == hasAuthorization)
