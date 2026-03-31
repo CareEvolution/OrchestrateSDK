@@ -7,6 +7,14 @@ public sealed class IdentityApiTests
     [Fact]
     public async Task AddOrUpdateRecordShouldEncodeRouteAndSendDemographicPayload()
     {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_IDENTITY_API_KEY"] = null,
+                ["ORCHESTRATE_IDENTITY_METRICS_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
                 Task.FromResult(
@@ -18,7 +26,11 @@ public sealed class IdentityApiTests
         using var httpClient = new HttpClient(handler);
         var api = new IdentityApi(
             httpClient,
-            new IdentityApiOptions { Url = "https://identity.example.com" }
+            new IdentityApiOptions
+            {
+                Url = "https://identity.example.com",
+                ApiKey = "test-identity-api-key",
+            }
         );
 
         await api.AddOrUpdateRecordAsync(
@@ -46,6 +58,14 @@ public sealed class IdentityApiTests
     [Fact]
     public async Task AddOrUpdateBlindedRecordShouldFlattenPayload()
     {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_IDENTITY_API_KEY"] = null,
+                ["ORCHESTRATE_IDENTITY_METRICS_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
                 Task.FromResult(
@@ -57,7 +77,11 @@ public sealed class IdentityApiTests
         using var httpClient = new HttpClient(handler);
         var api = new IdentityApi(
             httpClient,
-            new IdentityApiOptions { Url = "https://identity.example.com" }
+            new IdentityApiOptions
+            {
+                Url = "https://identity.example.com",
+                ApiKey = "test-identity-api-key",
+            }
         );
 
         await api.AddOrUpdateBlindedRecordAsync(
@@ -80,13 +104,25 @@ public sealed class IdentityApiTests
     [Fact]
     public async Task DeleteRecordShouldSendEmptyObjectPayload()
     {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_IDENTITY_API_KEY"] = null,
+                ["ORCHESTRATE_IDENTITY_METRICS_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Json("""{"changedPersons":[]}"""))
         );
         using var httpClient = new HttpClient(handler);
         var api = new IdentityApi(
             httpClient,
-            new IdentityApiOptions { Url = "https://identity.example.com" }
+            new IdentityApiOptions
+            {
+                Url = "https://identity.example.com",
+                ApiKey = "test-identity-api-key",
+            }
         );
 
         await api.DeleteRecordAsync(
@@ -103,6 +139,14 @@ public sealed class IdentityApiTests
     [Fact]
     public async Task MonitoringShouldCallExpectedRoute()
     {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_IDENTITY_API_KEY"] = null,
+                ["ORCHESTRATE_IDENTITY_METRICS_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
                 Task.FromResult(
@@ -114,7 +158,11 @@ public sealed class IdentityApiTests
         using var httpClient = new HttpClient(handler);
         var api = new IdentityApi(
             httpClient,
-            new IdentityApiOptions { Url = "https://identity.example.com" }
+            new IdentityApiOptions
+            {
+                Url = "https://identity.example.com",
+                ApiKey = "test-identity-api-key",
+            }
         );
 
         var response = await api.Monitoring.IdentifierMetricsAsync();
