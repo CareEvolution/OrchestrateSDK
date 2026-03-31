@@ -343,10 +343,10 @@ internal sealed class OrchestrateHttpClient(
         var issues = ReadOperationalOutcomes(responseText);
         if ((int)response.StatusCode >= 400 && (int)response.StatusCode < 600)
         {
-            return new OrchestrateClientError(responseText, issues, response.StatusCode);
+            return new OrchestrateClientException(responseText, issues, response.StatusCode);
         }
 
-        return new OrchestrateHttpError(responseText, response.StatusCode);
+        return new OrchestrateHttpException(responseText, response.StatusCode);
     }
 
     private static IReadOnlyList<string> ReadOperationalOutcomes(string responseText)

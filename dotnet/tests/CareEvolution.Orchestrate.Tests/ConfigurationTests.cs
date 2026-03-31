@@ -129,7 +129,7 @@ public sealed class ConfigurationTests
     }
 
     [Fact]
-    public async Task HttpErrorsShouldBeConvertedToOrchestrateClientErrors()
+    public async Task HttpErrorsShouldBeConvertedToOrchestrateClientExceptions()
     {
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
@@ -147,7 +147,7 @@ public sealed class ConfigurationTests
             new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
         );
 
-        var exception = await Assert.ThrowsAsync<OrchestrateClientError>(() =>
+        var exception = await Assert.ThrowsAsync<OrchestrateClientException>(() =>
             api.Terminology.StandardizeConditionAsync(
                 new StandardizeRequest { Code = "123", System = "SNOMED" }
             )

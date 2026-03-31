@@ -843,7 +843,7 @@ public sealed class LiveApiTests
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4ValueSetsByScopeWithoutPaginationShouldRaise()
     {
-        await Assert.ThrowsAsync<OrchestrateClientError>(() =>
+        await Assert.ThrowsAsync<OrchestrateClientException>(() =>
             Api.Terminology.GetFhirR4ValueSetsByScopeAsync(
                 new GetFhirR4ValueSetsByScopeRequest { Scope = "http://loinc.org" }
             )
