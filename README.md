@@ -68,6 +68,7 @@ Additionally, C# also supports dependency injection with `IOrchestrateApi` and `
 
 ```csharp
 using CareEvolution.Orchestrate;
+using Microsoft.Extensions.DependencyInjection;
 
 var services = new ServiceCollection();
 services.AddOrchestrateApi();
@@ -142,6 +143,7 @@ api = OrchestrateApi()
 With environment values as above or DI configuration:
 
 ```csharp
+using Microsoft.Extensions.DependencyInjection;
 using CareEvolution.Orchestrate;
 
 var services = new ServiceCollection();
