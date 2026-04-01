@@ -7,16 +7,30 @@ namespace CareEvolution.Orchestrate.Tests;
 
 public sealed class ApiSurfaceTests
 {
+    private static EnvironmentVariableScope ClearAmbientOrchestrateAuthEnvironment() =>
+        new(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_API_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
+
     [Fact]
     public async Task TerminologyBatchShouldPostToBatchRoute()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Json("""{"items":[{"coding":[]}]}"""))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         var response = await api.Terminology.StandardizeConditionAsync([
@@ -35,13 +49,18 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task ConvertHl7ShouldSendPlainTextAndQueryParameters()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Json("{}"))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         await api.Convert.Hl7ToFhirR4Async(
@@ -68,13 +87,18 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task AdvancedTransportShouldApplyBaseUrlAndDeserializeJson()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Json("""{"message":"ok"}"""))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         var response = await api.HttpHandler.GetJsonAsync<TransportProbeResponse>(
@@ -92,13 +116,18 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task AdvancedTransportShouldSupportTextResponses()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Text("<html></html>", "text/html"))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         using var content = new StringContent("<ClinicalDocument />");
@@ -135,13 +164,14 @@ public sealed class ApiSurfaceTests
         string expectedUrl
     )
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Json("""{"message":"ok"}"""))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = baseUrl }
+            new OrchestrateClientOptions { BaseUrl = baseUrl, ApiKey = "test-api-key" }
         );
 
         _ = await api.HttpHandler.GetJsonAsync<TransportProbeResponse>(path);
@@ -180,6 +210,7 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task ConvertPdfShouldReturnBytes()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var expected = new byte[] { 1, 2, 3, 4 };
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Bytes(expected, "application/pdf"))
@@ -187,7 +218,11 @@ public sealed class ApiSurfaceTests
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         var response = await api.Convert.CdaToPdfAsync(
@@ -201,13 +236,18 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task InsightRiskProfileShouldBuildExpectedQueryString()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Json("{}"))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         await api.Insight.RiskProfileAsync(
@@ -233,6 +273,7 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task GetFhirR4CodeSystemShouldEscapePathSegment()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
                 Task.FromResult(
@@ -242,7 +283,11 @@ public sealed class ApiSurfaceTests
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         _ = await api.Terminology.GetFhirR4CodeSystemAsync(
@@ -272,6 +317,7 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task StandardizeBundleShouldSerializeAsFhirJson()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         Assert.Equal(Hl7.Fhir.Model.BundleType.BatchResponse, LiveTestData.R4Bundle.Type);
         Assert.NotEmpty(LiveTestData.R4Bundle.Entry);
 
@@ -286,7 +332,11 @@ public sealed class ApiSurfaceTests
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         await api.Terminology.StandardizeBundleAsync(LiveTestData.R4Bundle);
@@ -304,6 +354,7 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task GetAllFhirR4ValueSetsForCodesShouldSerializeParametersWithValueString()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
                 Task.FromResult(
@@ -313,7 +364,11 @@ public sealed class ApiSurfaceTests
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         var parameters = new Parameters
@@ -349,13 +404,18 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task ConvertFhirR4ToOmopShouldSerializeAsFhirJson()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Bytes([80, 75, 3, 4], "application/zip"))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         _ = await api.Convert.FhirR4ToOmopAsync(
@@ -375,13 +435,18 @@ public sealed class ApiSurfaceTests
     [Fact]
     public async Task ConvertFhirR4ToNemsisV35ShouldSerializeAsFhirJson()
     {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
         var handler = new FakeHttpMessageHandler(
             (_, _) => Task.FromResult(FakeResponses.Text("<EMSDataSet />", "application/xml"))
         );
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         _ = await api.Convert.FhirR4ToNemsisV35Async(
