@@ -3,7 +3,7 @@ using System.ComponentModel;
 namespace CareEvolution.Orchestrate;
 
 [EditorBrowsable(EditorBrowsableState.Advanced)]
-public interface IOrchestrateHttpClient : IDisposable
+public interface IOrchestrateHttpClient
 {
     HttpClient HttpClient { get; }
 

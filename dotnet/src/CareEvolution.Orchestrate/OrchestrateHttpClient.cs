@@ -479,9 +479,4 @@ internal sealed class OrchestrateHttpClient(
 
         return string.Empty;
     }
-
-    public void Dispose()
-    {
-        _httpClient.Dispose();
-    }
 }

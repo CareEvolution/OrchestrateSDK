@@ -140,14 +140,13 @@ internal static class EnvironmentConfiguration
     private static string NormalizeBasicCredential(string metricsKey)
     {
         var normalized = metricsKey.Trim();
-        const string prefix = "Basic";
+        const string prefix = "Basic ";
         if (
             normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
             && normalized.Length > prefix.Length
-            && char.IsWhiteSpace(normalized[prefix.Length])
         )
         {
-            normalized = normalized[(prefix.Length + 1)..].TrimStart();
+            normalized = normalized[prefix.Length..].TrimStart();
         }
 
         return normalized;
