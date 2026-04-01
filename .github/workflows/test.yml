@@ -1,5 +1,8 @@
 name: Test
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
@@ -117,3 +120,34 @@ jobs:
       - name: Test
         working-directory: python
         run: poetry run pytest -m "${{ (inputs.suite || 'default') }}"
+
+  csharp:
+    name: CSharp
+    runs-on: ubuntu-latest
+    needs:
+      - python
+    strategy:
+      fail-fast: true
+      matrix:
+        dotnet-version: ["8.0.x", "10.0.x"]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5.2.0 # v5.2.0
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Restore dotnet tools
+        working-directory: dotnet
+        run: dotnet tool restore
+      - name: Check formatting
+        working-directory: dotnet
+        run: dotnet csharpier check .
+      - name: Restore dependencies
+        working-directory: dotnet
+        run: dotnet restore OrchestrateSDK.DotNet.sln
+      - name: Build
+        working-directory: dotnet
+        run: dotnet build OrchestrateSDK.DotNet.sln --configuration Release --no-restore
+      - name: Test
+        working-directory: dotnet
+        run: dotnet test OrchestrateSDK.DotNet.sln --configuration Release --no-build

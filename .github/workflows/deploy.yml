@@ -164,3 +164,49 @@ jobs:
           poetry publish --build --no-interaction -r pypi
           $version = poetry version
           Write-Host "Published ``$version`` to Pypi." >> $Env:GITHUB_STEP_SUMMARY
+
+  csharp:
+    name: CSharp
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    needs:
+      - test
+      - version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5.2.0 # v5.2.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - name: Restore dotnet tools
+        working-directory: dotnet
+        run: dotnet tool restore
+      - name: Check formatting
+        working-directory: dotnet
+        run: dotnet csharpier check .
+      - name: Restore dependencies
+        working-directory: dotnet
+        run: dotnet restore OrchestrateSDK.DotNet.sln
+      - name: Pack
+        working-directory: dotnet
+        run: dotnet pack src/CareEvolution.Orchestrate/CareEvolution.Orchestrate.csproj --configuration Release --no-restore -p:Version=${{ needs.version.outputs.version }} -o ./artifacts
+      - name: Upload package artifact
+        if: needs.version.outputs.target == 'dev'
+        uses: actions/upload-artifact@v4
+        with:
+          name: csharp-nuget-package-${{ needs.version.outputs.version }}
+          path: dotnet/artifacts/*.nupkg
+      - name: Publish NuGet
+        if: needs.version.outputs.target == 'prod'
+        working-directory: dotnet
+        run: |
+          dotnet nuget push ./artifacts/*.nupkg \
+            --source https://proget.careevolution.com/nuget/nuget/ \
+            --api-key ${{ secrets.PROGET_TOKEN }} \
+            --skip-duplicate
+          echo "Published `${{ needs.version.outputs.version }}` to NuGet.org." >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,65 @@
+{
+  "resourceType": "Bundle",
+  "type": "batch-response",
+  "entry": [
+    {
+      "fullUrl": "https://api.careevolutionapi.com/Patient/35b77437-425d-419c-90b5-af4bc433ebe9",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "35b77437-425d-419c-90b5-af4bc433ebe9",
+        "meta": {
+          "source": "http://rosetta.careevolution.com/identifiers/CareEvolution/MRN/1.3.6.1.4.1.37608_1.3.6.1.4.1.37608"
+        },
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "MR"
+                }
+              ]
+            },
+            "system": "urn:oid:1.3.6.1.4.1.37608",
+            "value": "IheTestPatient"
+          },
+          {
+            "system": "http://rosetta.careevolution.com/identifiers/Proprietary/1.3.6.1.4.1.37608",
+            "value": "IheTestPatient"
+          }
+        ],
+        "name": [
+          {
+            "use": "official",
+            "family": "Smith",
+            "given": [
+              "Patient"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "534-555-6666",
+            "use": "home"
+          }
+        ],
+        "gender": "female",
+        "birthDate": "1956-08-13",
+        "deceasedBoolean": false,
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "34 Drury Lane"
+            ],
+            "city": "Disney Land",
+            "state": "CA",
+            "postalCode": "90210"
+          }
+        ]
+      }
+    }
+  ]
+}

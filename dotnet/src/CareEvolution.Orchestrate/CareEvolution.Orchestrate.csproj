@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <PackageId>CareEvolution.Orchestrate</PackageId>
+    <Title>CareEvolution Orchestrate SDK</Title>
+    <Description>SDK for the Orchestrate API at api.careevolutionapi.com</Description>
+    <PackageProjectUrl>https://rosetta-api.docs.careevolution.com/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CareEvolution/OrchestrateSDK</RepositoryUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Authors>CareEvolution</Authors>
+    <Version>0.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CareEvolution.Fhir.Core" Version="1.11.0" />
+    <PackageReference
+      Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+      Version="8.0.2"
+    />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+  </ItemGroup>
+</Project>

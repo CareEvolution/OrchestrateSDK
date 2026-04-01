@@ -1,0 +1,3 @@
+**/bin
+**/obj
+tests/CareEvolution.Orchestrate.Tests/LiveData/**

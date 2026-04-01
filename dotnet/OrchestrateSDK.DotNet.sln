@@ -1,0 +1,27 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareEvolution.Orchestrate", "src/CareEvolution.Orchestrate/CareEvolution.Orchestrate.csproj", "{B21EA726-0E99-4CDB-8F56-7A3300565A0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareEvolution.Orchestrate.Tests", "tests/CareEvolution.Orchestrate.Tests/CareEvolution.Orchestrate.Tests.csproj", "{3259B89E-A60A-432D-A4B5-547646506A24}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B21EA726-0E99-4CDB-8F56-7A3300565A0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B21EA726-0E99-4CDB-8F56-7A3300565A0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B21EA726-0E99-4CDB-8F56-7A3300565A0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B21EA726-0E99-4CDB-8F56-7A3300565A0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3259B89E-A60A-432D-A4B5-547646506A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3259B89E-A60A-432D-A4B5-547646506A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3259B89E-A60A-432D-A4B5-547646506A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3259B89E-A60A-432D-A4B5-547646506A24}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
