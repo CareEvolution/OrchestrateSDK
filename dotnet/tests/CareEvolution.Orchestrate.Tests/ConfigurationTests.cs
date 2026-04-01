@@ -52,7 +52,12 @@ public sealed class ConfigurationTests
     public async Task OrchestrateApiShouldTreatWhitespaceBaseUrlAsMissing()
     {
         using var environment = new EnvironmentVariableScope(
-            new Dictionary<string, string?> { ["ORCHESTRATE_BASE_URL"] = "https://env.example.com" }
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_BASE_URL"] = "https://env.example.com",
+                ["ORCHESTRATE_API_KEY"] = "env-api-key",
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
         );
 
         var handler = new FakeHttpMessageHandler(
@@ -242,6 +247,14 @@ public sealed class ConfigurationTests
     [Fact]
     public async Task HttpErrorsShouldBeConvertedToOrchestrateClientExceptions()
     {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_API_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
+
         var handler = new FakeHttpMessageHandler(
             (_, _) =>
                 Task.FromResult(
@@ -255,7 +268,11 @@ public sealed class ConfigurationTests
         using var httpClient = new HttpClient(handler);
         var api = new OrchestrateApi(
             httpClient,
-            new OrchestrateClientOptions { BaseUrl = "https://api.example.com" }
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
         );
 
         var exception = await Assert.ThrowsAsync<OrchestrateClientException>(() =>
