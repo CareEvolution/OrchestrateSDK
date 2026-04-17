@@ -356,7 +356,10 @@ public sealed class ConfigurationTests
         Assert.Equal(3, exception.Issues.Count);
 
         // Error issue: diagnostics only, no details
-        Assert.Contains("error: invalid - Missing recordTarget in ClinicalDocument", exception.Issues[0]);
+        Assert.Contains(
+            "error: invalid - Missing recordTarget in ClinicalDocument",
+            exception.Issues[0]
+        );
 
         // Information issues: details.text extracted
         Assert.Contains("fb04306a-0834-432d-90c3-251ed7d3401d", exception.Issues[1]);
