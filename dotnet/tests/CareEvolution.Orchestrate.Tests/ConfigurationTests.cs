@@ -331,8 +331,7 @@ public sealed class ConfigurationTests
             """;
 
         var handler = new FakeHttpMessageHandler(
-            (_, _) =>
-                Task.FromResult(FakeResponses.Json(responseJson, HttpStatusCode.BadRequest))
+            (_, _) => Task.FromResult(FakeResponses.Json(responseJson, HttpStatusCode.BadRequest))
         );
 
         using var httpClient = new HttpClient(handler);
