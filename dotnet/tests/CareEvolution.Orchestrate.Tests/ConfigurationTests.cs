@@ -291,6 +291,85 @@ public sealed class ConfigurationTests
     }
 
     [Fact]
+    public async Task MultipleIssueOperationOutcomeShouldExposeAllStructuredIssues()
+    {
+        using var environment = new EnvironmentVariableScope(
+            new Dictionary<string, string?>
+            {
+                ["ORCHESTRATE_API_KEY"] = null,
+                ["ORCHESTRATE_ADDITIONAL_HEADERS"] = null,
+            }
+        );
+
+        const string responseJson = """
+            {
+              "resourceType": "OperationOutcome",
+              "issue": [
+                {
+                  "severity": "error",
+                  "code": "invalid",
+                  "diagnostics": "Missing recordTarget in ClinicalDocument"
+                },
+                {
+                  "severity": "information",
+                  "code": "informational",
+                  "details": {
+                    "coding": [{ "system": "https://quality.rosetta.careevolution.com/v1/CodeSystems/CDAProcessingMessage", "code": "DocumentId" }],
+                    "text": "fb04306a-0834-432d-90c3-251ed7d3401d"
+                  }
+                },
+                {
+                  "severity": "information",
+                  "code": "informational",
+                  "details": {
+                    "coding": [{ "system": "https://quality.rosetta.careevolution.com/v1/CodeSystems/CDAProcessingMessage", "code": "DocumentEffectiveTime" }],
+                    "text": "2011-05-27T01:44:27-05:00"
+                  }
+                }
+              ]
+            }
+            """;
+
+        var handler = new FakeHttpMessageHandler(
+            (_, _) =>
+                Task.FromResult(FakeResponses.Json(responseJson, HttpStatusCode.BadRequest))
+        );
+
+        using var httpClient = new HttpClient(handler);
+        var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
+        );
+
+        var exception = await Assert.ThrowsAsync<OrchestrateClientException>(() =>
+            api.Convert.CdaToFhirR4Async(
+                new ConvertCdaToFhirR4Request { Content = "<ClinicalDocument/>" }
+            )
+        );
+
+        Assert.Equal(HttpStatusCode.BadRequest, exception.StatusCode);
+        Assert.NotNull(exception.OperationOutcome);
+        Assert.Equal(3, exception.OperationOutcome!.Issue.Count);
+        Assert.Equal(3, exception.Issues.Count);
+
+        // Error issue: diagnostics only, no details
+        Assert.Contains("error: invalid - Missing recordTarget in ClinicalDocument", exception.Issues[0]);
+
+        // Information issues: details.text extracted
+        Assert.Contains("fb04306a-0834-432d-90c3-251ed7d3401d", exception.Issues[1]);
+        Assert.Contains("2011-05-27T01:44:27-05:00", exception.Issues[2]);
+
+        // Message covers all issues
+        Assert.Contains("Missing recordTarget in ClinicalDocument", exception.Message);
+        Assert.Contains("fb04306a-0834-432d-90c3-251ed7d3401d", exception.Message);
+        Assert.Contains("2011-05-27T01:44:27-05:00", exception.Message);
+    }
+
+    [Fact]
     public async Task MalformedJsonHttpErrorsShouldPreserveRawResponseText()
     {
         const string responseText = """{"oops":""";
