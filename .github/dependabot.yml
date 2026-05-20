@@ -1,6 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
     directory: "/python"
     schedule:
       interval: weekly
@@ -14,6 +19,11 @@ updates:
           - "minor"
           - "patch"
   - package-ecosystem: "npm"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
     directory: "/typescript"
     schedule:
       interval: weekly
@@ -27,6 +37,11 @@ updates:
           - "minor"
           - "patch"
   - package-ecosystem: "github-actions"
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
     directory: "/"
     schedule:
       interval: weekly
