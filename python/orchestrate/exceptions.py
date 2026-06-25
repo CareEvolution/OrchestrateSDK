@@ -1,10 +1,12 @@
 from orchestrate._internal.exceptions import (
-    OrchestrateError,
+    OperationOutcomeIssue,
     OrchestrateClientError,
+    OrchestrateError,
     OrchestrateHttpError,
 )
 
 __all__ = [
+    "OperationOutcomeIssue",
     "OrchestrateError",
     "OrchestrateClientError",
     "OrchestrateHttpError",
