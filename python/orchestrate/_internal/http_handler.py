@@ -1,11 +1,11 @@
 import json
 import os
 from ctypes import ArgumentError
-from dataclasses import dataclass
 from typing import Any, Mapping, Optional, Union
 
 import requests
 from orchestrate._internal.exceptions import (
+    OperationOutcomeIssue,
     OrchestrateClientError,
     OrchestrateHttpError,
 )
@@ -60,29 +60,12 @@ def _get_additional_headers() -> Mapping[str, str]:
     )
 
 
-@dataclass
-class _OperationalOutcomeIssue:
-    severity: str
-    code: str
-    diagnostics: str
-    details: str
-
-    def __str__(self) -> str:
-        s = f"{self.severity}: {self.code}"
-        message = "; ".join(
-            message for message in [self.details, self.diagnostics] if message
-        )
-        if message:
-            s += f" - {message}"
-        return s
-
-
-def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcomeIssue]:
+def _read_json_outcomes(response: requests.Response) -> list[OperationOutcomeIssue]:
     try:
         json_response = response.json()
         if "issue" in json_response:
             return [
-                _OperationalOutcomeIssue(
+                OperationOutcomeIssue(
                     issue.get("severity", ""),
                     issue.get("code", ""),
                     issue.get("diagnostics", ""),
@@ -95,7 +78,7 @@ def _read_json_outcomes(response: requests.Response) -> list[_OperationalOutcome
             == "https://tools.ietf.org/html/rfc9110#section-15.5.1"
         ):
             return [
-                _OperationalOutcomeIssue(
+                OperationOutcomeIssue(
                     severity="error",
                     code=json_response.get("title", ""),
                     diagnostics=json_response.get("detail", ""),
@@ -122,18 +105,10 @@ def _get_detail_coding_string(coding: dict) -> str:
     )
 
 
-def _read_operational_outcomes(response: requests.Response) -> list[str]:
-    outcomes = _read_json_outcomes(response)
-    if outcomes:
-        return [str(outcome) for outcome in outcomes]
-
-    return [response.text]
-
-
 def _exception_from_response(response: requests.Response) -> OrchestrateHttpError:
-    operational_outcomes = _read_operational_outcomes(response)
+    issues = _read_json_outcomes(response)
     if response.status_code >= 400 and response.status_code < 600:
-        return OrchestrateClientError(response.text, operational_outcomes)
+        return OrchestrateClientError(response.text, issues, response.status_code)
     return OrchestrateHttpError()
 
 
