@@ -178,7 +178,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup .NET
-        uses: actions/setup-dotnet@v5.4.0 # v5.2.0
+        uses: actions/setup-dotnet@v6.0.0 # v5.2.0
         with:
           dotnet-version: |
             8.0.x
