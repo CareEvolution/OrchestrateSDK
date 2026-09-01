@@ -958,7 +958,7 @@ def test_translate_fhir_r4_concept_map_with_code_should_translate():
 
 def test_translate_fhir_r4_concept_map_with_code_and_domain_should_translate():
     result = TEST_API.terminology.translate_fhir_r4_concept_map(
-        code="119981000146107", domain="Condition"
+        code="119981000146107", domain="DiagnosisCode"
     )
 
     assert result is not None

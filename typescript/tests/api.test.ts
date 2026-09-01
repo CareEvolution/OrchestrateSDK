@@ -717,7 +717,7 @@ describe("translate fhir r4 concept map", () => {
   it("should translate code and system", async () => {
     const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
-      domain: "Condition",
+      domain: "DiagnosisCode",
     });
     expect(result).toBeDefined();
     expect(result.parameter?.length).toBeGreaterThan(0);
