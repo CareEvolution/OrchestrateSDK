@@ -800,7 +800,11 @@ public sealed class LiveApiTests : IDisposable
     public async Task TranslateFhirR4ConceptMapWithCodeAndDomainShouldTranslate()
     {
         var result = await _api.Terminology.TranslateFhirR4ConceptMapAsync(
-            new TranslateFhirR4ConceptMapRequest { Code = "119981000146107", Domain = "DiagnosisCode" }
+            new TranslateFhirR4ConceptMapRequest
+            {
+                Code = "119981000146107",
+                Domain = "DiagnosisCode",
+            }
         );
         Assert.NotEmpty(result.Parameter);
     }
