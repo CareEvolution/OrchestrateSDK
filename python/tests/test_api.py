@@ -2,6 +2,7 @@ from io import BytesIO
 import json
 from pathlib import Path
 from tempfile import TemporaryFile
+from typing import get_args
 from zipfile import ZipFile
 
 import pytest
@@ -24,6 +25,7 @@ from orchestrate.terminology import (
     ClassifyMedicationRequest,
     ClassifyObservationRequest,
     StandardizeRequest,
+    TranslateDomains,
 )
 
 pytestmark = [pytest.mark.e2e, pytest.mark.default]
@@ -964,6 +966,23 @@ def test_translate_fhir_r4_concept_map_with_code_and_domain_should_translate():
     assert result is not None
     assert result["resourceType"] == "Parameters"
     assert len(result["parameter"]) > 0
+
+
+def test_translate_domains_should_match_supported_domains_value_set():
+    result = TEST_API.terminology.get_fhir_r4_value_set(
+        value_set_id="Rosetta.SupportedDomains"
+    )
+
+    assert result is not None
+    assert result["resourceType"] == "ValueSet"
+
+    codes = {
+        concept["code"]
+        for include in result["compose"]["include"]
+        for concept in include["concept"]
+    }
+
+    assert codes == set(get_args(TranslateDomains))
 
 
 def test_summarize_fhir_r4_value_set_scope_should_return_bundle():

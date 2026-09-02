@@ -359,7 +359,8 @@ TranslateFhirR4ConceptMapResponse = Parameters
 
 # Generated from the Rosetta.SupportedDomains ValueSet
 # (GET /terminology/v1/fhir/r4/ValueSet/Rosetta.SupportedDomains).
-# Keep in sync with translateDomains in typescript/src/terminology.ts.
+# Keep in sync with translateDomains in typescript/src/terminology.ts and
+# TranslateDomains in dotnet/src/CareEvolution.Orchestrate/TranslateDomains.cs.
 TranslateDomains = Literal[
     "Acuity",
     "AddressType",

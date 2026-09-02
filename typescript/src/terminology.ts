@@ -300,8 +300,9 @@ export type TranslateFhirR4ConceptMapResponse = Parameters;
 
 // Generated from the Rosetta.SupportedDomains ValueSet
 // (GET /terminology/v1/fhir/r4/ValueSet/Rosetta.SupportedDomains).
-// Keep in sync with TranslateDomains in python/orchestrate/_internal/terminology.py.
-const translateDomains = [
+// Keep in sync with TranslateDomains in python/orchestrate/_internal/terminology.py and
+// dotnet/src/CareEvolution.Orchestrate/TranslateDomains.cs.
+export const translateDomains = [
   "Acuity",
   "AddressType",
   "AdmissionType",

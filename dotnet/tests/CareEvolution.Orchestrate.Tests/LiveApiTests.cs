@@ -803,10 +803,29 @@ public sealed class LiveApiTests : IDisposable
             new TranslateFhirR4ConceptMapRequest
             {
                 Code = "119981000146107",
-                Domain = "DiagnosisCode",
+                Domain = TranslateDomains.DiagnosisCode,
             }
         );
         Assert.NotEmpty(result.Parameter);
+    }
+
+    [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
+    public async Task GetFhirR4SupportedDomainsValueSetShouldMatchTranslateDomains()
+    {
+        var result = await _api.Terminology.GetFhirR4ValueSetAsync(
+            new GetFhirR4ValueSetRequest { Id = "Rosetta.SupportedDomains" }
+        );
+
+        var valueSetDomains = result
+            .Compose.Include.SelectMany(include => include.Concept)
+            .Select(concept => concept.Code)
+            .OrderBy(code => code, StringComparer.Ordinal)
+            .ToList();
+        var sdkDomains = TranslateDomains
+            .All.OrderBy(code => code, StringComparer.Ordinal)
+            .ToList();
+
+        Assert.Equal(sdkDomains, valueSetDomains);
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
