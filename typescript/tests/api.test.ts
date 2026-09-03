@@ -7,6 +7,7 @@ import {
   ClassifyMedicationRequest,
   ClassifyObservationRequest,
   StandardizeRequest,
+  translateDomains,
 } from "../src/terminology";
 import { describe, it, expect, test } from "vitest";
 
@@ -717,10 +718,20 @@ describe("translate fhir r4 concept map", () => {
   it("should translate code and system", async () => {
     const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
-      domain: "Condition",
+      domain: "DiagnosisCode",
     });
     expect(result).toBeDefined();
     expect(result.parameter?.length).toBeGreaterThan(0);
+  });
+
+  it("SDK translate domains should match the Rosetta.SupportedDomains value set", async () => {
+    const result = await orchestrate.terminology.getFhirR4ValueSet({
+      id: "Rosetta.SupportedDomains",
+    });
+    const codes = (result.compose?.include ?? []).flatMap((include) =>
+      (include.concept ?? []).map((concept) => concept.code),
+    );
+    expect(codes.sort()).toEqual([...translateDomains].sort());
   });
 });
 
