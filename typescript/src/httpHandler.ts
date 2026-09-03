@@ -1,33 +1,8 @@
-import { OrchestrateClientError, OrchestrateHttpError } from "./exceptions.js";
+import { OperationOutcomeIssue, OrchestrateClientError, OrchestrateHttpError } from "./exceptions.js";
 
 export interface IHttpHandler {
   post<TIn, TOut>(path: string, body: TIn, headers?: { [key: string]: string; }): Promise<TOut>;
   get<TOut>(path: string, headers?: { [key: string]: string; }): Promise<TOut>;
-}
-
-class OperationalOutcomeIssue {
-  severity: string;
-  code: string;
-  diagnostics: string;
-  details: string;
-
-  constructor(severity: string, code: string, diagnostics: string, details: string) {
-    this.severity = severity;
-    this.code = code;
-    this.diagnostics = diagnostics;
-    this.details = details;
-  }
-
-  toString(): string {
-    let s = `${this.severity}: ${this.code}`;
-    const message = [this.details, this.diagnostics]
-      .filter(msg => msg)
-      .join("; ");
-    if (message) {
-      s += ` - ${message}`;
-    }
-    return s;
-  }
 }
 
 function getIssueDetailString(detail: any): string { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -50,12 +25,12 @@ function getDetailCodingString(coding: any): string { // eslint-disable-line @ty
   return parts.join(": ");
 }
 
-async function readJsonOutcomes(responseText: string): Promise<OperationalOutcomeIssue[]> {
+async function readJsonOutcomes(responseText: string): Promise<OperationOutcomeIssue[]> {
   try {
     const json = JSON.parse(responseText);
     if (json.issue) {
       return json.issue.map((issue: any) => // eslint-disable-line @typescript-eslint/no-explicit-any
-        new OperationalOutcomeIssue(
+        new OperationOutcomeIssue(
           issue.severity || "",
           issue.code || "",
           issue.diagnostics || "",
@@ -64,7 +39,7 @@ async function readJsonOutcomes(responseText: string): Promise<OperationalOutcom
       );
     }
     if (json.type === "https://tools.ietf.org/html/rfc9110#section-15.5.1") {
-      return [new OperationalOutcomeIssue(
+      return [new OperationOutcomeIssue(
         "error",
         json.title || "",
         json.detail || "",
@@ -78,19 +53,11 @@ async function readJsonOutcomes(responseText: string): Promise<OperationalOutcom
   }
 }
 
-async function readOperationalOutcomes(responseText: string): Promise<string[]> {
-  const outcomes = await readJsonOutcomes(responseText);
-  if (outcomes.length > 0) {
-    return outcomes.map((o) => o.toString());
-  }
-  return [responseText];
-}
-
 async function errorFromResponse(response: Response): Promise<never> {
   const responseText = await response.text();
-  const operationalOutcomes = await readOperationalOutcomes(responseText);
+  const issues = await readJsonOutcomes(responseText);
   if (response.status >= 400 && response.status < 600) {
-    throw new OrchestrateClientError(responseText, operationalOutcomes);
+    throw new OrchestrateClientError(responseText, issues, response.status);
   }
 
   throw new OrchestrateHttpError(responseText);
