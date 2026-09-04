@@ -9,6 +9,7 @@
     "module": "NodeNext",
     "outDir": "dist/esm",
     "moduleResolution": "NodeNext",
+    "rootDir": "src",
     "types": [
       "node"
     ],

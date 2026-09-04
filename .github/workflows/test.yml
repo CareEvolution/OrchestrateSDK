@@ -60,6 +60,9 @@ jobs:
       - name: Install dependencies
         working-directory: typescript
         run: npm ci
+      - name: Build
+        working-directory: typescript
+        run: npm run build
       - name: Default Tests
         if: ${{ (inputs.suite || 'default') == 'default' }}
         working-directory: typescript
