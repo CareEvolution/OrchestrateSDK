@@ -493,6 +493,25 @@ SummarizeFhirR4CodeSystemResponse = CodeSystem
 GetAllFhirR4ValueSetsForCodesResponse = Parameters
 
 
+def _build_translate_fhir_r4_concept_map_parameters(
+    code: str | None = None,
+    domain: str | None = None,
+    system: str | None = None,
+    display: str | None = None,
+) -> dict[str, Any]:
+    coding = {
+        key: value
+        for key, value in (("system", system), ("code", code), ("display", display))
+        if value and value.strip()
+    }
+    parameter: list[dict[str, Any]] = []
+    if domain and domain.strip():
+        parameter.append({"name": "domain", "valueString": domain})
+    if coding:
+        parameter.append({"name": "coding", "valueCoding": coding})
+    return {"resourceType": "Parameters", "parameter": parameter}
+
+
 def _get_pagination_parameters(
     page_number: Optional[int] = None,
     page_size: Optional[int] = None,
@@ -1337,16 +1356,22 @@ class TerminologyApi:
 
     def translate_fhir_r4_concept_map(
         self,
-        code: str,
+        code: str | None = None,
         domain: Optional[TranslateDomains] = None,
+        system: str | None = None,
+        display: str | None = None,
     ) -> TranslateFhirR4ConceptMapResponse:
         """
         Standardizes source codings to a reference code
+
+        At least one of `code` and `display` should be provided.
 
         ### Parameters
 
         - `code`: The code of the condition, problem, or diagnosis
         - `domain`: The source domain of the code
+        - `system`: The system of the code
+        - `display`: The display text of the code, used to match when `code` does not resolve
 
         ### Returns
 
@@ -1356,13 +1381,15 @@ class TerminologyApi:
 
         <https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html>
         """
-        parameters = {
-            "code": code,
-            "domain": domain,
-        }
-        return self.__http_handler.get(
+        body = _build_translate_fhir_r4_concept_map_parameters(
+            code=code,
+            domain=domain,
+            system=system,
+            display=display,
+        )
+        return self.__http_handler.post(
             path="/terminology/v1/fhir/r4/conceptmap/$translate",
-            parameters=parameters,
+            body=body,
         )
 
     def summarize_fhir_r4_value_set_scope(

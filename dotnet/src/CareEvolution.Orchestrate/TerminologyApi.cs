@@ -344,17 +344,12 @@ public sealed class TerminologyApi : ITerminologyApi
     public Task<Parameters> TranslateFhirR4ConceptMapAsync(
         TranslateFhirR4ConceptMapRequest request,
         CancellationToken cancellationToken = default
-    )
-    {
-        var route = RouteBuilder.Build(
+    ) =>
+        _http.PostJsonAsync<Parameters>(
             "/terminology/v1/fhir/r4/conceptmap/$translate",
-            [
-                new KeyValuePair<string, string?>("code", request.Code),
-                new KeyValuePair<string, string?>("domain", request.Domain),
-            ]
+            TranslateFhirR4ConceptMapParametersBuilder.Build(request),
+            cancellationToken
         );
-        return _http.GetJsonAsync<Parameters>(route, cancellationToken);
-    }
 
     public Task<Bundle> SummarizeFhirR4ValueSetScopeAsync(
         SummarizeFhirR4ValueSetScopeRequest request,

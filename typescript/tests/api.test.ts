@@ -707,21 +707,44 @@ describe("get fhir r4 concept maps", () => {
 });
 
 describe("translate fhir r4 concept map", () => {
+  const translateResult = (parameters: { parameter?: { name?: string; valueBoolean?: boolean }[] }) =>
+    parameters.parameter?.find((p) => p.name === "result")?.valueBoolean;
+
   it("should translate code", async () => {
     const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
     });
     expect(result).toBeDefined();
-    expect(result.parameter?.length).toBeGreaterThan(0);
+    expect(translateResult(result)).toBe(true);
   });
 
-  it("should translate code and system", async () => {
+  it("should translate code and domain", async () => {
     const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
       domain: "DiagnosisCode",
     });
     expect(result).toBeDefined();
-    expect(result.parameter?.length).toBeGreaterThan(0);
+    expect(translateResult(result)).toBe(true);
+  });
+
+  it("should translate code, system, and display", async () => {
+    const result = await orchestrate.terminology.translateFhirR4ConceptMap({
+      code: "119981000146107",
+      system: "http://snomed.info/sct",
+      display: "Essential hypertension",
+      domain: "DiagnosisCode",
+    });
+    expect(result).toBeDefined();
+    expect(translateResult(result)).toBe(true);
+  });
+
+  it("should translate display without code", async () => {
+    const result = await orchestrate.terminology.translateFhirR4ConceptMap({
+      display: "Essential hypertension",
+      domain: "DiagnosisCode",
+    });
+    expect(result).toBeDefined();
+    expect(translateResult(result)).toBe(true);
   });
 
   it("SDK translate domains should match the Rosetta.SupportedDomains value set", async () => {
