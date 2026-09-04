@@ -793,7 +793,7 @@ public sealed class LiveApiTests : IDisposable
         var result = await _api.Terminology.TranslateFhirR4ConceptMapAsync(
             new TranslateFhirR4ConceptMapRequest { Code = "119981000146107" }
         );
-        Assert.NotEmpty(result.Parameter);
+        Assert.True(TranslateResult(result));
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
@@ -806,7 +806,7 @@ public sealed class LiveApiTests : IDisposable
                 Domain = TranslateDomains.DiagnosisCode,
             }
         );
-        Assert.NotEmpty(result.Parameter);
+        Assert.True(TranslateResult(result));
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
@@ -821,8 +821,27 @@ public sealed class LiveApiTests : IDisposable
                 Domain = TranslateDomains.DiagnosisCode,
             }
         );
-        Assert.NotEmpty(result.Parameter);
+        Assert.True(TranslateResult(result));
     }
+
+    [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
+    public async Task TranslateFhirR4ConceptMapWithDisplayOnlyShouldTranslate()
+    {
+        var result = await _api.Terminology.TranslateFhirR4ConceptMapAsync(
+            new TranslateFhirR4ConceptMapRequest
+            {
+                Display = "Essential hypertension",
+                Domain = TranslateDomains.DiagnosisCode,
+            }
+        );
+        Assert.True(TranslateResult(result));
+    }
+
+    private static bool? TranslateResult(Parameters parameters) =>
+        (
+            parameters.Parameter.SingleOrDefault(p => p.Name == "result")?.Value
+            as Hl7.Fhir.Model.FhirBoolean
+        )?.Value;
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4SupportedDomainsValueSetShouldMatchTranslateDomains()

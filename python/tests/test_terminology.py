@@ -64,3 +64,25 @@ def test_build_parameters_drops_empty_fields():
 
     assert _coding(result) == {"code": "119981000146107"}
     assert _names(result) == ["coding"]
+
+
+def test_build_parameters_treats_whitespace_only_fields_as_absent():
+    result = _build_translate_fhir_r4_concept_map_parameters(
+        code="119981000146107", system="   "
+    )
+
+    assert _coding(result) == {"code": "119981000146107"}
+
+
+def test_build_parameters_omits_domain_when_whitespace_only():
+    result = _build_translate_fhir_r4_concept_map_parameters(
+        code="119981000146107", domain="   "
+    )
+
+    assert _names(result) == ["coding"]
+
+
+def test_build_parameters_omits_coding_when_all_fields_absent():
+    result = _build_translate_fhir_r4_concept_map_parameters(system="  ")
+
+    assert result["parameter"] == []

@@ -402,6 +402,77 @@ public sealed class ApiSurfaceTests
     }
 
     [Fact]
+    public async Task TranslateFhirR4ConceptMapShouldPostSerializedParametersBody()
+    {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
+        var handler = new FakeHttpMessageHandler(
+            (_, _) =>
+                Task.FromResult(
+                    FakeResponses.Json("""{"resourceType":"Parameters","parameter":[]}""")
+                )
+        );
+        using var httpClient = new HttpClient(handler);
+        var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
+        );
+
+        await api.Terminology.TranslateFhirR4ConceptMapAsync(
+            new TranslateFhirR4ConceptMapRequest
+            {
+                Code = "119981000146107",
+                System = "http://snomed.info/sct",
+                Display = "Essential hypertension",
+                Domain = TranslateDomains.DiagnosisCode,
+            }
+        );
+
+        Assert.NotNull(handler.LastRequest);
+        Assert.Equal(HttpMethod.Post, handler.LastRequest!.Method);
+        Assert.EndsWith(
+            "/terminology/v1/fhir/r4/conceptmap/$translate",
+            handler.LastRequest.RequestUri!.AbsolutePath,
+            StringComparison.Ordinal
+        );
+        Assert.Equal(
+            """{"resourceType":"Parameters","parameter":[{"name":"domain","valueString":"DiagnosisCode"},{"name":"coding","valueCoding":{"system":"http://snomed.info/sct","code":"119981000146107","display":"Essential hypertension"}}]}""",
+            handler.LastRequest.Body
+        );
+    }
+
+    [Fact]
+    public async Task TranslateFhirR4ConceptMapShouldOmitCodingParameterWhenAllFieldsAreWhitespace()
+    {
+        using var environment = ClearAmbientOrchestrateAuthEnvironment();
+        var handler = new FakeHttpMessageHandler(
+            (_, _) =>
+                Task.FromResult(
+                    FakeResponses.Json("""{"resourceType":"Parameters","parameter":[]}""")
+                )
+        );
+        using var httpClient = new HttpClient(handler);
+        var api = new OrchestrateApi(
+            httpClient,
+            new OrchestrateClientOptions
+            {
+                BaseUrl = "https://api.example.com",
+                ApiKey = "test-api-key",
+            }
+        );
+
+        await api.Terminology.TranslateFhirR4ConceptMapAsync(
+            new TranslateFhirR4ConceptMapRequest { Code = "   " }
+        );
+
+        Assert.NotNull(handler.LastRequest);
+        Assert.Equal("""{"resourceType":"Parameters"}""", handler.LastRequest!.Body);
+    }
+
+    [Fact]
     public async Task ConvertFhirR4ToOmopShouldSerializeAsFhirJson()
     {
         using var environment = ClearAmbientOrchestrateAuthEnvironment();

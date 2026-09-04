@@ -502,12 +502,13 @@ def _build_translate_fhir_r4_concept_map_parameters(
     coding = {
         key: value
         for key, value in (("system", system), ("code", code), ("display", display))
-        if value
+        if value and value.strip()
     }
     parameter: list[dict[str, Any]] = []
-    if domain:
+    if domain and domain.strip():
         parameter.append({"name": "domain", "valueString": domain})
-    parameter.append({"name": "coding", "valueCoding": coding})
+    if coding:
+        parameter.append({"name": "coding", "valueCoding": coding})
     return {"resourceType": "Parameters", "parameter": parameter}
 
 

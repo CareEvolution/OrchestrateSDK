@@ -6,13 +6,13 @@ internal static class TranslateFhirR4ConceptMapParametersBuilder
     {
         var coding = new Coding
         {
-            System = string.IsNullOrEmpty(request.System) ? null : request.System,
-            Code = string.IsNullOrEmpty(request.Code) ? null : request.Code,
-            Display = string.IsNullOrEmpty(request.Display) ? null : request.Display,
+            System = string.IsNullOrWhiteSpace(request.System) ? null : request.System,
+            Code = string.IsNullOrWhiteSpace(request.Code) ? null : request.Code,
+            Display = string.IsNullOrWhiteSpace(request.Display) ? null : request.Display,
         };
 
         var parameter = new List<Parameters.ParameterComponent>();
-        if (!string.IsNullOrEmpty(request.Domain))
+        if (!string.IsNullOrWhiteSpace(request.Domain))
         {
             parameter.Add(
                 new Parameters.ParameterComponent
@@ -22,7 +22,10 @@ internal static class TranslateFhirR4ConceptMapParametersBuilder
                 }
             );
         }
-        parameter.Add(new Parameters.ParameterComponent { Name = "coding", Value = coding });
+        if (coding.System != null || coding.Code != null || coding.Display != null)
+        {
+            parameter.Add(new Parameters.ParameterComponent { Name = "coding", Value = coding });
+        }
 
         return new Parameters { Parameter = parameter };
     }

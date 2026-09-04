@@ -44,9 +44,9 @@ const standardizeResponseSystems = [
 
 export type StandardizeTargetSystem = (typeof standardizeTargetSystems)[number];
 
-export type StandardizeRequest = Coding & { targetSystem?: StandardizeTargetSystem; };
+export type StandardizeRequest = Coding & { targetSystem?: StandardizeTargetSystem };
 
-export type StandardizeResponseCoding = Coding & { system: (typeof standardizeResponseSystems)[number]; };
+export type StandardizeResponseCoding = Coding & { system: (typeof standardizeResponseSystems)[number] };
 
 export type StandardizeResponse = {
   readonly coding: ReadonlyArray<StandardizeResponseCoding>;
@@ -79,7 +79,7 @@ const classifyConditionSystems = [
 
 export type ClassifyConditionSystem = (typeof classifyConditionSystems)[number];
 
-export type ClassifyConditionRequest = ClassifyRequest & { system: ClassifyConditionSystem; };
+export type ClassifyConditionRequest = ClassifyRequest & { system: ClassifyConditionSystem };
 
 const covid19Condition = [
   "Confirmed",
@@ -116,7 +116,7 @@ const classifyMedicationSystems = [
 
 export type ClassifyMedicationSystem = (typeof classifyMedicationSystems)[number];
 
-export type ClassifyMedicationRequest = ClassifyRequest & { system: ClassifyMedicationSystem; };
+export type ClassifyMedicationRequest = ClassifyRequest & { system: ClassifyMedicationSystem };
 
 const covid19Rx = ["vaccination", "immunoglobulin", "medication"] as const;
 
@@ -130,7 +130,7 @@ export type ClassifyMedicationResponse = {
 
 const classifyObservationSystems = ["http://loinc.org", "LOINC", "http://snomed.info/sct", "SNOMED"] as const;
 
-export type ClassifyObservationRequest = ClassifyRequest & { system: (typeof classifyObservationSystems)[number]; };
+export type ClassifyObservationRequest = ClassifyRequest & { system: (typeof classifyObservationSystems)[number] };
 
 export type ClassifyObservationResponse = {
   loincComponent: string;
@@ -415,17 +415,19 @@ export type TranslateFhirR4ConceptMapRequest = {
   display?: string;
 };
 
-export const buildTranslateFhirR4ConceptMapParameters = (request: TranslateFhirR4ConceptMapRequest): Parameters => {
+const buildTranslateFhirR4ConceptMapParameters = (request: TranslateFhirR4ConceptMapRequest): Parameters => {
   const coding: Coding = {};
-  if (request.system) coding.system = request.system;
-  if (request.code) coding.code = request.code;
-  if (request.display) coding.display = request.display;
+  if (request.system?.trim()) coding.system = request.system;
+  if (request.code?.trim()) coding.code = request.code;
+  if (request.display?.trim()) coding.display = request.display;
 
   const parameter: ParametersParameter[] = [];
-  if (request.domain) {
+  if (request.domain?.trim()) {
     parameter.push({ name: "domain", valueString: request.domain });
   }
-  parameter.push({ name: "coding", valueCoding: coding });
+  if (Object.keys(coding).length > 0) {
+    parameter.push({ name: "coding", valueCoding: coding });
+  }
 
   return { resourceType: "Parameters", parameter };
 };

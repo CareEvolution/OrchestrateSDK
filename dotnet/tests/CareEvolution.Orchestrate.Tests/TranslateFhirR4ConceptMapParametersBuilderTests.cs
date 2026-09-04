@@ -80,4 +80,37 @@ public sealed class TranslateFhirR4ConceptMapParametersBuilderTests
         Assert.Null(coding.System);
         Assert.Equal("119981000146107", coding.Code);
     }
+
+    [Fact]
+    public void BuildShouldTreatWhitespaceOnlyFieldsAsAbsent()
+    {
+        var parameters = TranslateFhirR4ConceptMapParametersBuilder.Build(
+            new TranslateFhirR4ConceptMapRequest { Code = "119981000146107", System = "   " }
+        );
+
+        var coding = (Coding)parameters.Parameter.Single(p => p.Name == "coding").Value!;
+        Assert.Null(coding.System);
+        Assert.Equal("119981000146107", coding.Code);
+    }
+
+    [Fact]
+    public void BuildShouldOmitDomainParameterWhenDomainIsWhitespaceOnly()
+    {
+        var parameters = TranslateFhirR4ConceptMapParametersBuilder.Build(
+            new TranslateFhirR4ConceptMapRequest { Code = "119981000146107", Domain = "   " }
+        );
+
+        var coding = Assert.Single(parameters.Parameter);
+        Assert.Equal("coding", coding.Name);
+    }
+
+    [Fact]
+    public void BuildShouldOmitCodingParameterWhenAllCodingFieldsAreAbsent()
+    {
+        var parameters = TranslateFhirR4ConceptMapParametersBuilder.Build(
+            new TranslateFhirR4ConceptMapRequest { System = "  " }
+        );
+
+        Assert.Empty(parameters.Parameter);
+    }
 }

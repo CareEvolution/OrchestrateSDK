@@ -950,12 +950,19 @@ def test_get_fhir_r4_concept_maps_should_return_a_bundle():
     )
 
 
+def _translate_result(parameters: dict) -> bool | None:
+    return next(
+        (p["valueBoolean"] for p in parameters["parameter"] if p["name"] == "result"),
+        None,
+    )
+
+
 def test_translate_fhir_r4_concept_map_with_code_should_translate():
     result = TEST_API.terminology.translate_fhir_r4_concept_map(code="119981000146107")
 
     assert result is not None
     assert result["resourceType"] == "Parameters"
-    assert len(result["parameter"]) > 0
+    assert _translate_result(result) is True
 
 
 def test_translate_fhir_r4_concept_map_with_code_and_domain_should_translate():
@@ -965,7 +972,7 @@ def test_translate_fhir_r4_concept_map_with_code_and_domain_should_translate():
 
     assert result is not None
     assert result["resourceType"] == "Parameters"
-    assert len(result["parameter"]) > 0
+    assert _translate_result(result) is True
 
 
 def test_translate_fhir_r4_concept_map_with_system_and_display_should_translate():
@@ -978,7 +985,17 @@ def test_translate_fhir_r4_concept_map_with_system_and_display_should_translate(
 
     assert result is not None
     assert result["resourceType"] == "Parameters"
-    assert len(result["parameter"]) > 0
+    assert _translate_result(result) is True
+
+
+def test_translate_fhir_r4_concept_map_with_display_only_should_translate():
+    result = TEST_API.terminology.translate_fhir_r4_concept_map(
+        display="Essential hypertension", domain="DiagnosisCode"
+    )
+
+    assert result is not None
+    assert result["resourceType"] == "Parameters"
+    assert _translate_result(result) is True
 
 
 def test_translate_domains_should_match_supported_domains_value_set():
