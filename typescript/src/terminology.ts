@@ -409,8 +409,25 @@ export const translateDomains = [
 ] as const;
 
 export type TranslateFhirR4ConceptMapRequest = {
-  code: string;
+  code?: string;
   domain?: (typeof translateDomains)[number];
+  system?: string;
+  display?: string;
+};
+
+export const buildTranslateFhirR4ConceptMapParameters = (request: TranslateFhirR4ConceptMapRequest): Parameters => {
+  const coding: Coding = {};
+  if (request.system) coding.system = request.system;
+  if (request.code) coding.code = request.code;
+  if (request.display) coding.display = request.display;
+
+  const parameter: ParametersParameter[] = [];
+  if (request.domain) {
+    parameter.push({ name: "domain", valueString: request.domain });
+  }
+  parameter.push({ name: "coding", valueCoding: coding });
+
+  return { resourceType: "Parameters", parameter };
 };
 
 export type GetFhirR4ValueSetScopesResponse = ValueSet;
@@ -747,19 +764,16 @@ export class TerminologyApi {
   }
 
   /**
-   * Standardizes source codings to a reference code
+   * Standardizes source codings to a reference code. At least one of `code` and `display` should be provided.
    * @param request The best source description of the concept
    * @returns A Parameters object with the `"result"` parameter of `"valueBoolean": true` indicating if the service was able to standardize the code
    * @link https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html
    */
   translateFhirR4ConceptMap(request: TranslateFhirR4ConceptMapRequest): Promise<TranslateFhirR4ConceptMapResponse> {
-    let route = "/terminology/v1/fhir/r4/conceptmap/$translate";
-    const urlParameters = new URLSearchParams({ code: request.code });
-    if (request.domain) {
-      urlParameters.append("domain", request.domain);
-    }
-    route += `?${urlParameters.toString()}`;
-    return this.httpHandler.get(route);
+    return this.httpHandler.post(
+      "/terminology/v1/fhir/r4/conceptmap/$translate",
+      buildTranslateFhirR4ConceptMapParameters(request),
+    );
   }
 
   /**

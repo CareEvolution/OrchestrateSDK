@@ -968,6 +968,19 @@ def test_translate_fhir_r4_concept_map_with_code_and_domain_should_translate():
     assert len(result["parameter"]) > 0
 
 
+def test_translate_fhir_r4_concept_map_with_system_and_display_should_translate():
+    result = TEST_API.terminology.translate_fhir_r4_concept_map(
+        code="119981000146107",
+        system="http://snomed.info/sct",
+        display="Essential hypertension",
+        domain="DiagnosisCode",
+    )
+
+    assert result is not None
+    assert result["resourceType"] == "Parameters"
+    assert len(result["parameter"]) > 0
+
+
 def test_translate_domains_should_match_supported_domains_value_set():
     result = TEST_API.terminology.get_fhir_r4_value_set(
         value_set_id="Rosetta.SupportedDomains"

@@ -810,6 +810,21 @@ public sealed class LiveApiTests : IDisposable
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
+    public async Task TranslateFhirR4ConceptMapWithSystemAndDisplayShouldTranslate()
+    {
+        var result = await _api.Terminology.TranslateFhirR4ConceptMapAsync(
+            new TranslateFhirR4ConceptMapRequest
+            {
+                Code = "119981000146107",
+                System = "http://snomed.info/sct",
+                Display = "Essential hypertension",
+                Domain = TranslateDomains.DiagnosisCode,
+            }
+        );
+        Assert.NotEmpty(result.Parameter);
+    }
+
+    [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
     public async Task GetFhirR4SupportedDomainsValueSetShouldMatchTranslateDomains()
     {
         var result = await _api.Terminology.GetFhirR4ValueSetAsync(

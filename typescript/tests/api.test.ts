@@ -715,9 +715,20 @@ describe("translate fhir r4 concept map", () => {
     expect(result.parameter?.length).toBeGreaterThan(0);
   });
 
-  it("should translate code and system", async () => {
+  it("should translate code and domain", async () => {
     const result = await orchestrate.terminology.translateFhirR4ConceptMap({
       code: "119981000146107",
+      domain: "DiagnosisCode",
+    });
+    expect(result).toBeDefined();
+    expect(result.parameter?.length).toBeGreaterThan(0);
+  });
+
+  it("should translate code, system, and display", async () => {
+    const result = await orchestrate.terminology.translateFhirR4ConceptMap({
+      code: "119981000146107",
+      system: "http://snomed.info/sct",
+      display: "Essential hypertension",
       domain: "DiagnosisCode",
     });
     expect(result).toBeDefined();
