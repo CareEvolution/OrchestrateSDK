@@ -16,6 +16,11 @@
 	"author": "CareEvolution",
 	"license": "Apache-2.0",
 	"homepage": "https://rosetta-api.docs.careevolution.com/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CareEvolution/OrchestrateSDK.git",
+		"directory": "typescript"
+	},
 	"devDependencies": {
 		"@types/node": "^26.1.1",
 		"@typescript-eslint/eslint-plugin": "^8.0.0",
