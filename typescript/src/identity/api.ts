@@ -49,6 +49,25 @@ export type GetPersonByIDRequest = {
 export type GetPersonByIDResponse = Person;
 
 
+/** Field comparisons for a failed stateless /v1/validateMatch request.
+ * Record A is the first demographic; record B is the second.
+ */
+export type ValidateMatchNoMatchReason = {
+  exactFields?: string[] | null;
+  highSimilarityFields?: string[] | null;
+  lowSimilarityFields?: string[] | null;
+  differentFields?: string[] | null;
+  recordAMissingFields?: string[] | null;
+  recordBMissingFields?: string[] | null;
+};
+
+/** Stateless /v1/validateMatch response, with optional match diagnostics. */
+export type ValidateMatchResponse = {
+  result: string;
+  matchReason?: string | null;
+  noMatchReason?: ValidateMatchNoMatchReason | null;
+};
+
 export type MatchDemographicsResponse = {
   matchedPersons: Person[];
   advisories: Advisories[];
@@ -118,6 +137,16 @@ export class IdentityApi {
     this._httpHandler = createIdentityHttpHandler(configuration.apiKey, configuration.metricsKey, configuration.url);
     this.httpHandler = this._httpHandler;
     this.monitoring = new IdentityMonitoringApi(this._httpHandler);
+  }
+
+  /**
+   * Compare two demographics using the stateless Identity service.
+   * Configure this client's URL and credentials for the stateless service.
+   * @param demographic1 Record A in the returned no-match diagnostics.
+   * @param demographic2 Record B in the returned no-match diagnostics.
+   */
+  public async validateMatch(demographic1: Demographic, demographic2: Demographic): Promise<ValidateMatchResponse> {
+    return this._httpHandler.post("/v1/validateMatch", [demographic1, demographic2]);
   }
 
   toString(): string {
