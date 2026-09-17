@@ -1,9 +1,11 @@
+import json
 from typing import Any, Callable, Literal, Optional, TypedDict, Union, overload
 from urllib.parse import quote_plus
 from orchestrate._internal.http_handler import HttpHandler, create_identity_http_handler
 from orchestrate._internal.identity.advisories import Advisories
 from orchestrate._internal.identity.demographic import (
     Demographic,
+    demographic_to_dict,
     demographic_api_method_overload_handler,
 )
 from orchestrate._internal.identity.local_hashing import BlindedDemographic
@@ -168,6 +170,22 @@ class IdentityApi:
         IdentityApi. This may change without warning.
         """
         return self.__http_handler
+
+    def validate_match(
+        self, demographic1: Demographic, demographic2: Demographic
+    ) -> ValidateMatchResponse:
+        """Compare two demographics using the stateless Identity service.
+
+        Configure this client's URL and credentials for the stateless service.
+        The request's first demographic is record A and the second is record B
+        in the returned no-match diagnostics.
+        """
+        return self.__http_handler.post(
+            "/v1/validateMatch",
+            body=json.dumps(
+                [demographic_to_dict(demographic1), demographic_to_dict(demographic2)]
+            ),
+        )
 
     def __demographic_api_method_overload_handler(
         self, *args, **kwargs

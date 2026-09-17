@@ -224,3 +224,35 @@ describe("Identity Metrics API", () => {
     expect(overlapMetricsResponse.datasourceOverlapRecords.length).toBeGreaterThan(0);
   });
 });
+
+describe("validateMatch", () => {
+  it("should match identical demographics", async () => {
+    const response = await identityApi.validateMatch(demographic, demographic);
+
+    expect(response.result).toBe("MATCH");
+    expect(response.matchReason).toBeTruthy();
+    expect(response.noMatchReason ?? null).toBeNull();
+  });
+
+  it.each([false, true])("should return no-match details with reverse records %s", async (reverseRecords) => {
+    const otherDemographic: Demographic = {
+      firstName: "SyntheticBeta",
+      lastName: "SyntheticPatient",
+      dob: "1962-11-23",
+      gender: "male",
+      email: "synthetic@example.test",
+    };
+    const [first, second] = reverseRecords ? [otherDemographic, demographic] : [demographic, otherDemographic];
+
+    const response = await identityApi.validateMatch(first, second);
+
+    expect(response.result).toBe("NO_MATCH");
+    expect(response.matchReason ?? null).toBeNull();
+    expect(response.noMatchReason?.differentFields).toContain("DOB");
+    expect(response.noMatchReason?.exactFields).toContain("Gender");
+    const missingFields = reverseRecords
+      ? response.noMatchReason?.recordBMissingFields
+      : response.noMatchReason?.recordAMissingFields;
+    expect(missingFields).toContain("Email");
+  });
+});

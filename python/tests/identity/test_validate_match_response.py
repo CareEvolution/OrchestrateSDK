@@ -5,6 +5,7 @@ import pytest
 from requests import Response
 
 from orchestrate.identity import (
+    Demographic,
     IdentityApi,
     ValidateMatchNoMatchReason,
     ValidateMatchResponse,
@@ -58,7 +59,7 @@ pytestmark = pytest.mark.default
         ),
     ],
 )
-def test_transport_should_deserialize_validate_match_response(
+def test_validate_match_should_send_demographics_and_return_response(
     monkeypatch: pytest.MonkeyPatch, expected: ValidateMatchResponse
 ) -> None:
     monkeypatch.delenv("ORCHESTRATE_IDENTITY_METRICS_KEY", raising=False)
@@ -71,11 +72,15 @@ def test_transport_should_deserialize_validate_match_response(
     monkeypatch.setattr("orchestrate._internal.http_handler.requests.post", post)
     api = IdentityApi(url="https://identity.example.test", api_key="test-api-key")
 
-    response: ValidateMatchResponse = api._http_handler.post(
-        "/v1/validateMatch", body=json.dumps([{}, {}])
+    response = api.validate_match(
+        Demographic(first_name="SyntheticAlpha", home_phone_number="212-555-0175"),
+        Demographic(first_name="SyntheticBeta", email="synthetic@example.test"),
     )
 
     assert response == expected
     post.assert_called_once()
     assert post.call_args.args[0] == "https://identity.example.test/v1/validateMatch"
-    assert json.loads(post.call_args.kwargs["data"]) == [{}, {}]
+    assert json.loads(post.call_args.kwargs["data"]) == [
+        {"firstName": "SyntheticAlpha", "homePhoneNumber": "212-555-0175"},
+        {"firstName": "SyntheticBeta", "email": "synthetic@example.test"},
+    ]

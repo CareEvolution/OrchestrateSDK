@@ -139,6 +139,16 @@ export class IdentityApi {
     this.monitoring = new IdentityMonitoringApi(this._httpHandler);
   }
 
+  /**
+   * Compare two demographics using the stateless Identity service.
+   * Configure this client's URL and credentials for the stateless service.
+   * @param demographic1 Record A in the returned no-match diagnostics.
+   * @param demographic2 Record B in the returned no-match diagnostics.
+   */
+  public async validateMatch(demographic1: Demographic, demographic2: Demographic): Promise<ValidateMatchResponse> {
+    return this._httpHandler.post("/v1/validateMatch", [demographic1, demographic2]);
+  }
+
   toString(): string {
     return `IdentityApi(${this._httpHandler.toString()})`;
   }

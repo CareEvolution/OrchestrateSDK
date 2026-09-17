@@ -50,7 +50,7 @@ function responseCases(): { name: string; response: ValidateMatchResponse }[] {
   ];
 }
 
-describe("ValidateMatchResponse", () => {
+describe("IdentityApi.validateMatch", () => {
   beforeEach(() => {
     vi.stubEnv("ORCHESTRATE_IDENTITY_METRICS_KEY", "");
     vi.stubEnv("ORCHESTRATE_ADDITIONAL_HEADERS", "{}");
@@ -61,7 +61,7 @@ describe("ValidateMatchResponse", () => {
     vi.unstubAllEnvs();
   });
 
-  it.each(responseCases())("deserializes $name through the transport", async ({ response: expected }) => {
+  it.each(responseCases())("sends demographics and returns $name", async ({ response: expected }) => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify(expected), {
         status: 200,
@@ -74,12 +74,20 @@ describe("ValidateMatchResponse", () => {
       apiKey: "test-api-key",
     });
 
-    const response = await api.httpHandler.post<Demographic[], ValidateMatchResponse>("/v1/validateMatch", [{}, {}]);
+    const demographic1: Demographic = { firstName: "SyntheticAlpha", homePhoneNumber: "212-555-0175" };
+    const demographic2: Demographic = { firstName: "SyntheticBeta", email: "synthetic@example.test" };
+    const response = await api.validateMatch(demographic1, demographic2);
 
     expect(response).toEqual(expected);
     expect(fetchMock).toHaveBeenCalledExactlyOnceWith(
       "https://identity.example.test/v1/validateMatch",
-      expect.objectContaining({ method: "POST", body: "[{},{}]" }),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify([
+          { firstName: "SyntheticAlpha", homePhoneNumber: "212-555-0175" },
+          { firstName: "SyntheticBeta", email: "synthetic@example.test" },
+        ]),
+      }),
     );
   });
 });

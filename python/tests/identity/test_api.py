@@ -350,3 +350,46 @@ def test_monitoring_overlap_metrics_should_have_metrics():
         for record in response["datasourceOverlapRecords"]
     )
     assert response["datasourceOverlapRecords"][0]["overlapCount"] > 0
+
+
+def test_validate_match_same_demographic_should_match() -> None:
+    response = _TEST_API.validate_match(_DEMOGRAPHIC, _DEMOGRAPHIC)
+
+    assert response is not None
+    assert response["result"] == "MATCH"
+    assert response.get("matchReason")
+    assert response.get("noMatchReason") is None
+
+
+@pytest.mark.parametrize("reverse_records", [False, True])
+def test_validate_match_different_demographics_should_return_no_match_reason(
+    reverse_records: bool,
+) -> None:
+    other_demographic = Demographic(
+        first_name="SyntheticBeta",
+        last_name="SyntheticPatient",
+        dob="1962-11-23",
+        gender="male",
+        email="synthetic@example.test",
+    )
+    first, second = (
+        (other_demographic, _DEMOGRAPHIC)
+        if reverse_records
+        else (_DEMOGRAPHIC, other_demographic)
+    )
+
+    response = _TEST_API.validate_match(first, second)
+
+    assert response is not None
+    assert response["result"] == "NO_MATCH"
+    assert response.get("matchReason") is None
+    reason = response.get("noMatchReason")
+    assert reason is not None
+    assert "DOB" in (reason.get("differentFields") or [])
+    assert "Gender" in (reason.get("exactFields") or [])
+    missing_fields = (
+        reason.get("recordBMissingFields")
+        if reverse_records
+        else reason.get("recordAMissingFields")
+    )
+    assert "Email" in (missing_fields or [])
