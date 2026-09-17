@@ -49,6 +49,25 @@ export type GetPersonByIDRequest = {
 export type GetPersonByIDResponse = Person;
 
 
+/** Field comparisons for a failed stateless /v1/validateMatch request.
+ * Record A is the first demographic; record B is the second.
+ */
+export type ValidateMatchNoMatchReason = {
+  exactFields?: string[] | null;
+  highSimilarityFields?: string[] | null;
+  lowSimilarityFields?: string[] | null;
+  differentFields?: string[] | null;
+  recordAMissingFields?: string[] | null;
+  recordBMissingFields?: string[] | null;
+};
+
+/** Stateless /v1/validateMatch response, with optional match diagnostics. */
+export type ValidateMatchResponse = {
+  result: string;
+  matchReason?: string | null;
+  noMatchReason?: ValidateMatchNoMatchReason | null;
+};
+
 export type MatchDemographicsResponse = {
   matchedPersons: Person[];
   advisories: Advisories[];

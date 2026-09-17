@@ -43,6 +43,32 @@ GetPersonByRecordResponse = Person
 GetPersonByIdResponse = Person
 
 
+class ValidateMatchNoMatchReason(TypedDict, total=False):
+    """Field comparisons for a failed stateless /v1/validateMatch request.
+
+    Record A is the first demographic in the request; record B is the second.
+    Comparison categories may be omitted or null.
+    """
+
+    exactFields: Optional[list[str]]
+    highSimilarityFields: Optional[list[str]]
+    lowSimilarityFields: Optional[list[str]]
+    differentFields: Optional[list[str]]
+    recordAMissingFields: Optional[list[str]]
+    recordBMissingFields: Optional[list[str]]
+
+
+class _ValidateMatchResult(TypedDict):
+    result: str
+
+
+class ValidateMatchResponse(_ValidateMatchResult, total=False):
+    """Stateless /v1/validateMatch response, with optional match diagnostics."""
+
+    matchReason: Optional[str]
+    noMatchReason: Optional[ValidateMatchNoMatchReason]
+
+
 class MatchDemographicsResponse(TypedDict):
     matchingPersons: list[Person]
     advisories: list[Advisories]
