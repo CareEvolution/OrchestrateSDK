@@ -19,6 +19,24 @@ public sealed class IdentityApi
 
     public HttpClient HttpClient => _http.HttpClient;
 
+    /// <summary>
+    /// Compare two demographics using the stateless Identity service.
+    /// Configure this client's URL and credentials for the stateless service.
+    /// </summary>
+    /// <param name="demographic1">Record A in the returned no-match diagnostics.</param>
+    /// <param name="demographic2">Record B in the returned no-match diagnostics.</param>
+    /// <param name="cancellationToken">Cancels the request.</param>
+    public Task<ValidateMatchResponse> ValidateMatchAsync(
+        Demographic demographic1,
+        Demographic demographic2,
+        CancellationToken cancellationToken = default
+    ) =>
+        _http.PostJsonAsync<ValidateMatchResponse>(
+            "/v1/validateMatch",
+            new[] { demographic1, demographic2 },
+            cancellationToken
+        );
+
     public Task<AddOrUpdateRecordResponse> AddOrUpdateRecordAsync(
         AddOrUpdateRecordRequest request,
         CancellationToken cancellationToken = default

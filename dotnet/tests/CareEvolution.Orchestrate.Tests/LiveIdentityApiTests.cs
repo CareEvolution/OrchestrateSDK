@@ -257,6 +257,46 @@ public sealed class LiveIdentityApiTests : IDisposable
         Assert.True(response.DatasourceOverlapRecords[0].OverlapCount > 0);
     }
 
+    [LiveFact(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
+    public async Task ValidateMatchSameDemographicShouldMatch()
+    {
+        var response = await _api.ValidateMatchAsync(Demographic, Demographic);
+
+        Assert.Equal("MATCH", response.Result);
+        Assert.False(string.IsNullOrWhiteSpace(response.MatchReason));
+        Assert.Null(response.NoMatchReason);
+    }
+
+    [LiveTheory(LiveTestEnvironment.IdentityApiKey, LiveTestEnvironment.IdentityUrl)]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ValidateMatchDifferentDemographicsShouldReturnNoMatchReason(
+        bool reverseRecords
+    )
+    {
+        var otherDemographic = new Demographic
+        {
+            FirstName = "SyntheticBeta",
+            LastName = "SyntheticPatient",
+            Dob = "1962-11-23",
+            Gender = "male",
+            Email = "synthetic@example.test",
+        };
+        var response = reverseRecords
+            ? await _api.ValidateMatchAsync(otherDemographic, Demographic)
+            : await _api.ValidateMatchAsync(Demographic, otherDemographic);
+
+        Assert.Equal("NO_MATCH", response.Result);
+        Assert.Null(response.MatchReason);
+        var reason = Assert.IsType<ValidateMatchNoMatchReason>(response.NoMatchReason);
+        Assert.Contains("DOB", reason.DifferentFields ?? []);
+        Assert.Contains("Gender", reason.ExactFields ?? []);
+        var missingFields = reverseRecords
+            ? reason.RecordBMissingFields
+            : reason.RecordAMissingFields;
+        Assert.Contains("Email", missingFields ?? []);
+    }
+
     private async Task<(Person Person, string Identifier)> CreateRandomRecordAsync()
     {
         var identifier = Guid.NewGuid().ToString();
