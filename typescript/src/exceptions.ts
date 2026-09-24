@@ -17,8 +17,7 @@ export class OrchestrateClientError extends OrchestrateError {
     let message;
     if (issues.length > 0) {
       message = `\n  * ${issues.join(" \n  * ")}`;
-    }
-    else {
+    } else {
       message = response_text;
     }
     super(message);

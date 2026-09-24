@@ -1,23 +1,14 @@
 {
-	"compilerOptions": {
-		"strict": true,
-		"declaration": false,
-		"lib": [
-			"ES6"
-		],
-		"target": "ES6",
-		"module": "NodeNext",
-		"types": [
-			"node"
-		],
-		"esModuleInterop": true,
-		"rootDir": "src"
-	},
-	"include": [
-		"src"
-	],
-	"exclude": [
-		"dist",
-		"node_modules"
-	]
+  "compilerOptions": {
+    "strict": true,
+    "declaration": false,
+    "lib": ["ES6"],
+    "target": "ES6",
+    "module": "NodeNext",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "exclude": ["dist", "node_modules"]
 }

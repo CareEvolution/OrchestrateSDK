@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { IdentityApi, Person } from "../../src/identity/api.js";
 import { Demographic } from "../../src/identity/demographic.js";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
 const identityApi = new IdentityApi();
@@ -10,13 +10,14 @@ const demographic: Demographic = {
   firstName: "John",
   lastName: "Doe",
   dob: "1980-01-01",
-  gender: "male"
+  gender: "male",
 };
 
 const defaultSource = "source";
 
 const blindedDemographic = {
-  data: "H4sIAAAAAAAEA5yX2ZKj2BGG36WuO4Z9m4i5EItAbALEbs8FYkfsq6Cj392apiasmtK4" +
+  data:
+    "H4sIAAAAAAAEA5yX2ZKj2BGG36WuO4Z9m4i5EItAbALEbs8FYkfsq6Cj392apiasmtK4" +
     "bHODdCL4+PPkfzKT729z3A95U7/9Cn17S/K4jIa3X//x/W1c2/jt1zf2TL99e8uCIXv8oTZPz" +
     "2FVw3H0gEU8aEbMNdFaLIRqQWYMiLn4bL9lt4Ajf3s81cZ9NY3B+KDvzHfMMt217WwgXfHPCQ" +
     "Rh+jKzx3b/WQox5ETdglwmMNmX+v3Gcaifm2UeN3+gh7zKy6DPx/Wh+8e3738qVI+0T/t1kEU" +
@@ -64,7 +65,7 @@ async function createTestingRecord(identifier: string): Promise<Person> {
   return addResponse.matchedPerson;
 }
 
-async function createRandomRecord(): Promise<{ person: Person; identifier: string; }> {
+async function createRandomRecord(): Promise<{ person: Person; identifier: string }> {
   const identifier = Math.random().toString(36).substring(7);
   const person = await createTestingRecord(identifier);
   return { person, identifier };
@@ -156,7 +157,7 @@ describe("Identity API", () => {
       identifier,
     });
 
-    expect(deleteResponse.changedPersons.map(changedPerson => changedPerson.id)).toContain(person.id);
+    expect(deleteResponse.changedPersons.map((changedPerson) => changedPerson.id)).toContain(person.id);
   });
 
   it("addMatchGuidance should add match guidance", async () => {
@@ -170,8 +171,8 @@ describe("Identity API", () => {
       comment: "Test",
     });
 
-    expect(addMatchGuidanceResponse.changedPersons.map(changedPerson => changedPerson.id)).toContain(firstPerson.id);
-    expect(addMatchGuidanceResponse.changedPersons.map(changedPerson => changedPerson.id)).toContain(secondPerson.id);
+    expect(addMatchGuidanceResponse.changedPersons.map((changedPerson) => changedPerson.id)).toContain(firstPerson.id);
+    expect(addMatchGuidanceResponse.changedPersons.map((changedPerson) => changedPerson.id)).toContain(secondPerson.id);
   });
 
   it("removeMatchGuidance should remove match guidance", async () => {
@@ -193,7 +194,11 @@ describe("Identity API", () => {
       comment: "Removal Test",
     });
 
-    expect(removeMatchGuidanceResponse.changedPersons.map(changedPerson => changedPerson.id).some(id => [firstPerson.id, secondPerson.id].includes(id))).toBeTruthy();
+    expect(
+      removeMatchGuidanceResponse.changedPersons
+        .map((changedPerson) => changedPerson.id)
+        .some((id) => [firstPerson.id, secondPerson.id].includes(id)),
+    ).toBeTruthy();
   });
 });
 
@@ -203,7 +208,6 @@ describe("Identity Metrics API", () => {
   });
 
   it("should have identifier metrics", async () => {
-
     const identifierMetricsResponse = await identityApi.monitoring.identifierMetrics();
 
     expect(new Date(identifierMetricsResponse.refreshed).getUTCDate()).toBeDefined();
@@ -212,7 +216,9 @@ describe("Identity Metrics API", () => {
     expect(identifierMetricsResponse.globalMetricsRecords).toBeDefined();
     expect(identifierMetricsResponse.globalMetricsRecords[0].source).toBe("");
     expect(identifierMetricsResponse.summaryMetricsRecords).toBeDefined();
-    expect(identifierMetricsResponse.summaryMetricsRecords.find(record => record.source === defaultSource)?.source).toBe(defaultSource);
+    expect(
+      identifierMetricsResponse.summaryMetricsRecords.find((record) => record.source === defaultSource)?.source,
+    ).toBe(defaultSource);
     expect(identifierMetricsResponse.sourceTotals).toBeDefined();
   });
 

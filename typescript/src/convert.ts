@@ -107,7 +107,6 @@ export type ConvertFhirR4ToNemsisV35Request = {
 
 export type ConvertFhirR4ToNemsisV35Response = string;
 
-
 export type ConvertFhirR4ToManifestRequest = {
   content: Bundle;
   delimiter?: string;
@@ -117,7 +116,6 @@ export type ConvertFhirR4ToManifestRequest = {
 };
 
 export type ConvertFhirR4ToManifestResponse = ArrayBuffer;
-
 
 export class ConvertApi {
   private httpHandler: IHttpHandler;
@@ -138,7 +136,7 @@ export class ConvertApi {
   hl7ToFhirR4(request: ConvertHl7ToFhirR4Request): Promise<ConvertHl7ToFhirR4Response> {
     const headers = {
       "Content-Type": "text/plain",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -176,7 +174,7 @@ export class ConvertApi {
   cdaToFhirR4(request: ConvertCdaToFhirR4Request): Promise<ConvertCdaToFhirR4Response> {
     const headers = {
       "Content-Type": "application/xml",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -211,7 +209,7 @@ export class ConvertApi {
     const headers = {
       "Content-Type": "application/xml",
       Accept: "application/pdf",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     return this.httpHandler.post<string, ArrayBuffer>("/convert/v1/cdatopdf", request.content, headers);
   }
 
@@ -224,7 +222,7 @@ export class ConvertApi {
   fhirR4ToCda(request: ConvertFhirR4ToCdaRequest): Promise<ConvertFhirR4ToCdaResponse> {
     const headers = {
       Accept: "application/xml",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     return this.httpHandler.post("/convert/v1/fhirr4tocda", request.content, headers);
   }
 
@@ -236,12 +234,8 @@ export class ConvertApi {
   fhirR4ToOmop(request: ConvertFhirR4ToOmopRequest): Promise<ConvertFhirR4ToOmopResponse> {
     const headers = {
       Accept: "application/zip",
-    } as { [key: string]: string; };
-    return this.httpHandler.post<Bundle, ArrayBuffer>(
-      "/convert/v1/fhirr4toomop",
-      request.content,
-      headers
-    );
+    } as { [key: string]: string };
+    return this.httpHandler.post<Bundle, ArrayBuffer>("/convert/v1/fhirr4toomop", request.content, headers);
   }
 
   /**
@@ -253,7 +247,7 @@ export class ConvertApi {
   combineFhirR4Bundles(request: ConvertCombineFhirR4BundlesRequest): Promise<ConvertCombineFhirR4BundlesResponse> {
     const headers = {
       "Content-Type": "application/x-ndjson",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -282,7 +276,7 @@ export class ConvertApi {
   x12ToFhirR4(request: ConvertX12ToFhirR4Request): Promise<ConvertX12ToFhirR4Response> {
     const headers = {
       "Content-Type": "text/plain",
-    } as { [key: string]: string; };
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.patientID) {
       parameters.append("patientId", request.patientID);
@@ -339,13 +333,9 @@ export class ConvertApi {
   cdaToHtml(request: ConvertCdaToHtmlRequest): Promise<ConvertCdaToHtmlResponse> {
     const headers = {
       "Content-Type": "application/xml",
-      "Accept": "text/html",
-    } as { [key: string]: string; };
-    return this.httpHandler.post(
-      "/convert/v1/cdatohtml",
-      request.content,
-      headers
-    );
+      Accept: "text/html",
+    } as { [key: string]: string };
+    return this.httpHandler.post("/convert/v1/cdatohtml", request.content, headers);
   }
 
   /**
@@ -356,13 +346,9 @@ export class ConvertApi {
    */
   fhirR4ToNemsisV34(request: ConvertFhirR4ToNemsisV34Request): Promise<ConvertFhirR4ToNemsisV34Response> {
     const headers = {
-      "Accept": "application/xml",
-    } as { [key: string]: string; };
-    return this.httpHandler.post(
-      "/convert/v1/fhirr4tonemsisv34",
-      request.content,
-      headers
-    );
+      Accept: "application/xml",
+    } as { [key: string]: string };
+    return this.httpHandler.post("/convert/v1/fhirr4tonemsisv34", request.content, headers);
   }
 
   /**
@@ -373,13 +359,9 @@ export class ConvertApi {
    */
   fhirR4ToNemsisV35(request: ConvertFhirR4ToNemsisV35Request): Promise<ConvertFhirR4ToNemsisV35Response> {
     const headers = {
-      "Accept": "application/xml",
-    } as { [key: string]: string; };
-    return this.httpHandler.post(
-      "/convert/v1/fhirr4tonemsisv35",
-      request.content,
-      headers
-    );
+      Accept: "application/xml",
+    } as { [key: string]: string };
+    return this.httpHandler.post("/convert/v1/fhirr4tonemsisv35", request.content, headers);
   }
 
   /**
@@ -390,8 +372,8 @@ export class ConvertApi {
    */
   fhirR4ToManifest(request: ConvertFhirR4ToManifestRequest): Promise<ConvertFhirR4ToManifestResponse> {
     const headers = {
-      Accept: "application/zip"
-    } as { [key: string]: string; };
+      Accept: "application/zip",
+    } as { [key: string]: string };
     const parameters = new URLSearchParams();
     if (request.delimiter) {
       parameters.append("delimiter", request.delimiter);

@@ -1,8 +1,8 @@
 import { OrchestrateClientError, OrchestrateHttpError } from "./exceptions.js";
 
 export interface IHttpHandler {
-  post<TIn, TOut>(path: string, body: TIn, headers?: { [key: string]: string; }): Promise<TOut>;
-  get<TOut>(path: string, headers?: { [key: string]: string; }): Promise<TOut>;
+  post<TIn, TOut>(path: string, body: TIn, headers?: { [key: string]: string }): Promise<TOut>;
+  get<TOut>(path: string, headers?: { [key: string]: string }): Promise<TOut>;
 }
 
 class OperationalOutcomeIssue {
@@ -20,9 +20,7 @@ class OperationalOutcomeIssue {
 
   toString(): string {
     let s = `${this.severity}: ${this.code}`;
-    const message = [this.details, this.diagnostics]
-      .filter(msg => msg)
-      .join("; ");
+    const message = [this.details, this.diagnostics].filter((msg) => msg).join("; ");
     if (message) {
       s += ` - ${message}`;
     }
@@ -30,7 +28,8 @@ class OperationalOutcomeIssue {
   }
 }
 
-function getIssueDetailString(detail: any): string { // eslint-disable-line @typescript-eslint/no-explicit-any
+function getIssueDetailString(detail: any): string {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   if (detail?.text) {
     return detail.text;
   }
@@ -45,8 +44,9 @@ function getIssueDetailString(detail: any): string { // eslint-disable-line @typ
   return "";
 }
 
-function getDetailCodingString(coding: any): string { // eslint-disable-line @typescript-eslint/no-explicit-any
-  const parts = [coding?.code, coding?.display].filter(s => s);
+function getDetailCodingString(coding: any): string {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
+  const parts = [coding?.code, coding?.display].filter((s) => s);
   return parts.join(": ");
 }
 
@@ -54,26 +54,22 @@ async function readJsonOutcomes(responseText: string): Promise<OperationalOutcom
   try {
     const json = JSON.parse(responseText);
     if (json.issue) {
-      return json.issue.map((issue: any) => // eslint-disable-line @typescript-eslint/no-explicit-any
-        new OperationalOutcomeIssue(
-          issue.severity || "",
-          issue.code || "",
-          issue.diagnostics || "",
-          getIssueDetailString(issue.details || {})
-        )
+      return json.issue.map(
+        (issue: any) =>
+          // eslint-disable-line @typescript-eslint/no-explicit-any
+          new OperationalOutcomeIssue(
+            issue.severity || "",
+            issue.code || "",
+            issue.diagnostics || "",
+            getIssueDetailString(issue.details || {}),
+          ),
       );
     }
     if (json.type === "https://tools.ietf.org/html/rfc9110#section-15.5.1") {
-      return [new OperationalOutcomeIssue(
-        "error",
-        json.title || "",
-        json.detail || "",
-        ""
-      )];
+      return [new OperationalOutcomeIssue("error", json.title || "", json.detail || "", "")];
     }
     return [];
-  }
-  catch (e) {
+  } catch (e) {
     return [];
   }
 }
@@ -99,11 +95,11 @@ async function errorFromResponse(response: Response): Promise<never> {
 export class HttpHandler implements IHttpHandler {
   constructor(
     private baseUrl: string,
-    private defaultHeaders: { [key: string]: string; },
+    private defaultHeaders: { [key: string]: string },
     private timeoutMs: number,
-  ) { }
+  ) {}
 
-  private mergeHeaders(headers?: { [key: string]: string; }): { [key: string]: string; } {
+  private mergeHeaders(headers?: { [key: string]: string }): { [key: string]: string } {
     return {
       ...this.defaultHeaders,
       ...(headers ?? {}),
@@ -117,8 +113,9 @@ export class HttpHandler implements IHttpHandler {
   async post(
     path: string,
     body: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-    headers?: { [key: string]: string; },
-  ): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+    headers?: { [key: string]: string },
+  ): Promise<any> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const requestHeaders = this.mergeHeaders(headers);
 
@@ -144,7 +141,8 @@ export class HttpHandler implements IHttpHandler {
     return await response.text();
   }
 
-  async get(path: string, headers?: { [key: string]: string; }): Promise<any> { // eslint-disable-line @typescript-eslint/no-explicit-any
+  async get(path: string, headers?: { [key: string]: string }): Promise<any> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     const requestHeaders = this.mergeHeaders(headers);
 
     const url = this.baseUrl + path;
