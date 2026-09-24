@@ -28,8 +28,8 @@ class OperationalOutcomeIssue {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getIssueDetailString(detail: any): string {
-  // eslint-disable-line @typescript-eslint/no-explicit-any
   if (detail?.text) {
     return detail.text;
   }
@@ -44,8 +44,8 @@ function getIssueDetailString(detail: any): string {
   return "";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getDetailCodingString(coding: any): string {
-  // eslint-disable-line @typescript-eslint/no-explicit-any
   const parts = [coding?.code, coding?.display].filter((s) => s);
   return parts.join(": ");
 }
@@ -55,8 +55,8 @@ async function readJsonOutcomes(responseText: string): Promise<OperationalOutcom
     const json = JSON.parse(responseText);
     if (json.issue) {
       return json.issue.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (issue: any) =>
-          // eslint-disable-line @typescript-eslint/no-explicit-any
           new OperationalOutcomeIssue(
             issue.severity || "",
             issue.code || "",
@@ -69,7 +69,7 @@ async function readJsonOutcomes(responseText: string): Promise<OperationalOutcom
       return [new OperationalOutcomeIssue("error", json.title || "", json.detail || "", "")];
     }
     return [];
-  } catch (e) {
+  } catch {
     return [];
   }
 }
@@ -114,9 +114,8 @@ export class HttpHandler implements IHttpHandler {
     path: string,
     body: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     headers?: { [key: string]: string },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
-
     const requestHeaders = this.mergeHeaders(headers);
 
     const preparedBody = requestHeaders["Content-Type"] === "application/json" ? JSON.stringify(body) : body;
@@ -141,8 +140,8 @@ export class HttpHandler implements IHttpHandler {
     return await response.text();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async get(path: string, headers?: { [key: string]: string }): Promise<any> {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
     const requestHeaders = this.mergeHeaders(headers);
 
     const url = this.baseUrl + path;

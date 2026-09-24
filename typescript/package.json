@@ -12,6 +12,7 @@
 		"test:watch": "vitest",
 		"fmt": "prettier --check .",
 		"fmt:fix": "prettier --write .",
+		"lint": "eslint .",
 		"test:e2e": "vitest -c vitest.config.e2e.js"
 	},
 	"author": "CareEvolution",
@@ -23,12 +24,14 @@
 		"directory": "typescript"
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@types/node": "^26.1.1",
-		"@typescript-eslint/eslint-plugin": "^8.0.0",
 		"dotenv": "^17.2.3",
+		"eslint": "^10.11.0",
 		"prettier": "^3.2.5",
 		"rollup": "^4.0.2",
 		"typescript": "~6.0.3",
+		"typescript-eslint": "^8.70.1",
 		"vitest": "^4.0.13"
 	},
 	"keywords": [

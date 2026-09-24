@@ -21,6 +21,7 @@ npm run test:watch
 npm run test:e2e      # vitest -c vitest.config.e2e.js
 npm run build         # emits ESM into dist/esm/
 npm run fmt           # prettier --check .  (fmt:fix to write)
+npm run lint          # eslint .
 ```
 
 Run a single TS test with `npx vitest run tests/api.test.ts -t "classify condition"`.

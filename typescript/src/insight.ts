@@ -1,21 +1,21 @@
 import { Bundle, MeasureReport, Measure, Patient, RiskAssessment, OperationOutcome } from "fhir/r4.js";
 import { IHttpHandler } from "./httpHandler.js";
 
-const raSegments = [
+type RaSegments = readonly [
   "community nondual aged",
   "community full benefit dual aged",
   "community full benefit dual disabled",
   "community nondual disabled",
   "long term institutional",
-] as const;
+];
 
-const hccVersions = ["22", "23", "24"] as const;
+type HccVersions = readonly ["22", "23", "24"];
 
 export type InsightRiskProfileRequest = {
   content: Bundle;
-  hccVersion?: (typeof hccVersions)[number];
+  hccVersion?: HccVersions[number];
   periodEndDate?: string;
-  raSegment?: (typeof raSegments)[number];
+  raSegment?: RaSegments[number];
 };
 
 export type InsightRiskProfileResource = Patient | MeasureReport | Measure | RiskAssessment | OperationOutcome;
