@@ -29,6 +29,10 @@ updates:
       interval: weekly
     assignees:
       - "jeremytwfortune"
+    ignore:
+      # typescript-eslint doesn't support TS 7.0; revisit when 7.1 ships its API.
+      - dependency-name: "typescript"
+        versions: [">=7.0.0 <7.1.0"]
     groups:
       minor-patch:
         patterns:
