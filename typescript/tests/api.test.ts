@@ -389,7 +389,7 @@ describe("convert hl7 to fhir r4", () => {
   });
 
   const labHl7 = `
-MSH|^~\&|||||20220309050000||ORU^R01|||2.7
+MSH|^~\\&|||||20220309050000||ORU^R01|||2.7
 PID|1||123456||LastName^FirstName|||||||||||||5678
 PV1|1|I||||||||||||||||||||||||||||||||||||||||||20220309050000
 OBR||001CCK612||ABC^AUTOMATED BLOOD COUNT^LAB|||20220309134200|||2222^ORDERED,BY||||20220309134400|Specimen^|10341^Doctor MD^First^F||||W2622||||HE|F|CBC^ABC|^^^^^R|^~^~^|||||||
@@ -405,7 +405,7 @@ OBX|8|ST|^RDW^LAB|1|17.9|%|11.5-14.5|H|||F|||202203091347|R^ROUTINE LAB|2222^ORD
 OBX|9|ST|^PLATELETS^LAB|1|125|K/UL|130-400|L|||F|||202203091347|R^ROUTINE LAB|2222^ORDERED,BY|
 `;
   const transcriptionHl7 = `
-MSH|^~\&||TX|||20110706100000||ORU^R01|||2.3
+MSH|^~\\&||TX|||20110706100000||ORU^R01|||2.3
 PID|1||123456||LastName^FirstName||20000101|M||||||||||7890
 PV1|1|I||||||||||||||||||||||||||||||||||||||||||20110706100000
 ORC|RE|^SCM|||||||20110706100000|||010400^DOE MD^JOHN^^^^

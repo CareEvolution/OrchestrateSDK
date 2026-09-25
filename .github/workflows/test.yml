@@ -60,6 +60,12 @@ jobs:
       - name: Install dependencies
         working-directory: typescript
         run: npm ci
+      - name: Format
+        working-directory: typescript
+        run: npm run fmt
+      - name: Lint
+        working-directory: typescript
+        run: npm run lint
       - name: Build
         working-directory: typescript
         run: npm run build

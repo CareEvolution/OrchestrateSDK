@@ -11,7 +11,7 @@ import {
 import { IHttpHandler } from "./httpHandler.js";
 import { handleBatchOverload } from "./batch.js";
 
-const standardizeTargetSystems = [
+type StandardizeTargetSystems = readonly [
   "ICD-10-CM",
   "ICD-9-CM-Diagnosis",
   "SNOMED",
@@ -30,9 +30,9 @@ const standardizeTargetSystems = [
   // TODO: "http://www.ama-assn.org/go/cpt-hcpcs" HCPCS URL
   "http://hl7.org/fhir/sid/ndc",
   "http://hl7.org/fhir/sid/cvx",
-] as const;
+];
 
-const standardizeResponseSystems = [
+type StandardizeResponseSystems = readonly [
   "http://hl7.org/fhir/sid/icd-10",
   "http://hl7.org/fhir/sid/icd-9",
   "http://snomed.info/sct",
@@ -40,13 +40,13 @@ const standardizeResponseSystems = [
   "http://hl7.org/fhir/sid/cvx",
   "http://www.nlm.nih.gov/research/umls/rxnorm",
   "http://loinc.org",
-] as const;
+];
 
-export type StandardizeTargetSystem = (typeof standardizeTargetSystems)[number];
+export type StandardizeTargetSystem = StandardizeTargetSystems[number];
 
 export type StandardizeRequest = Coding & { targetSystem?: StandardizeTargetSystem };
 
-export type StandardizeResponseCoding = Coding & { system: (typeof standardizeResponseSystems)[number] };
+export type StandardizeResponseCoding = Coding & { system: StandardizeResponseSystems[number] };
 
 export type StandardizeResponse = {
   readonly coding: ReadonlyArray<StandardizeResponseCoding>;
@@ -68,27 +68,27 @@ export type StandardizeBundleResponse = Bundle;
 
 export type ClassifyRequest = Coding;
 
-const classifyConditionSystems = [
+type ClassifyConditionSystems = readonly [
   "http://snomed.info/sct",
   "http://hl7.org/fhir/sid/icd-10-cm",
   "http://hl7.org/fhir/sid/icd-9-cm-diagnosis",
   "ICD-10-CM",
   "ICD-9-CM-Diagnosis",
   "SNOMED",
-] as const;
+];
 
-export type ClassifyConditionSystem = (typeof classifyConditionSystems)[number];
+export type ClassifyConditionSystem = ClassifyConditionSystems[number];
 
 export type ClassifyConditionRequest = ClassifyRequest & { system: ClassifyConditionSystem };
 
-const covid19Condition = [
+type Covid19Condition = readonly [
   "Confirmed",
   "Suspected",
   "Exposure",
   "Encounter",
   "SignsAndSymptoms",
   "NonspecificRespiratoryViralInfection",
-] as const;
+];
 
 export type ClassifyConditionResponse = {
   ccsrCatgory: CodeableConcept;
@@ -100,10 +100,10 @@ export type ClassifyConditionResponse = {
   behavioral: boolean;
   substance: boolean;
   socialDeterminant: boolean;
-  covid19Condition: typeof covid19Condition;
+  covid19Condition: Covid19Condition;
 };
 
-const classifyMedicationSystems = [
+type ClassifyMedicationSystems = readonly [
   "RxNorm",
   "NDC",
   "CVX",
@@ -112,25 +112,25 @@ const classifyMedicationSystems = [
   "http://hl7.org/fhir/sid/ndc",
   "http://hl7.org/fhir/sid/cvx",
   "http://snomed.info/sct",
-] as const;
+];
 
-export type ClassifyMedicationSystem = (typeof classifyMedicationSystems)[number];
+export type ClassifyMedicationSystem = ClassifyMedicationSystems[number];
 
 export type ClassifyMedicationRequest = ClassifyRequest & { system: ClassifyMedicationSystem };
 
-const covid19Rx = ["vaccination", "immunoglobulin", "medication"] as const;
+type Covid19Rx = readonly ["vaccination", "immunoglobulin", "medication"];
 
 export type ClassifyMedicationResponse = {
   medRtTherapeuticClass: string[];
   rxNormIngredient: string[];
   rxNormStrength: string;
   rxNormGeneric: boolean;
-  covid19Rx: typeof covid19Rx;
+  covid19Rx: Covid19Rx;
 };
 
-const classifyObservationSystems = ["http://loinc.org", "LOINC", "http://snomed.info/sct", "SNOMED"] as const;
+type ClassifyObservationSystems = readonly ["http://loinc.org", "LOINC", "http://snomed.info/sct", "SNOMED"];
 
-export type ClassifyObservationRequest = ClassifyRequest & { system: (typeof classifyObservationSystems)[number] };
+export type ClassifyObservationRequest = ClassifyRequest & { system: ClassifyObservationSystems[number] };
 
 export type ClassifyObservationResponse = {
   loincComponent: string;
@@ -156,7 +156,7 @@ export type GetFhirR4CodeSystemResponse = CodeSystem;
 
 export type SummarizeFhirR4CodeSystemsResponse = Bundle<CodeSystem>;
 
-const codeSystems = [
+type CodeSystems = readonly [
   "ICD-10-CM",
   "ICD-9-CM-Diagnosis",
   "SNOMED",
@@ -279,17 +279,17 @@ const codeSystems = [
   "uscore-condition-category",
   "v2 Name Type",
   "X12ClaimAdjustmentReasonCodes",
-] as const;
+];
 
 export type GetFhirR4CodeSystemRequest = {
-  codeSystem: (typeof codeSystems)[number];
+  codeSystem: CodeSystems[number];
   conceptContains?: string;
   pageNumber?: number;
   pageSize?: number;
 };
 
 export type SummarizeFhirR4CodeSystemRequest = {
-  codeSystem: (typeof codeSystems)[number];
+  codeSystem: CodeSystems[number];
 };
 
 export type SummarizeFhirR4CodeSystemResponse = CodeSystem;
@@ -452,17 +452,17 @@ export type GetFhirR4ValueSetRequest = {
 
 export type GetFhirR4ValueSetResponse = ValueSet;
 
-const classifyValueSetSystems = [
+type ClassifyValueSetSystems = readonly [
   "http://snomed.info/sct",
   "http://hl7.org/fhir/sid/icd-10-cm",
   "http://hl7.org/fhir/sid/icd-9-cm-diagnosis",
   "http://hl7.org/fhir/sid/ndc",
   "http://hl7.org/fhir/sid/cvx",
-] as const;
+];
 
 type ClassifyFhirR4ValueSetMembershipRequestSystem = ParametersParameter & {
   name: "system";
-  valueString: (typeof classifyValueSetSystems)[number];
+  valueString: ClassifyValueSetSystems[number];
 };
 
 type ClassifyFhirR4ValueSetMembershipRequestCode = ParametersParameter & {

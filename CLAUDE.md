@@ -19,8 +19,9 @@ npm ci
 npm run test          # vitest run, default suite
 npm run test:watch
 npm run test:e2e      # vitest -c vitest.config.e2e.js
-npm run build         # emits ESM + CJS into dist/
+npm run build         # emits ESM into dist/esm/
 npm run fmt           # prettier --check .  (fmt:fix to write)
+npm run lint          # eslint .
 ```
 
 Run a single TS test with `npx vitest run tests/api.test.ts -t "classify condition"`.
@@ -75,7 +76,7 @@ Response bodies are typed as FHIR R4 resources, via `@types/fhir` in TypeScript,
 
 Python: everything public re-exports from `orchestrate._internal.*`. Treat `_internal` as private and unstable. Public modules are `terminology`, `insight`, `convert`, `exceptions`, `identity`, `fhir`.
 
-TypeScript: the build produces both ESM (`tsconfig.esm.json`) and CJS (`tsconfig.cjs.json` plus `scripts/build-cjs-package.mjs`). `package.json` declares subpath exports (`@careevolution/orchestrate/terminology`, `/identity`, etc.) that must stay in sync with `src/` module names.
+TypeScript: the package is ESM-only (`tsconfig.esm.json`, output in `dist/esm/`); there is no CommonJS build. `package.json` declares subpath exports (`@careevolution/orchestrate/terminology`, `/identity`, etc.) that must stay in sync with `src/` module names.
 
 C#: `OrchestrateApi` and `IdentityApi` take an `HttpClient` in their constructor for DI and testability. `services.AddOrchestrateApi()` registers `IOrchestrateApi` against a named `IHttpClientFactory` client. Targets `net8.0` and `net10.0`.
 

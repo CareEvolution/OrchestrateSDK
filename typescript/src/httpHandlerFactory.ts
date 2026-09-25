@@ -23,7 +23,7 @@ function getPriorityTimeout(timeoutMs: number | undefined): number {
   return envTimeout ? parseInt(envTimeout, 10) : (timeoutMs ?? defaultTimeoutMs);
 }
 
-function getAdditionalHeaders(): { [key: string]: string; } | undefined {
+function getAdditionalHeaders(): { [key: string]: string } | undefined {
   if (process.env[additionalHeadersEnvironmentVariable]) {
     return JSON.parse(process.env[additionalHeadersEnvironmentVariable]);
   }
@@ -42,7 +42,7 @@ export function createHttpHandler(
     ...additionalHeaders,
     "Content-Type": "application/json",
     Accept: "application/json",
-  } as { [key: string]: string; };
+  } as { [key: string]: string };
 
   const priorityApiKey = getPriorityFromEnvironment(apiKey, apiKeyEnvironmentVariable);
 
@@ -66,13 +66,15 @@ export function createIdentityHttpHandler(
     ...additionalHeaders,
     "Content-Type": "application/json",
     Accept: "application/json",
-  } as { [key: string]: string; };
+  } as { [key: string]: string };
 
   const priorityApiKey = getPriorityFromEnvironment(apiKey, identityApiKeyEnvironmentVariable);
   const priorityMetricsKey = getPriorityFromEnvironment(metricsKey, identityMetricsKeyEnvironmentVariable);
 
   if (!priorityUrl) {
-    throw new Error(`Identity URL is required. Specify in the constructor or set '${identityUrlEnvironmentVariable}' environment variable.`);
+    throw new Error(
+      `Identity URL is required. Specify in the constructor or set '${identityUrlEnvironmentVariable}' environment variable.`,
+    );
   }
 
   if (priorityApiKey) {
@@ -97,10 +99,12 @@ export function createLocalHashingHttpHandler(
     ...additionalHeaders,
     "Content-Type": "application/json",
     Accept: "application/json",
-  } as { [key: string]: string; };
+  } as { [key: string]: string };
 
   if (!priorityUrl) {
-    throw new Error(`Local hashing URL is required. Specify in the constructor or set '${identityLocalHashingUrlEnvironmentVariable}' environment variable.`);
+    throw new Error(
+      `Local hashing URL is required. Specify in the constructor or set '${identityLocalHashingUrlEnvironmentVariable}' environment variable.`,
+    );
   }
 
   return new HttpHandler(priorityUrl, defaultHeaders, priorityTimeoutMs);

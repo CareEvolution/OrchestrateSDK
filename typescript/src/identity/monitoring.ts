@@ -1,33 +1,33 @@
 import { IHttpHandler } from "../httpHandler.js";
 
 type IdentifierMetricsRecordType =
-  "City" |
-  "DOB" |
-  "Email" |
-  "FirstName" |
-  "Gender" |
-  "HighwayNumber" |
-  "HighwayPrefix" |
-  "LastFourSSN" |
-  "LastName" |
-  "MaidenName" |
-  "MiddleName" |
-  "Ordinal" |
-  "PO" |
-  "POBoxNumber" |
-  "PhoneNumber" |
-  "SSN" |
-  "State" |
-  "StreetFraction" |
-  "StreetName" |
-  "StreetNumber" |
-  "StreetNumberAlpha" |
-  "StreetType" |
-  "UnitNumber" |
-  "UnitNumberAlpha" |
-  "UnitType" |
-  "ZipCode" |
-  "ZipCodeExtension";
+  | "City"
+  | "DOB"
+  | "Email"
+  | "FirstName"
+  | "Gender"
+  | "HighwayNumber"
+  | "HighwayPrefix"
+  | "LastFourSSN"
+  | "LastName"
+  | "MaidenName"
+  | "MiddleName"
+  | "Ordinal"
+  | "PO"
+  | "POBoxNumber"
+  | "PhoneNumber"
+  | "SSN"
+  | "State"
+  | "StreetFraction"
+  | "StreetName"
+  | "StreetNumber"
+  | "StreetNumberAlpha"
+  | "StreetType"
+  | "UnitNumber"
+  | "UnitNumberAlpha"
+  | "UnitType"
+  | "ZipCode"
+  | "ZipCodeExtension";
 
 export type IdentifierMetricsRecord = {
   identifierType: IdentifierMetricsRecordType;
@@ -64,9 +64,8 @@ export type OverlapMetricsResponse = {
   datasourceOverlapRecords: DatasourceOverlapRecord[];
 };
 
-
 export class IdentityMonitoringApi {
-  constructor(private readonly httpHandler: IHttpHandler) { }
+  constructor(private readonly httpHandler: IHttpHandler) {}
 
   toString(): string {
     return `IdentityMonitoringApi(${this.httpHandler.toString()})`;

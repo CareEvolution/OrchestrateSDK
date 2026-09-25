@@ -28,11 +28,7 @@ import {
   IdentityApi,
 } from "./identity/api.js";
 import { Demographic, BlindedDemographic } from "./identity/demographic.js";
-import {
-  HashDemographicResponse,
-  LocalHashingApi,
-  LocalHashingApiConfiguration
-} from "./identity/localHashing.js";
+import { HashDemographicResponse, LocalHashingApi, LocalHashingApiConfiguration } from "./identity/localHashing.js";
 
 export {
   PersonStatus,

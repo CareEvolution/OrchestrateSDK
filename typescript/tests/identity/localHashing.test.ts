@@ -1,7 +1,7 @@
 import { LocalHashingApi } from "../../src/identity/localHashing.js";
 import { describe, expect, it } from "vitest";
 import { Demographic } from "../../src/identity/demographic.js";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
 const localHashingApi = new LocalHashingApi();
@@ -23,8 +23,8 @@ describe.concurrent("LocalHashingApi", () => {
 
   it("with invalid demographic fields should return an advisory", async () => {
     const result = await localHashingApi.hash({
-      ...demographic
-      , dob: "121980-01-01"
+      ...demographic,
+      dob: "121980-01-01",
     });
 
     expect(result.version).greaterThan(0);

@@ -48,7 +48,6 @@ export type GetPersonByIDRequest = {
 
 export type GetPersonByIDResponse = Person;
 
-
 /** Field comparisons for a failed stateless /v1/validateMatch request.
  * Record A is the first demographic; record B is the second.
  */
@@ -75,9 +74,7 @@ export type MatchDemographicsResponse = {
 
 export type MatchDemographicsRequest = Demographic;
 
-
 export type MatchBlindedDemographicRequest = BlindedDemographic;
-
 
 export type MatchBlindedDemographicsResponse = {
   matchedPersons: Person[];
@@ -177,11 +174,13 @@ export class IdentityApi {
    * @returns Returns the record's assigned person ID, along with any changes resulting from the addition or update.
    * @link https://orchestrate.docs.careevolution.com/identity/operations/add_update_record_blinded.html
    */
-  public async addOrUpdateBlindedRecord(request: AddOrUpdateBlindedRecordRequest): Promise<AddOrUpdateBlindedRecordResponse> {
+  public async addOrUpdateBlindedRecord(
+    request: AddOrUpdateBlindedRecordRequest,
+  ): Promise<AddOrUpdateBlindedRecordResponse> {
     const sourceIdentifierRoute = buildSourceIdentifierRoute(request.source, request.identifier);
     const payload = {
       data: request.blindedDemographic.data,
-      version: request.blindedDemographic.version
+      version: request.blindedDemographic.version,
     };
     return this._httpHandler.post(`/mpi/v1/blindedRecord/${sourceIdentifierRoute}`, payload);
   }
@@ -226,7 +225,9 @@ export class IdentityApi {
    * @returns Persons and their associated records that match the provided demographics.
    * @link https://orchestrate.docs.careevolution.com/identity/operations/match_demographics_blinded.html
    */
-  public async matchBlindedDemographics(demographic: MatchBlindedDemographicRequest): Promise<MatchBlindedDemographicsResponse> {
+  public async matchBlindedDemographics(
+    demographic: MatchBlindedDemographicRequest,
+  ): Promise<MatchBlindedDemographicsResponse> {
     return this._httpHandler.post("/mpi/v1/matchBlinded", demographic);
   }
 
@@ -269,6 +270,4 @@ export class IdentityApi {
   public async removeMatchGuidance(request: RemoveMatchGuidanceRequest): Promise<RemoveMatchGuidanceResponse> {
     return this._httpHandler.post(`/mpi/v1/removeGuidance`, request);
   }
-
-
 }

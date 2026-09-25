@@ -2,15 +2,17 @@
 	"name": "@careevolution/orchestrate",
 	"version": "0.0.0",
 	"description": "A TypeScript client for the Orchestrate API",
-	"main": "dist/cjs/index.js",
+	"main": "dist/esm/index.js",
 	"module": "dist/esm/index.js",
+	"types": "dist/esm/index.d.ts",
 	"type": "module",
 	"scripts": {
-		"build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && node ./scripts/build-cjs-package.mjs",
+		"build": "tsc -p tsconfig.esm.json",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"fmt": "prettier --check .",
 		"fmt:fix": "prettier --write .",
+		"lint": "eslint .",
 		"test:e2e": "vitest -c vitest.config.e2e.js"
 	},
 	"author": "CareEvolution",
@@ -22,12 +24,14 @@
 		"directory": "typescript"
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@types/node": "^26.1.1",
-		"@typescript-eslint/eslint-plugin": "^8.0.0",
 		"dotenv": "^17.2.3",
+		"eslint": "^10.11.0",
 		"prettier": "^3.2.5",
 		"rollup": "^4.0.2",
 		"typescript": "~6.0.3",
+		"typescript-eslint": "^8.70.1",
 		"vitest": "^4.0.13"
 	},
 	"keywords": [
@@ -42,48 +46,34 @@
 		"dist"
 	],
 	"engines": {
-		"node": ">=20.0.0"
+		"node": "^20.19.0 || >=22.12.0"
 	},
 	"exports": {
 		".": {
-			"import": "./dist/esm/index.js",
-			"require": "./dist/cjs/index.js",
 			"types": "./dist/esm/index.d.ts",
-			"default": "./dist/esm/index.mjs"
+			"default": "./dist/esm/index.js"
 		},
 		"./terminology": {
-			"import": "./dist/esm/terminology.js",
-			"require": "./dist/cjs/terminology.js",
 			"types": "./dist/esm/terminology.d.ts",
 			"default": "./dist/esm/terminology.js"
 		},
 		"./convert": {
-			"import": "./dist/esm/convert.js",
-			"require": "./dist/cjs/convert.js",
 			"types": "./dist/esm/convert.d.ts",
 			"default": "./dist/esm/convert.js"
 		},
 		"./insight": {
-			"import": "./dist/esm/insight.js",
-			"require": "./dist/cjs/insight.js",
 			"types": "./dist/esm/insight.d.ts",
 			"default": "./dist/esm/insight.js"
 		},
 		"./exceptions": {
-			"import": "./dist/esm/exceptions.js",
-			"require": "./dist/cjs/exceptions.js",
 			"types": "./dist/esm/exceptions.d.ts",
 			"default": "./dist/esm/exceptions.js"
 		},
 		"./identity": {
-			"import": "./dist/esm/identity.js",
-			"require": "./dist/cjs/identity.js",
 			"types": "./dist/esm/identity.d.ts",
 			"default": "./dist/esm/identity.js"
 		},
 		"./identity/monitoring": {
-			"import": "./dist/esm/identityMonitoring.js",
-			"require": "./dist/cjs/identityMonitoring.js",
 			"types": "./dist/esm/identityMonitoring.d.ts",
 			"default": "./dist/esm/identityMonitoring.js"
 		}
