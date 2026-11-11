@@ -29,7 +29,7 @@ jobs:
       target: ${{ steps.version.outputs.target }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: Get Version
@@ -58,8 +58,8 @@ jobs:
       - version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
           registry-url: "https://registry.npmjs.org"
@@ -100,10 +100,10 @@ jobs:
       - version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
       - name: Install Python
         id: setup-python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: "3.14"
       - name: Install Poetry
@@ -176,7 +176,7 @@ jobs:
       - version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.0.0 # v5.2.0
         with:
@@ -197,7 +197,7 @@ jobs:
         run: dotnet pack src/CareEvolution.Orchestrate/CareEvolution.Orchestrate.csproj --configuration Release --no-restore -p:Version=${{ needs.version.outputs.version }} -o ./artifacts
       - name: Upload package artifact
         if: needs.version.outputs.target == 'dev'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: csharp-nuget-package-${{ needs.version.outputs.version }}
           path: dotnet/artifacts/*.nupkg
