@@ -1023,7 +1023,7 @@ def test_summarize_fhir_r4_value_set_scope_should_return_bundle():
     assert result is not None
     assert result["resourceType"] == "Bundle"
     assert len(result["entry"]) > 0
-    assert len(result["entry"]) <= 10000
+    assert len(result["entry"]) == result["total"]
 
 
 def test_get_fhir_r4_value_set_should_return_a_value_set():
@@ -1053,9 +1053,13 @@ def test_get_fhir_r4_value_set_scopes_should_return_value_set():
     assert len(result["compose"]["include"]) > 0
 
 
-def test_get_fhir_r4_value_sets_by_scope_no_pagination_should_raise():
-    with pytest.raises(OrchestrateHttpError):
-        TEST_API.terminology.get_fhir_r4_value_sets_by_scope(scope="http://loinc.org")
+def test_get_fhir_r4_value_sets_by_scope_no_pagination_should_return_all_entries():
+    result = TEST_API.terminology.get_fhir_r4_value_sets_by_scope(
+        scope="http://loinc.org"
+    )
+    assert result["resourceType"] == "Bundle"
+    assert len(result["entry"]) > 0
+    assert len(result["entry"]) == result["total"]
 
 
 def test_get_fhir_r4_value_seets_by_scope_with_page_and_scope_should_return_bundle():

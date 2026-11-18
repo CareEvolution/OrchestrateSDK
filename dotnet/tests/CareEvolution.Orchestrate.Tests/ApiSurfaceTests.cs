@@ -295,7 +295,7 @@ public sealed class ApiSurfaceTests
         );
 
         Assert.Equal(
-            "https://api.example.com/terminology/v1/fhir/r4/codesystem/SNOMED%2FCT%20Demo",
+            "https://api.example.com/terminology/v1/fhir/r4/codesystem/SNOMED%2FCT%20Demo?page.num=0&_count=10000",
             handler.LastRequest!.RequestUri!.AbsoluteUri
         );
     }

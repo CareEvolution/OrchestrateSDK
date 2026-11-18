@@ -74,6 +74,14 @@ var services = new ServiceCollection();
 services.AddOrchestrateApi();
 ```
 
+### Pagination
+
+CodeSystem contents, CodeSystem summaries, ConceptMaps, ValueSets by scope, and ValueSet scope summaries support paging. Supply both page number and page size to return one page. Supplying only one raises an argument error before any HTTP request. Omit both to retrieve all concepts or entries in a single CodeSystem or Bundle. Page numbers start at 0.
+
+TypeScript accepts `pageNumber` and `pageSize` in the request object. Python accepts `page_number` and `page_size` arguments. C# accepts `PageNumber` and `PageSize` on request objects; `GetFhirR4ConceptMapsAsync` and `SummarizeFhirR4CodeSystemsAsync` accept named `pageNumber` and `pageSize` arguments.
+
+Automatic retrieval preserves resource metadata and filters, removes page navigation links from the combined Bundle, and propagates errors rather than returning partial results.
+
 ## Configuration
 
 The SDK supports environment variables for configuring HTTP behavior. These can be used for local development, CI, or shared runtime configuration.

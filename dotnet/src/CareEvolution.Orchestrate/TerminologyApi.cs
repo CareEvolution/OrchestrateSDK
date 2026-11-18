@@ -34,7 +34,11 @@ public interface ITerminologyApi
         GetFhirR4CodeSystemRequest request,
         CancellationToken cancellationToken = default
     );
-    Task<Bundle> GetFhirR4ConceptMapsAsync(CancellationToken cancellationToken = default);
+    Task<Bundle> GetFhirR4ConceptMapsAsync(
+        CancellationToken cancellationToken = default,
+        int? pageNumber = null,
+        int? pageSize = null
+    );
     Task<ValueSet> GetFhirR4ValueSetAsync(
         GetFhirR4ValueSetRequest request,
         CancellationToken cancellationToken = default
@@ -100,7 +104,11 @@ public interface ITerminologyApi
         SummarizeFhirR4CodeSystemRequest request,
         CancellationToken cancellationToken = default
     );
-    Task<Bundle> SummarizeFhirR4CodeSystemsAsync(CancellationToken cancellationToken = default);
+    Task<Bundle> SummarizeFhirR4CodeSystemsAsync(
+        CancellationToken cancellationToken = default,
+        int? pageNumber = null,
+        int? pageSize = null
+    );
     Task<ValueSet> SummarizeFhirR4ValueSetAsync(
         SummarizeFhirR4ValueSetRequest request,
         CancellationToken cancellationToken = default
@@ -122,6 +130,72 @@ public sealed class TerminologyApi : ITerminologyApi
     internal TerminologyApi(OrchestrateHttpClient http)
     {
         _http = http;
+    }
+
+    private async Task<T> GetPagesAsync<T, TItem>(
+        string path,
+        KeyValuePair<string, string?>[] parameters,
+        int? pageNumber,
+        int? pageSize,
+        Func<T, List<TItem>> items,
+        CancellationToken cancellationToken
+    )
+    {
+        if ((pageNumber is null) != (pageSize is null))
+        {
+            throw new ArgumentException("pageNumber and pageSize must be provided together");
+        }
+        var automatic = pageNumber is null && pageSize is null;
+        if (automatic)
+        {
+            pageNumber = 0;
+            pageSize = 10000;
+        }
+
+        Task<T> FetchPage() =>
+            _http.GetJsonAsync<T>(
+                RouteBuilder.Build(
+                    path,
+                    parameters,
+                    [
+                        new(
+                            "page.num",
+                            pageNumber?.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                        ),
+                        new(
+                            "_count",
+                            pageSize?.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                        ),
+                    ]
+                ),
+                cancellationToken
+            );
+
+        var result = await FetchPage().ConfigureAwait(false);
+        if (!automatic)
+            return result;
+
+        var total = result switch
+        {
+            Bundle bundle => bundle.Total,
+            CodeSystem codeSystem => codeSystem.Count,
+            _ => null,
+        };
+        var page = result;
+        while (items(page).Count > 0 && (total is null || items(result).Count < total))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            pageNumber++;
+            page = await FetchPage().ConfigureAwait(false);
+            items(result).AddRange(items(page));
+        }
+        if (result is Bundle aggregatedBundle)
+        {
+            aggregatedBundle.Link.RemoveAll(link =>
+                link.Relation is "self" or "next" or "prev" or "previous" or "first" or "last"
+            );
+        }
+        return result;
     }
 
     public Task<ClassifyConditionResponse> ClassifyConditionAsync(
@@ -319,27 +393,43 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        var route = RouteBuilder.Build(
+        return GetPagesAsync(
             $"/terminology/v1/fhir/r4/codesystem/{RouteBuilder.Escape(request.CodeSystem)}",
-            [
-                new KeyValuePair<string, string?>("page.num", request.PageNumber?.ToString()),
-                new KeyValuePair<string, string?>("_count", request.PageSize?.ToString()),
-                new KeyValuePair<string, string?>("concept:contains", request.ConceptContains),
-            ]
+            [new("concept:contains", request.ConceptContains)],
+            request.PageNumber,
+            request.PageSize,
+            (CodeSystem resource) => resource.Concept,
+            cancellationToken
         );
-        return _http.GetJsonAsync<CodeSystem>(route, cancellationToken);
     }
 
     public Task<Bundle> SummarizeFhirR4CodeSystemsAsync(
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        int? pageNumber = null,
+        int? pageSize = null
     ) =>
-        _http.GetJsonAsync<Bundle>(
-            "/terminology/v1/fhir/r4/codesystem?_summary=true",
+        GetPagesAsync(
+            "/terminology/v1/fhir/r4/codesystem",
+            [new("_summary", "true")],
+            pageNumber,
+            pageSize,
+            (Bundle resource) => resource.Entry,
             cancellationToken
         );
 
-    public Task<Bundle> GetFhirR4ConceptMapsAsync(CancellationToken cancellationToken = default) =>
-        _http.GetJsonAsync<Bundle>("/terminology/v1/fhir/r4/conceptmap", cancellationToken);
+    public Task<Bundle> GetFhirR4ConceptMapsAsync(
+        CancellationToken cancellationToken = default,
+        int? pageNumber = null,
+        int? pageSize = null
+    ) =>
+        GetPagesAsync(
+            "/terminology/v1/fhir/r4/conceptmap",
+            [],
+            pageNumber,
+            pageSize,
+            (Bundle resource) => resource.Entry,
+            cancellationToken
+        );
 
     public Task<Parameters> TranslateFhirR4ConceptMapAsync(
         TranslateFhirR4ConceptMapRequest request,
@@ -356,14 +446,14 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        var route = RouteBuilder.Build(
+        return GetPagesAsync(
             "/terminology/v1/fhir/r4/valueset",
-            [
-                new KeyValuePair<string, string?>("extension.scope", request.Scope),
-                new KeyValuePair<string, string?>("_summary", "true"),
-            ]
+            [new("extension.scope", request.Scope), new("_summary", "true")],
+            request.PageNumber,
+            request.PageSize,
+            (Bundle resource) => resource.Entry,
+            cancellationToken
         );
-        return _http.GetJsonAsync<Bundle>(route, cancellationToken);
     }
 
     public Task<ValueSet> SummarizeFhirR4ValueSetAsync(
@@ -389,16 +479,14 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        var route = RouteBuilder.Build(
+        return GetPagesAsync(
             "/terminology/v1/fhir/r4/valueset",
-            [
-                new KeyValuePair<string, string?>("name", request.Name),
-                new KeyValuePair<string, string?>("page.num", request.PageNumber?.ToString()),
-                new KeyValuePair<string, string?>("_count", request.PageSize?.ToString()),
-                new KeyValuePair<string, string?>("extension.scope", request.Scope),
-            ]
+            [new("name", request.Name), new("extension.scope", request.Scope)],
+            request.PageNumber,
+            request.PageSize,
+            (Bundle resource) => resource.Entry,
+            cancellationToken
         );
-        return _http.GetJsonAsync<Bundle>(route, cancellationToken);
     }
 
     public Task<ValueSet> GetFhirR4ValueSetScopesAsync(
