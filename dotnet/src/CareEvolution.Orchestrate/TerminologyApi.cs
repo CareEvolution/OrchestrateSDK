@@ -34,11 +34,7 @@ public interface ITerminologyApi
         GetFhirR4CodeSystemRequest request,
         CancellationToken cancellationToken = default
     );
-    Task<Bundle> GetFhirR4ConceptMapsAsync(
-        CancellationToken cancellationToken = default,
-        int? pageNumber = null,
-        int? pageSize = null
-    );
+    Task<Bundle> GetFhirR4ConceptMapsAsync(CancellationToken cancellationToken = default);
     Task<ValueSet> GetFhirR4ValueSetAsync(
         GetFhirR4ValueSetRequest request,
         CancellationToken cancellationToken = default
@@ -104,11 +100,7 @@ public interface ITerminologyApi
         SummarizeFhirR4CodeSystemRequest request,
         CancellationToken cancellationToken = default
     );
-    Task<Bundle> SummarizeFhirR4CodeSystemsAsync(
-        CancellationToken cancellationToken = default,
-        int? pageNumber = null,
-        int? pageSize = null
-    );
+    Task<Bundle> SummarizeFhirR4CodeSystemsAsync(CancellationToken cancellationToken = default);
     Task<ValueSet> SummarizeFhirR4ValueSetAsync(
         SummarizeFhirR4ValueSetRequest request,
         CancellationToken cancellationToken = default
@@ -132,68 +124,97 @@ public sealed class TerminologyApi : ITerminologyApi
         _http = http;
     }
 
-    private async Task<T> GetPagesAsync<T, TItem>(
+    private static string PageRoute(
+        string path,
+        KeyValuePair<string, string?>[] parameters,
+        int? pageNumber,
+        int? pageSize
+    )
+    {
+        if ((pageNumber is null) != (pageSize is null))
+            throw new ArgumentException("pageNumber and pageSize must be provided together");
+        return RouteBuilder.Build(
+            path,
+            parameters,
+            [
+                new(
+                    "page.num",
+                    (pageNumber ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture)
+                ),
+                new(
+                    "_count",
+                    (pageSize ?? 10000).ToString(System.Globalization.CultureInfo.InvariantCulture)
+                ),
+            ]
+        );
+    }
+
+    private async Task<Bundle> GetBundlePagesAsync(
         string path,
         KeyValuePair<string, string?>[] parameters,
         int? pageNumber,
         int? pageSize,
-        Func<T, List<TItem>> items,
         CancellationToken cancellationToken
     )
     {
-        if ((pageNumber is null) != (pageSize is null))
-        {
-            throw new ArgumentException("pageNumber and pageSize must be provided together");
-        }
-        var automatic = pageNumber is null && pageSize is null;
-        if (automatic)
-        {
-            pageNumber = 0;
-            pageSize = 10000;
-        }
-
-        Task<T> FetchPage() =>
-            _http.GetJsonAsync<T>(
-                RouteBuilder.Build(
-                    path,
-                    parameters,
-                    [
-                        new(
-                            "page.num",
-                            pageNumber?.ToString(System.Globalization.CultureInfo.InvariantCulture)
-                        ),
-                        new(
-                            "_count",
-                            pageSize?.ToString(System.Globalization.CultureInfo.InvariantCulture)
-                        ),
-                    ]
-                ),
-                cancellationToken
-            );
-
-        var result = await FetchPage().ConfigureAwait(false);
-        if (!automatic)
+        var route = PageRoute(path, parameters, pageNumber, pageSize);
+        var result = await _http
+            .GetJsonAsync<Bundle>(route, cancellationToken)
+            .ConfigureAwait(false);
+        if (pageNumber is not null)
             return result;
 
-        var total = result switch
-        {
-            Bundle bundle => bundle.Total,
-            CodeSystem codeSystem => codeSystem.Count,
-            _ => null,
-        };
-        var page = result;
-        while (items(page).Count > 0 && (total is null || items(result).Count < total))
+        var next = result.Link.FirstOrDefault(link => link.Relation == "next")?.Url;
+        while (!string.IsNullOrEmpty(next))
         {
             cancellationToken.ThrowIfCancellationRequested();
-            pageNumber++;
-            page = await FetchPage().ConfigureAwait(false);
-            items(result).AddRange(items(page));
+            var resolved = new Uri(new Uri(new Uri("https://relative.invalid"), route), next);
+            route =
+                resolved.Host == "relative.invalid" ? resolved.PathAndQuery : resolved.AbsoluteUri;
+            var page = await _http
+                .GetJsonAsync<Bundle>(route, cancellationToken)
+                .ConfigureAwait(false);
+            result.Entry.AddRange(page.Entry);
+            next = page.Link.FirstOrDefault(link => link.Relation == "next")?.Url;
         }
-        if (result is Bundle aggregatedBundle)
+        result.Link.RemoveAll(link =>
+            link.Relation is "self" or "next" or "prev" or "previous" or "first" or "last"
+        );
+        return result;
+    }
+
+    private async Task<CodeSystem> GetCodeSystemPagesAsync(
+        string path,
+        KeyValuePair<string, string?>[] parameters,
+        int? pageNumber,
+        int? pageSize,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await _http
+            .GetJsonAsync<CodeSystem>(
+                PageRoute(path, parameters, pageNumber, pageSize),
+                cancellationToken
+            )
+            .ConfigureAwait(false);
+        if (pageNumber is not null)
+            return result;
+
+        var page = result;
+        var currentPage = 0;
+        while (
+            page.Concept.Count > 0 && (result.Count is null || result.Concept.Count < result.Count)
+        )
         {
-            aggregatedBundle.Link.RemoveAll(link =>
-                link.Relation is "self" or "next" or "prev" or "previous" or "first" or "last"
-            );
+            cancellationToken.ThrowIfCancellationRequested();
+            currentPage++;
+            page = await _http
+                .GetJsonAsync<CodeSystem>(
+                    PageRoute(path, parameters, currentPage, 10000),
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
+            result.Concept.AddRange(page.Concept);
         }
         return result;
     }
@@ -393,41 +414,32 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        return GetPagesAsync(
+        return GetCodeSystemPagesAsync(
             $"/terminology/v1/fhir/r4/codesystem/{RouteBuilder.Escape(request.CodeSystem)}",
             [new("concept:contains", request.ConceptContains)],
             request.PageNumber,
             request.PageSize,
-            (CodeSystem resource) => resource.Concept,
             cancellationToken
         );
     }
 
     public Task<Bundle> SummarizeFhirR4CodeSystemsAsync(
-        CancellationToken cancellationToken = default,
-        int? pageNumber = null,
-        int? pageSize = null
+        CancellationToken cancellationToken = default
     ) =>
-        GetPagesAsync(
+        GetBundlePagesAsync(
             "/terminology/v1/fhir/r4/codesystem",
             [new("_summary", "true")],
-            pageNumber,
-            pageSize,
-            (Bundle resource) => resource.Entry,
+            null,
+            null,
             cancellationToken
         );
 
-    public Task<Bundle> GetFhirR4ConceptMapsAsync(
-        CancellationToken cancellationToken = default,
-        int? pageNumber = null,
-        int? pageSize = null
-    ) =>
-        GetPagesAsync(
+    public Task<Bundle> GetFhirR4ConceptMapsAsync(CancellationToken cancellationToken = default) =>
+        GetBundlePagesAsync(
             "/terminology/v1/fhir/r4/conceptmap",
             [],
-            pageNumber,
-            pageSize,
-            (Bundle resource) => resource.Entry,
+            null,
+            null,
             cancellationToken
         );
 
@@ -446,12 +458,11 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        return GetPagesAsync(
+        return GetBundlePagesAsync(
             "/terminology/v1/fhir/r4/valueset",
             [new("extension.scope", request.Scope), new("_summary", "true")],
-            request.PageNumber,
-            request.PageSize,
-            (Bundle resource) => resource.Entry,
+            null,
+            null,
             cancellationToken
         );
     }
@@ -479,12 +490,11 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        return GetPagesAsync(
+        return GetBundlePagesAsync(
             "/terminology/v1/fhir/r4/valueset",
             [new("name", request.Name), new("extension.scope", request.Scope)],
             request.PageNumber,
             request.PageSize,
-            (Bundle resource) => resource.Entry,
             cancellationToken
         );
     }

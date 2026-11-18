@@ -195,3 +195,43 @@ def test_http_handler_post_bad_request_should_throw_orchestrate_error(
         )
 
     assert expected_message in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/continuation?cursor=a%2Bb",
+        "https://api.example.test/continuation?cursor=a%2Bb",
+    ],
+)
+def test_paging_link_should_preserve_url_and_authentication(monkeypatch, path):
+    response = Mock(text='{"resourceType":"Bundle"}')
+    response.json.return_value = {"resourceType": "Bundle"}
+    get = Mock(return_value=response)
+    monkeypatch.setattr("orchestrate._internal.http_handler.requests.get", get)
+    handler = HttpHandler(
+        base_url="https://api.example.test",
+        default_headers={"x-api-key": "test-key", "Accept": "application/json"},
+        timeout_ms=1000,
+    )
+    assert handler.get(path) == {"resourceType": "Bundle"}
+    assert get.call_args.args[0] == "https://api.example.test/continuation?cursor=a%2Bb"
+    assert get.call_args.kwargs["headers"]["x-api-key"] == "test-key"
+
+
+@pytest.mark.parametrize(
+    "path", ["https://other.example/next", "http://api.example.test/next"]
+)
+def test_paging_link_to_another_origin_should_fail_before_http(monkeypatch, path):
+    get = Mock()
+    monkeypatch.setattr("orchestrate._internal.http_handler.requests.get", get)
+    handler = HttpHandler(
+        base_url="https://api.example.test",
+        default_headers={"x-api-key": "test-key"},
+        timeout_ms=1000,
+    )
+    with pytest.raises(
+        ValueError, match="Paging links must use the configured API origin"
+    ):
+        handler.get(path)
+    get.assert_not_called()

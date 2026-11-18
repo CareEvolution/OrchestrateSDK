@@ -76,11 +76,11 @@ services.AddOrchestrateApi();
 
 ### Pagination
 
-CodeSystem contents, CodeSystem summaries, ConceptMaps, ValueSets by scope, and ValueSet scope summaries support paging. Supply both page number and page size to return one page. Supplying only one raises an argument error before any HTTP request. Omit both to retrieve all concepts or entries in a single CodeSystem or Bundle. Page numbers start at 0.
+CodeSystem contents, CodeSystem summaries, ConceptMaps, ValueSets by scope, and ValueSet scope summaries retrieve all results automatically. Bundle responses follow the server's `next` links until none remains. CodeSystem contents use numbered pages internally. The SDK combines the concepts or entries into a single response and propagates errors rather than returning partial results.
 
-TypeScript accepts `pageNumber` and `pageSize` in the request object. Python accepts `page_number` and `page_size` arguments. C# accepts `PageNumber` and `PageSize` on request objects; `GetFhirR4ConceptMapsAsync` and `SummarizeFhirR4CodeSystemsAsync` accept named `pageNumber` and `pageSize` arguments.
+Existing page-number and page-size options remain available for CodeSystem contents and ValueSets by scope in all three clients, and for ConceptMaps in Python. Supply both to return one page; supply neither to retrieve all results. Supplying only one raises an argument error before HTTP. Page numbers start at 0.
 
-Automatic retrieval preserves resource metadata and filters, removes page navigation links from the combined Bundle, and propagates errors rather than returning partial results.
+Automatic retrieval preserves resource metadata, removes page navigation links from the combined Bundle, and follows continuation URLs on the configured API origin.
 
 ## Configuration
 

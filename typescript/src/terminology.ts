@@ -281,7 +281,7 @@ type CodeSystems = readonly [
   "X12ClaimAdjustmentReasonCodes",
 ];
 
-export type PaginationRequest = {
+type PaginationRequest = {
   pageNumber?: number;
   pageSize?: number;
 };
@@ -437,7 +437,7 @@ const buildTranslateFhirR4ConceptMapParameters = (request: TranslateFhirR4Concep
 
 export type GetFhirR4ValueSetScopesResponse = ValueSet;
 
-export type SummarizeFhirR4ValueSetScopeRequest = PaginationRequest & {
+export type SummarizeFhirR4ValueSetScopeRequest = {
   scope: string;
 };
 
@@ -532,14 +532,28 @@ export class TerminologyApi {
       return this.httpHandler.get<T>(`${path}?${parameters.toString()}`);
     };
     const result = await fetchPage();
+    let route = `${path}?${parameters.toString()}`;
     if (!automatic) return result;
 
-    const total = result.total ?? result.count;
     let page = result;
-    while ((page[collection]?.length ?? 0) > 0 && (total === undefined || (result[collection]?.length ?? 0) < total)) {
-      pageNumber = (pageNumber ?? 0) + 1;
-      page = await fetchPage();
-      result[collection]!.push(...(page[collection] ?? []));
+    if (collection === "entry") {
+      let next = page.link?.find((link) => link.relation === "next")?.url;
+      while (next) {
+        const resolved = new URL(next, new URL(route, "https://relative.invalid"));
+        route = resolved.origin === "https://relative.invalid" ? resolved.pathname + resolved.search : resolved.href;
+        page = await this.httpHandler.get<T>(route);
+        (result.entry ??= []).push(...(page.entry ?? []));
+        next = page.link?.find((link) => link.relation === "next")?.url;
+      }
+    } else {
+      while (
+        (page.concept?.length ?? 0) > 0 &&
+        (result.count === undefined || (result.concept?.length ?? 0) < result.count)
+      ) {
+        pageNumber = (pageNumber ?? 0) + 1;
+        page = await fetchPage();
+        result.concept!.push(...(page.concept ?? []));
+      }
     }
     if (result.link) {
       result.link = result.link.filter(
@@ -790,13 +804,8 @@ export class TerminologyApi {
    * @returns A bundle of known CodeSystems
    * @link https://rosetta-api.docs.careevolution.com/fhir/codesystem.html
    */
-  summarizeFhirR4CodeSystems(request: PaginationRequest = {}): Promise<SummarizeFhirR4CodeSystemsResponse> {
-    return this.getPages(
-      "/terminology/v1/fhir/r4/codesystem",
-      new URLSearchParams({ _summary: "true" }),
-      request,
-      "entry",
-    );
+  summarizeFhirR4CodeSystems(): Promise<SummarizeFhirR4CodeSystemsResponse> {
+    return this.getPages("/terminology/v1/fhir/r4/codesystem", new URLSearchParams({ _summary: "true" }), {}, "entry");
   }
 
   /**
@@ -804,8 +813,8 @@ export class TerminologyApi {
    * @returns A bundle of known ConceptMaps
    * @link https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html
    */
-  getFhirR4ConceptMaps(request: PaginationRequest = {}): Promise<GetFhirR4ConceptMapResponse> {
-    return this.getPages("/terminology/v1/fhir/r4/conceptmap", new URLSearchParams(), request, "entry");
+  getFhirR4ConceptMaps(): Promise<GetFhirR4ConceptMapResponse> {
+    return this.getPages("/terminology/v1/fhir/r4/conceptmap", new URLSearchParams(), {}, "entry");
   }
 
   /**
@@ -834,7 +843,7 @@ export class TerminologyApi {
       "extension.scope": request.scope,
       _summary: "true",
     });
-    return this.getPages("/terminology/v1/fhir/r4/valueset", params, request, "entry");
+    return this.getPages("/terminology/v1/fhir/r4/valueset", params, {}, "entry");
   }
 
   /**

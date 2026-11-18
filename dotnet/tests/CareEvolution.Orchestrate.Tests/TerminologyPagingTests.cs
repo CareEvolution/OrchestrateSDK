@@ -18,8 +18,12 @@ public sealed class TerminologyPagingTests
             "scope-summaries",
         };
 
+    public static TheoryData<string> ExplicitRoutes => new() { "codesystem", "valuesets" };
+    public static TheoryData<string> BundleRoutes =>
+        new() { "code-system-summaries", "conceptmaps", "valuesets", "scope-summaries" };
+
     [Theory]
-    [MemberData(nameof(Routes))]
+    [MemberData(nameof(ExplicitRoutes))]
     public async Task IncompletePagingShouldFailBeforeHttp(string route)
     {
         foreach (var paging in new (int? PageNumber, int? PageSize)[] { (0, null), (null, 2) })
@@ -39,7 +43,7 @@ public sealed class TerminologyPagingTests
     }
 
     [Theory]
-    [MemberData(nameof(Routes))]
+    [MemberData(nameof(ExplicitRoutes))]
     public async Task ExplicitPagingShouldReturnOnlyRequestedPage(string route)
     {
         foreach (var pageNumber in new[] { 0, 3 })
@@ -49,7 +53,9 @@ public sealed class TerminologyPagingTests
                 (request, _) =>
                 {
                     requests.Add(request.RequestUri!);
-                    return Task.FromResult(FakeResponses.Json(Page(route, ["one"])));
+                    return Task.FromResult(
+                        FakeResponses.Json(Page(route, ["one"], next: "/unused"))
+                    );
                 }
             );
             using var http = new HttpClient(handler);
@@ -68,16 +74,50 @@ public sealed class TerminologyPagingTests
     }
 
     [Theory]
-    [MemberData(nameof(Routes))]
-    public async Task OmittedPagingShouldAggregateShortPagesAndPreserveMetadata(string route)
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CodeSystemShouldAggregateConceptsWithNumberedPages(bool knownCount)
     {
-        foreach (var knownTotal in new[] { false, true })
+        var requests = new List<Uri>();
+        var pages = new Queue<string>([
+            Page("codesystem", ["one"], knownCount ? 2 : null),
+            Page("codesystem", ["two"]),
+            Page("codesystem", []),
+        ]);
+        var handler = new FakeHttpMessageHandler(
+            (request, _) =>
+            {
+                requests.Add(request.RequestUri!);
+                return Task.FromResult(FakeResponses.Json(pages.Dequeue()));
+            }
+        );
+        using var http = new HttpClient(handler);
+        var result = Assert.IsType<CodeSystem>(await Call(Api(http), "codesystem"));
+        Assert.Equal(["one", "two"], Ids(result));
+        Assert.Equal("resource-id", result.Id);
+        Assert.Equal(knownCount ? 2 : (int?)null, result.Count);
+        Assert.Equal(knownCount ? 2 : 3, requests.Count);
+        for (var index = 0; index < requests.Count; index++)
+            AssertRequest(requests[index], "codesystem", index, 10000);
+    }
+
+    [Theory]
+    [MemberData(nameof(BundleRoutes))]
+    public async Task BundleShouldFollowNextLinksRegardlessOfCountsOrEmptyPages(string route)
+    {
+        foreach (
+            var next in new[]
+            {
+                "/continuation?cursor=a%2Bb",
+                "https://example.test/continuation?cursor=a%2Bb",
+            }
+        )
         {
             var requests = new List<Uri>();
             var pages = new Queue<string>([
-                Page(route, ["one"], knownTotal ? 2 : null),
+                Page(route, [], 0, next),
+                Page(route, ["one"], next: "?cursor=last%2Ftoken"),
                 Page(route, ["two"]),
-                Page(route, []),
             ]);
             var handler = new FakeHttpMessageHandler(
                 (request, _) =>
@@ -87,30 +127,56 @@ public sealed class TerminologyPagingTests
                 }
             );
             using var http = new HttpClient(handler);
-
-            var result = await Call(Api(http), route);
-
+            var result = Assert.IsType<Bundle>(await Call(Api(http), route));
             Assert.Equal(["one", "two"], Ids(result));
-            if (result is Bundle bundle)
-            {
-                Assert.Equal("resource-id", bundle.Id);
-                var link = Assert.Single(bundle.Link);
-                Assert.Equal("alternate", link.Relation);
-                Assert.Equal("https://example.test/catalog", link.Url);
-                Assert.Equal(knownTotal ? 2 : (int?)null, bundle.Total);
-            }
-            else
-            {
-                var codeSystem = Assert.IsType<CodeSystem>(result);
-                Assert.Equal("resource-id", codeSystem.Id);
-                Assert.Equal(knownTotal ? 2 : (int?)null, codeSystem.Count);
-            }
-            Assert.Equal(knownTotal ? 2 : 3, requests.Count);
-            for (var index = 0; index < requests.Count; index++)
-            {
-                AssertRequest(requests[index], route, index, 10000);
-            }
+            Assert.Equal("resource-id", result.Id);
+            Assert.Equal(0, result.Total);
+            var link = Assert.Single(result.Link);
+            Assert.Equal("alternate", link.Relation);
+            Assert.Equal("https://example.test/catalog", link.Url);
+            Assert.Equal(3, requests.Count);
+            AssertRequest(requests[0], route, 0, 10000);
+            Assert.Equal("https://example.test/continuation?cursor=a%2Bb", requests[1].AbsoluteUri);
+            Assert.Equal(
+                "https://example.test/continuation?cursor=last%2Ftoken",
+                requests[2].AbsoluteUri
+            );
         }
+    }
+
+    [Theory]
+    [MemberData(nameof(BundleRoutes))]
+    public async Task BundleWithoutNextLinkShouldStopEvenWhenTotalSuggestsMore(string route)
+    {
+        var calls = 0;
+        var handler = new FakeHttpMessageHandler(
+            (_, _) =>
+            {
+                calls++;
+                return Task.FromResult(FakeResponses.Json(Page(route, ["one"], 999)));
+            }
+        );
+        using var http = new HttpClient(handler);
+        Assert.Equal(["one"], Ids(await Call(Api(http), route)));
+        Assert.Equal(1, calls);
+    }
+
+    [Theory]
+    [InlineData("https://other.example/next")]
+    [InlineData("http://example.test/next")]
+    public async Task NextLinkToDifferentOriginShouldFailBeforeSendingCredentials(string next)
+    {
+        var calls = 0;
+        var handler = new FakeHttpMessageHandler(
+            (_, _) =>
+            {
+                calls++;
+                return Task.FromResult(FakeResponses.Json(Page("valuesets", [], next: next)));
+            }
+        );
+        using var http = new HttpClient(handler);
+        await Assert.ThrowsAsync<ArgumentException>(() => Call(Api(http), "valuesets"));
+        Assert.Equal(1, calls);
     }
 
     [Theory]
@@ -140,7 +206,7 @@ public sealed class TerminologyPagingTests
             (_, _) =>
                 Task.FromResult(
                     ++calls == 1
-                        ? FakeResponses.Json(Page(route, ["one"]))
+                        ? FakeResponses.Json(Page(route, ["one"], next: "/next"))
                         : FakeResponses.Json("{}", HttpStatusCode.InternalServerError)
                 )
         );
@@ -161,7 +227,7 @@ public sealed class TerminologyPagingTests
             {
                 calls++;
                 cancellation.Cancel();
-                return Task.FromResult(FakeResponses.Json(Page(route, ["one"])));
+                return Task.FromResult(FakeResponses.Json(Page(route, ["one"], next: "/next")));
             }
         );
         using var http = new HttpClient(handler);
@@ -198,15 +264,9 @@ public sealed class TerminologyPagingTests
                 cancellationToken
             ),
             "code-system-summaries" => await api.Terminology.SummarizeFhirR4CodeSystemsAsync(
-                cancellationToken,
-                pageNumber,
-                pageSize
+                cancellationToken
             ),
-            "conceptmaps" => await api.Terminology.GetFhirR4ConceptMapsAsync(
-                cancellationToken,
-                pageNumber,
-                pageSize
-            ),
+            "conceptmaps" => await api.Terminology.GetFhirR4ConceptMapsAsync(cancellationToken),
             "valuesets" => await api.Terminology.GetFhirR4ValueSetsByScopeAsync(
                 new()
                 {
@@ -218,12 +278,7 @@ public sealed class TerminologyPagingTests
                 cancellationToken
             ),
             "scope-summaries" => await api.Terminology.SummarizeFhirR4ValueSetScopeAsync(
-                new()
-                {
-                    Scope = "http://loinc.org",
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                },
+                new() { Scope = "http://loinc.org" },
                 cancellationToken
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(route)),
@@ -237,7 +292,7 @@ public sealed class TerminologyPagingTests
             _ => throw new ArgumentException("Unexpected response", nameof(result)),
         };
 
-    private static string Page(string route, string[] ids, int? total = null)
+    private static string Page(string route, string[] ids, int? total = null, string? next = null)
     {
         var resource = new Dictionary<string, object?> { ["id"] = "resource-id" };
         if (route == "codesystem")
@@ -250,12 +305,14 @@ public sealed class TerminologyPagingTests
         else
         {
             resource["resourceType"] = "Bundle";
-            resource["link"] = new[]
+            var links = new List<object>
             {
                 new { relation = "self", url = "https://example.test/page/0" },
-                new { relation = "next", url = "https://example.test/page/1" },
-                new { relation = "alternate", url = "https://example.test/catalog" },
             };
+            if (next is not null)
+                links.Add(new { relation = "next", url = next });
+            links.Add(new { relation = "alternate", url = "https://example.test/catalog" });
+            resource["link"] = links;
             resource["entry"] = ids.Select(id => new
             {
                 resource = new { resourceType = "ValueSet", id },

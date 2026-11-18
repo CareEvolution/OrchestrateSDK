@@ -1,6 +1,6 @@
 import sys
 from typing import Any, Callable, Mapping, Optional, Union, overload
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 
 from orchestrate._internal.batch import handle_batch_overloaded_request
 from orchestrate._internal.fhir import Parameters
@@ -555,15 +555,37 @@ class TerminologyApi:
         if not automatic:
             return result
 
-        assert page_number is not None
-        total = result.get("total", result.get("count"))
         page = result
-        while page.get(collection) and (
-            total is None or len(result[collection]) < total
-        ):
-            page_number += 1
-            page = fetch_page()
-            result[collection].extend(page.get(collection, []))
+        if collection == "entry":
+            next_link = next(
+                (
+                    link["url"]
+                    for link in page.get("link", [])
+                    if link.get("relation") == "next"
+                ),
+                None,
+            )
+            while next_link:
+                path = urljoin(path, next_link)
+                page = self.__http_handler.get(path=path)
+                result.setdefault("entry", []).extend(page.get("entry", []))
+                next_link = next(
+                    (
+                        link["url"]
+                        for link in page.get("link", [])
+                        if link.get("relation") == "next"
+                    ),
+                    None,
+                )
+        else:
+            assert page_number is not None
+            total = result.get("count")
+            while page.get("concept") and (
+                total is None or len(result["concept"]) < total
+            ):
+                page_number += 1
+                page = fetch_page()
+                result["concept"].extend(page.get("concept", []))
         if "link" in result:
             result["link"] = [
                 link
@@ -1365,11 +1387,7 @@ class TerminologyApi:
             page_size,
         )
 
-    def summarize_fhir_r4_code_systems(
-        self,
-        page_number: Optional[int] = None,
-        page_size: Optional[int] = None,
-    ) -> SummarizeFhirR4CodeSystemsResponse:
+    def summarize_fhir_r4_code_systems(self) -> SummarizeFhirR4CodeSystemsResponse:
         """
         Describes available code systems
 
@@ -1385,8 +1403,8 @@ class TerminologyApi:
             "/terminology/v1/fhir/r4/codesystem",
             {"_summary": "true"},
             "entry",
-            page_number,
-            page_size,
+            None,
+            None,
         )
 
     def get_fhir_r4_concept_maps(
@@ -1452,10 +1470,7 @@ class TerminologyApi:
         )
 
     def summarize_fhir_r4_value_set_scope(
-        self,
-        scope: str,
-        page_number: Optional[int] = None,
-        page_size: Optional[int] = None,
+        self, scope: str
     ) -> SummarizeFhirR4ValueSetScopeResponse:
         """
         Retrieves the set of ValueSets described in a scope
@@ -1480,8 +1495,8 @@ class TerminologyApi:
             "/terminology/v1/fhir/r4/valueset",
             parameters,
             "entry",
-            page_number,
-            page_size,
+            None,
+            None,
         )
 
     def get_fhir_r4_value_set(
