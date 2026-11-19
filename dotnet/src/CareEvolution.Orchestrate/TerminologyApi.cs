@@ -124,6 +124,101 @@ public sealed class TerminologyApi : ITerminologyApi
         _http = http;
     }
 
+    private static string PageRoute(
+        string path,
+        KeyValuePair<string, string?>[] parameters,
+        int? pageNumber,
+        int? pageSize
+    )
+    {
+        if ((pageNumber is null) != (pageSize is null))
+            throw new ArgumentException("pageNumber and pageSize must be provided together");
+        return RouteBuilder.Build(
+            path,
+            parameters,
+            [
+                new(
+                    "page.num",
+                    (pageNumber ?? 0).ToString(System.Globalization.CultureInfo.InvariantCulture)
+                ),
+                new(
+                    "_count",
+                    (pageSize ?? 10000).ToString(System.Globalization.CultureInfo.InvariantCulture)
+                ),
+            ]
+        );
+    }
+
+    private async Task<Bundle> GetBundlePagesAsync(
+        string path,
+        KeyValuePair<string, string?>[] parameters,
+        int? pageNumber,
+        int? pageSize,
+        CancellationToken cancellationToken
+    )
+    {
+        var route = PageRoute(path, parameters, pageNumber, pageSize);
+        var result = await _http
+            .GetJsonAsync<Bundle>(route, cancellationToken)
+            .ConfigureAwait(false);
+        if (pageNumber is not null)
+            return result;
+
+        var next = result.Link.FirstOrDefault(link => link.Relation == "next")?.Url;
+        while (!string.IsNullOrEmpty(next))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var resolved = new Uri(new Uri(new Uri("https://relative.invalid"), route), next);
+            route =
+                resolved.Host == "relative.invalid" ? resolved.PathAndQuery : resolved.AbsoluteUri;
+            var page = await _http
+                .GetJsonAsync<Bundle>(route, cancellationToken)
+                .ConfigureAwait(false);
+            result.Entry.AddRange(page.Entry);
+            next = page.Link.FirstOrDefault(link => link.Relation == "next")?.Url;
+        }
+        result.Link.RemoveAll(link =>
+            link.Relation is "self" or "next" or "prev" or "previous" or "first" or "last"
+        );
+        return result;
+    }
+
+    private async Task<CodeSystem> GetCodeSystemPagesAsync(
+        string path,
+        KeyValuePair<string, string?>[] parameters,
+        int? pageNumber,
+        int? pageSize,
+        CancellationToken cancellationToken
+    )
+    {
+        var result = await _http
+            .GetJsonAsync<CodeSystem>(
+                PageRoute(path, parameters, pageNumber, pageSize),
+                cancellationToken
+            )
+            .ConfigureAwait(false);
+        if (pageNumber is not null)
+            return result;
+
+        var page = result;
+        var currentPage = 0;
+        while (
+            page.Concept.Count > 0 && (result.Count is null || result.Concept.Count < result.Count)
+        )
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            currentPage++;
+            page = await _http
+                .GetJsonAsync<CodeSystem>(
+                    PageRoute(path, parameters, currentPage, 10000),
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
+            result.Concept.AddRange(page.Concept);
+        }
+        return result;
+    }
+
     public Task<ClassifyConditionResponse> ClassifyConditionAsync(
         ClassifyConditionRequest request,
         CancellationToken cancellationToken = default
@@ -319,27 +414,34 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        var route = RouteBuilder.Build(
+        return GetCodeSystemPagesAsync(
             $"/terminology/v1/fhir/r4/codesystem/{RouteBuilder.Escape(request.CodeSystem)}",
-            [
-                new KeyValuePair<string, string?>("page.num", request.PageNumber?.ToString()),
-                new KeyValuePair<string, string?>("_count", request.PageSize?.ToString()),
-                new KeyValuePair<string, string?>("concept:contains", request.ConceptContains),
-            ]
+            [new("concept:contains", request.ConceptContains)],
+            request.PageNumber,
+            request.PageSize,
+            cancellationToken
         );
-        return _http.GetJsonAsync<CodeSystem>(route, cancellationToken);
     }
 
     public Task<Bundle> SummarizeFhirR4CodeSystemsAsync(
         CancellationToken cancellationToken = default
     ) =>
-        _http.GetJsonAsync<Bundle>(
-            "/terminology/v1/fhir/r4/codesystem?_summary=true",
+        GetBundlePagesAsync(
+            "/terminology/v1/fhir/r4/codesystem",
+            [new("_summary", "true")],
+            null,
+            null,
             cancellationToken
         );
 
     public Task<Bundle> GetFhirR4ConceptMapsAsync(CancellationToken cancellationToken = default) =>
-        _http.GetJsonAsync<Bundle>("/terminology/v1/fhir/r4/conceptmap", cancellationToken);
+        GetBundlePagesAsync(
+            "/terminology/v1/fhir/r4/conceptmap",
+            [],
+            null,
+            null,
+            cancellationToken
+        );
 
     public Task<Parameters> TranslateFhirR4ConceptMapAsync(
         TranslateFhirR4ConceptMapRequest request,
@@ -356,14 +458,13 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        var route = RouteBuilder.Build(
+        return GetBundlePagesAsync(
             "/terminology/v1/fhir/r4/valueset",
-            [
-                new KeyValuePair<string, string?>("extension.scope", request.Scope),
-                new KeyValuePair<string, string?>("_summary", "true"),
-            ]
+            [new("extension.scope", request.Scope), new("_summary", "true")],
+            null,
+            null,
+            cancellationToken
         );
-        return _http.GetJsonAsync<Bundle>(route, cancellationToken);
     }
 
     public Task<ValueSet> SummarizeFhirR4ValueSetAsync(
@@ -389,16 +490,13 @@ public sealed class TerminologyApi : ITerminologyApi
         CancellationToken cancellationToken = default
     )
     {
-        var route = RouteBuilder.Build(
+        return GetBundlePagesAsync(
             "/terminology/v1/fhir/r4/valueset",
-            [
-                new KeyValuePair<string, string?>("name", request.Name),
-                new KeyValuePair<string, string?>("page.num", request.PageNumber?.ToString()),
-                new KeyValuePair<string, string?>("_count", request.PageSize?.ToString()),
-                new KeyValuePair<string, string?>("extension.scope", request.Scope),
-            ]
+            [new("name", request.Name), new("extension.scope", request.Scope)],
+            request.PageNumber,
+            request.PageSize,
+            cancellationToken
         );
-        return _http.GetJsonAsync<Bundle>(route, cancellationToken);
     }
 
     public Task<ValueSet> GetFhirR4ValueSetScopesAsync(

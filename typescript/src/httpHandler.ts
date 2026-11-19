@@ -144,8 +144,11 @@ export class HttpHandler implements IHttpHandler {
   async get(path: string, headers?: { [key: string]: string }): Promise<any> {
     const requestHeaders = this.mergeHeaders(headers);
 
-    const url = this.baseUrl + path;
-    const response = await fetch(url, {
+    const url = /^[a-z][a-z0-9+.-]*:/i.test(path) ? new URL(path) : new URL(this.baseUrl + path);
+    if (url.origin !== new URL(this.baseUrl).origin) {
+      throw new Error("Paging links must use the configured API origin");
+    }
+    const response = await fetch(url.href, {
       method: "GET",
       headers: requestHeaders,
       signal: this.timeoutMs ? AbortSignal.timeout(this.timeoutMs) : undefined,

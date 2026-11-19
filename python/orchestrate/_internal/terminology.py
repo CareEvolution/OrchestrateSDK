@@ -1,6 +1,6 @@
 import sys
-from typing import Any, Callable, Optional, Union, overload
-from urllib.parse import quote
+from typing import Any, Callable, Mapping, Optional, Union, overload
+from urllib.parse import quote, urljoin
 
 from orchestrate._internal.batch import handle_batch_overloaded_request
 from orchestrate._internal.fhir import Parameters
@@ -526,6 +526,74 @@ def _get_pagination_parameters(
 class TerminologyApi:
     def __init__(self, http_handler: HttpHandler) -> None:
         self.__http_handler = http_handler
+
+    def _get_pages(
+        self,
+        path: str,
+        parameters: Mapping[str, Optional[str]],
+        collection: str,
+        page_number: Optional[int],
+        page_size: Optional[int],
+    ) -> Any:
+        if (page_number is None) != (page_size is None):
+            raise ValueError("page_number and page_size must be provided together")
+        automatic = page_number is None and page_size is None
+        if automatic:
+            page_number, page_size = 0, 10000
+        query = {key: value for key, value in parameters.items() if value is not None}
+
+        def fetch_page():
+            return self.__http_handler.get(
+                path=path,
+                parameters={
+                    **query,
+                    **_get_pagination_parameters(page_number, page_size),
+                },
+            )
+
+        result = fetch_page()
+        if not automatic:
+            return result
+
+        page = result
+        if collection == "entry":
+            next_link = next(
+                (
+                    link["url"]
+                    for link in page.get("link", [])
+                    if link.get("relation") == "next"
+                ),
+                None,
+            )
+            while next_link:
+                path = urljoin(path, next_link)
+                page = self.__http_handler.get(path=path)
+                result.setdefault("entry", []).extend(page.get("entry", []))
+                next_link = next(
+                    (
+                        link["url"]
+                        for link in page.get("link", [])
+                        if link.get("relation") == "next"
+                    ),
+                    None,
+                )
+        else:
+            assert page_number is not None
+            total = result.get("count")
+            while page.get("concept") and (
+                total is None or len(result["concept"]) < total
+            ):
+                page_number += 1
+                page = fetch_page()
+                result["concept"].extend(page.get("concept", []))
+        if "link" in result:
+            result["link"] = [
+                link
+                for link in result["link"]
+                if link.get("relation")
+                not in ("self", "next", "prev", "previous", "first", "last")
+            ]
+        return result
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(base_url={self.__http_handler.base_url!r})"
@@ -1311,13 +1379,12 @@ class TerminologyApi:
 
         <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
-        parameters = _get_pagination_parameters(page_number, page_size)
-        if concept_contains is not None:
-            parameters["concept:contains"] = concept_contains
-
-        return self.__http_handler.get(
-            path=f"/terminology/v1/fhir/r4/codesystem/{code_system}",
-            parameters=parameters,
+        return self._get_pages(
+            f"/terminology/v1/fhir/r4/codesystem/{quote(code_system, safe='')}",
+            {"concept:contains": concept_contains},
+            "concept",
+            page_number,
+            page_size,
         )
 
     def summarize_fhir_r4_code_systems(self) -> SummarizeFhirR4CodeSystemsResponse:
@@ -1332,8 +1399,12 @@ class TerminologyApi:
 
         <https://rosetta-api.docs.careevolution.com/fhir/codesystem.html>
         """
-        return self.__http_handler.get(
-            path="/terminology/v1/fhir/r4/codesystem", parameters={"_summary": "true"}
+        return self._get_pages(
+            "/terminology/v1/fhir/r4/codesystem",
+            {"_summary": "true"},
+            "entry",
+            None,
+            None,
         )
 
     def get_fhir_r4_concept_maps(
@@ -1352,7 +1423,13 @@ class TerminologyApi:
 
         <https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html>
         """
-        return self.__http_handler.get(path=f"/terminology/v1/fhir/r4/conceptmap")
+        return self._get_pages(
+            "/terminology/v1/fhir/r4/conceptmap",
+            {},
+            "entry",
+            page_number,
+            page_size,
+        )
 
     def translate_fhir_r4_concept_map(
         self,
@@ -1414,9 +1491,12 @@ class TerminologyApi:
             "extension.scope": scope,
             "_summary": "true",
         }
-        return self.__http_handler.get(
-            path="/terminology/v1/fhir/r4/valueset",
-            parameters=parameters,
+        return self._get_pages(
+            "/terminology/v1/fhir/r4/valueset",
+            parameters,
+            "entry",
+            None,
+            None,
         )
 
     def get_fhir_r4_value_set(
@@ -1508,13 +1588,15 @@ class TerminologyApi:
         <https://rosetta-api.docs.careevolution.com/fhir/valueset.html>
         """
         parameters = {
-            **_get_pagination_parameters(page_number, page_size),
             "name": name,
             "extension.scope": scope,
         }
-        return self.__http_handler.get(
-            path=f"/terminology/v1/fhir/r4/valueset",
-            parameters=parameters,
+        return self._get_pages(
+            "/terminology/v1/fhir/r4/valueset",
+            parameters,
+            "entry",
+            page_number,
+            page_size,
         )
 
     def summarize_fhir_r4_code_system(

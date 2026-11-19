@@ -281,11 +281,14 @@ type CodeSystems = readonly [
   "X12ClaimAdjustmentReasonCodes",
 ];
 
-export type GetFhirR4CodeSystemRequest = {
-  codeSystem: CodeSystems[number];
-  conceptContains?: string;
+type PaginationRequest = {
   pageNumber?: number;
   pageSize?: number;
+};
+
+export type GetFhirR4CodeSystemRequest = PaginationRequest & {
+  codeSystem: CodeSystems[number];
+  conceptContains?: string;
 };
 
 export type SummarizeFhirR4CodeSystemRequest = {
@@ -486,11 +489,9 @@ export type ClassifyFhirR4ValueSetMembershipRequest = Parameters & {
 
 export type ClassifyFhirR4ValueSetMembershipResponse = Parameters;
 
-export type GetFhirR4ValueSetsByScopeRequest = {
+export type GetFhirR4ValueSetsByScopeRequest = PaginationRequest & {
   name?: string;
   scope?: string;
-  pageNumber?: number;
-  pageSize?: number;
 };
 
 export type GetFhirR4ValueSetsByScopeResponse = Bundle<ValueSet>;
@@ -503,6 +504,63 @@ export class TerminologyApi {
 
   constructor(httpHandler: IHttpHandler) {
     this.httpHandler = httpHandler;
+  }
+
+  private async getPages<
+    T extends {
+      entry?: unknown[];
+      concept?: unknown[];
+      total?: number;
+      count?: number;
+      link?: { relation: string; url: string }[];
+    },
+  >(
+    path: string,
+    parameters: URLSearchParams,
+    request: PaginationRequest,
+    collection: "entry" | "concept",
+  ): Promise<T> {
+    if ((request.pageNumber === undefined) !== (request.pageSize === undefined)) {
+      throw new Error("pageNumber and pageSize must be provided together");
+    }
+    const automatic = request.pageNumber === undefined && request.pageSize === undefined;
+    let pageNumber = automatic ? 0 : request.pageNumber;
+    const pageSize = automatic ? 10000 : request.pageSize;
+    const fetchPage = () => {
+      if (pageNumber !== undefined) parameters.set("page.num", String(pageNumber));
+      if (pageSize !== undefined) parameters.set("_count", String(pageSize));
+      return this.httpHandler.get<T>(`${path}?${parameters.toString()}`);
+    };
+    const result = await fetchPage();
+    let route = `${path}?${parameters.toString()}`;
+    if (!automatic) return result;
+
+    let page = result;
+    if (collection === "entry") {
+      let next = page.link?.find((link) => link.relation === "next")?.url;
+      while (next) {
+        const resolved = new URL(next, new URL(route, "https://relative.invalid"));
+        route = resolved.origin === "https://relative.invalid" ? resolved.pathname + resolved.search : resolved.href;
+        page = await this.httpHandler.get<T>(route);
+        (result.entry ??= []).push(...(page.entry ?? []));
+        next = page.link?.find((link) => link.relation === "next")?.url;
+      }
+    } else {
+      while (
+        (page.concept?.length ?? 0) > 0 &&
+        (result.count === undefined || (result.concept?.length ?? 0) < result.count)
+      ) {
+        pageNumber = (pageNumber ?? 0) + 1;
+        page = await fetchPage();
+        result.concept!.push(...(page.concept ?? []));
+      }
+    }
+    if (result.link) {
+      result.link = result.link.filter(
+        (link) => ["self", "next", "prev", "previous", "first", "last"].indexOf(link.relation) === -1,
+      );
+    }
+    return result;
   }
 
   handleBatchOverload<TIn, TOut>(url: string, request: TIn): Promise<TOut> {
@@ -729,22 +787,16 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/fhir/codesystem.html
    */
   getFhirR4CodeSystem(request: GetFhirR4CodeSystemRequest): Promise<GetFhirR4CodeSystemResponse> {
-    const urlParameters = new URLSearchParams();
-    if (request.pageNumber) {
-      urlParameters.append("page.num", request.pageNumber.toString());
-    }
-    if (request.pageSize) {
-      urlParameters.append("_count", request.pageSize.toString());
-    }
+    const parameters = new URLSearchParams();
     if (request.conceptContains) {
-      urlParameters.append("concept:contains", request.conceptContains);
+      parameters.set("concept:contains", request.conceptContains);
     }
-    let route = `/terminology/v1/fhir/r4/codesystem/${request.codeSystem}`;
-    const urlParametersString = urlParameters.toString();
-    if (urlParametersString) {
-      route += `?${urlParametersString}`;
-    }
-    return this.httpHandler.get(route);
+    return this.getPages(
+      `/terminology/v1/fhir/r4/codesystem/${encodeURIComponent(request.codeSystem)}`,
+      parameters,
+      request,
+      "concept",
+    );
   }
 
   /**
@@ -753,7 +805,7 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/fhir/codesystem.html
    */
   summarizeFhirR4CodeSystems(): Promise<SummarizeFhirR4CodeSystemsResponse> {
-    return this.httpHandler.get("/terminology/v1/fhir/r4/codesystem?_summary=true");
+    return this.getPages("/terminology/v1/fhir/r4/codesystem", new URLSearchParams({ _summary: "true" }), {}, "entry");
   }
 
   /**
@@ -762,7 +814,7 @@ export class TerminologyApi {
    * @link https://rosetta-api.docs.careevolution.com/fhir/conceptmap.html
    */
   getFhirR4ConceptMaps(): Promise<GetFhirR4ConceptMapResponse> {
-    return this.httpHandler.get("/terminology/v1/fhir/r4/conceptmap");
+    return this.getPages("/terminology/v1/fhir/r4/conceptmap", new URLSearchParams(), {}, "entry");
   }
 
   /**
@@ -791,8 +843,7 @@ export class TerminologyApi {
       "extension.scope": request.scope,
       _summary: "true",
     });
-    const route = `/terminology/v1/fhir/r4/valueset?${params.toString()}`;
-    return this.httpHandler.get(route);
+    return this.getPages("/terminology/v1/fhir/r4/valueset", params, {}, "entry");
   }
 
   /**
@@ -831,17 +882,10 @@ export class TerminologyApi {
     if (request.name) {
       parameters.append("name", request.name);
     }
-    if (request.pageNumber) {
-      parameters.append("page.num", request.pageNumber.toString());
-    }
-    if (request.pageSize) {
-      parameters.append("_count", request.pageSize.toString());
-    }
     if (request.scope) {
       parameters.append("extension.scope", request.scope);
     }
-    const route = `/terminology/v1/fhir/r4/valueset?${parameters.toString()}`;
-    return this.httpHandler.get(route);
+    return this.getPages("/terminology/v1/fhir/r4/valueset", parameters, request, "entry");
   }
 
   /**

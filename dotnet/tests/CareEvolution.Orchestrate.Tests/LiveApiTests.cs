@@ -869,7 +869,7 @@ public sealed class LiveApiTests : IDisposable
             new SummarizeFhirR4ValueSetScopeRequest { Scope = "http://loinc.org" }
         );
         Assert.NotEmpty(result.Entry);
-        Assert.True(result.Entry.Count <= 10000);
+        Assert.Equal(result.Total, result.Entry.Count);
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
@@ -906,13 +906,13 @@ public sealed class LiveApiTests : IDisposable
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]
-    public async Task GetFhirR4ValueSetsByScopeWithoutPaginationShouldRaise()
+    public async Task GetFhirR4ValueSetsByScopeWithoutPaginationShouldReturnAllEntries()
     {
-        await Assert.ThrowsAsync<OrchestrateClientException>(() =>
-            _api.Terminology.GetFhirR4ValueSetsByScopeAsync(
-                new GetFhirR4ValueSetsByScopeRequest { Scope = "http://loinc.org" }
-            )
+        var result = await _api.Terminology.GetFhirR4ValueSetsByScopeAsync(
+            new GetFhirR4ValueSetsByScopeRequest { Scope = "http://loinc.org" }
         );
+        Assert.NotEmpty(result.Entry);
+        Assert.Equal(result.Total, result.Entry.Count);
     }
 
     [LiveFact(LiveTestEnvironment.OrchestrateApiKey)]

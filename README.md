@@ -74,6 +74,14 @@ var services = new ServiceCollection();
 services.AddOrchestrateApi();
 ```
 
+### Pagination
+
+CodeSystem contents, CodeSystem summaries, ConceptMaps, ValueSets by scope, and ValueSet scope summaries retrieve all results automatically. Bundle responses follow the server's `next` links until none remains. CodeSystem contents use numbered pages internally. The SDK combines the concepts or entries into a single response and propagates errors rather than returning partial results.
+
+Existing page-number and page-size options remain available for CodeSystem contents and ValueSets by scope in all three clients, and for ConceptMaps in Python. Supply both to return one page; supply neither to retrieve all results. Supplying only one raises an argument error before HTTP. Page numbers start at 0.
+
+Automatic retrieval preserves resource metadata, removes page navigation links from the combined Bundle, and follows continuation URLs on the configured API origin.
+
 ## Configuration
 
 The SDK supports environment variables for configuring HTTP behavior. These can be used for local development, CI, or shared runtime configuration.

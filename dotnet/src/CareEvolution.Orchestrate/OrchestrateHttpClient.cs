@@ -303,6 +303,23 @@ internal sealed class OrchestrateHttpClient(
 
     private Uri BuildUri(string path)
     {
+        if (
+            !path.StartsWith("/", StringComparison.Ordinal)
+            && Uri.TryCreate(path, UriKind.Absolute, out var absolute)
+        )
+        {
+            var configured = new Uri(_configuration.BaseUrl);
+            if (
+                absolute.Scheme != configured.Scheme
+                || absolute.Host != configured.Host
+                || absolute.Port != configured.Port
+            )
+                throw new ArgumentException(
+                    "Paging links must use the configured API origin",
+                    nameof(path)
+                );
+            return absolute;
+        }
         var normalizedBaseUrl = _configuration.BaseUrl.TrimEnd('/');
         var normalizedPath = path.StartsWith("/", StringComparison.Ordinal) ? path : $"/{path}";
         return new Uri($"{normalizedBaseUrl}{normalizedPath}", UriKind.Absolute);

@@ -766,7 +766,7 @@ describe("summarize fhir r4 value set scope", () => {
     expect(result).toBeDefined();
     expect(result.resourceType).toBe("Bundle");
     expect(result.entry?.length).toBeGreaterThan(0);
-    expect(result.entry?.length).toBeLessThanOrEqual(10000);
+    expect(result.entry).toHaveLength(result.total!);
   }, 10000);
 });
 
@@ -801,12 +801,11 @@ describe("get fhir r4 value set scopes", () => {
 });
 
 describe("get fhir r4 value set by scope", () => {
-  it("should throw without pagination", async () => {
-    await expect(
-      orchestrate.terminology.getFhirR4ValueSetsByScope({
-        scope: "http://loinc.org",
-      }),
-    ).rejects.toThrow();
+  it("should return all entries without pagination", async () => {
+    const result = await orchestrate.terminology.getFhirR4ValueSetsByScope({ scope: "http://loinc.org" });
+    expect(result.resourceType).toBe("Bundle");
+    expect(result.entry?.length).toBeGreaterThan(0);
+    expect(result.entry).toHaveLength(result.total!);
   });
 
   it("should return a bundle with page and scope", async () => {

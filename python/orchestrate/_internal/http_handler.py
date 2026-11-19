@@ -1,5 +1,6 @@
 import json
 import os
+from urllib.parse import urlsplit
 from ctypes import ArgumentError
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional, Union
@@ -207,7 +208,22 @@ class HttpHandler:
     ) -> Any:
         request_headers = self.__merge_headers(headers)
 
-        url = f"{self.base_url}{path}"
+        url = path if urlsplit(path).scheme else f"{self.base_url}{path}"
+        base, target = urlsplit(self.base_url), urlsplit(url)
+
+        def origin(parsed):
+            return (
+                parsed.scheme.lower(),
+                parsed.hostname,
+                (
+                    parsed.port
+                    if parsed.port is not None
+                    else (443 if parsed.scheme.lower() == "https" else 80)
+                ),
+            )
+
+        if origin(target) != origin(base):
+            raise ValueError("Paging links must use the configured API origin")
         response = requests.get(
             url,
             headers=request_headers,
