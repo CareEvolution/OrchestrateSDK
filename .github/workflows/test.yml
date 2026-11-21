@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - name: Install Python
         id: setup-python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Poetry
@@ -149,7 +149,7 @@ jobs:
           }
           "ORCHESTRATE_API_KEY=${{ secrets.ORCHESTRATE_API_KEY }}" | Out-File -FilePath ./.env -Encoding utf8
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0 # v5.2.0
+        uses: actions/setup-dotnet@v6.1.0 # v5.2.0
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Restore dotnet tools
