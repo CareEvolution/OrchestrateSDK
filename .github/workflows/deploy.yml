@@ -103,7 +103,7 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - name: Install Python
         id: setup-python
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: "3.14"
       - name: Install Poetry
@@ -178,7 +178,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6.0.0 # v5.2.0
+        uses: actions/setup-dotnet@v6.1.0 # v5.2.0
         with:
           dotnet-version: |
             8.0.x

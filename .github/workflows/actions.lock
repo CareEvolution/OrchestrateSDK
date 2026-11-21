@@ -5,15 +5,15 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/deploy.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-dotnet@v6.0.0'
+        - 'actions/setup-dotnet@v6.1.0'
         - 'actions/setup-node@v7.1.0'
-        - 'actions/setup-python@v7.0.0'
+        - 'actions/setup-python@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
     '.github/workflows/test.yml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-dotnet@v6.0.0'
+        - 'actions/setup-dotnet@v6.1.0'
         - 'actions/setup-node@v7.1.0'
-        - 'actions/setup-python@v7.0.0'
+        - 'actions/setup-python@v7.1.0'
     '.github/workflows/verify-lockfile.yml':
         - 'actions/checkout@v7.0.1'
 dependencies:
@@ -22,9 +22,9 @@ dependencies:
         commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/setup-dotnet@v6.0.0':
-        ref: 'v6.0.0'
-        commit: 'sha1-a98b56852c35b8e3190ac28c8c2271da59106c68'
+    'actions/setup-dotnet@v6.1.0':
+        ref: 'v6.1.0'
+        commit: 'sha1-0f4a354dd5547a28c70b7853dbd95d5b67886e73'
         owner_id: 44036562
         repo_id: 192625306
     'actions/setup-node@v7.1.0':
@@ -32,9 +32,9 @@ dependencies:
         commit: 'sha1-949feb2413d6458794dcd2491c4babbbce0c15c1'
         owner_id: 44036562
         repo_id: 189476904
-    'actions/setup-python@v7.0.0':
-        ref: 'v7.0.0'
-        commit: 'sha1-5fda3b95a4ea91299a34e894583c3862153e4b97'
+    'actions/setup-python@v7.1.0':
+        ref: 'v7.1.0'
+        commit: 'sha1-6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
         owner_id: 44036562
         repo_id: 192625525
     'actions/upload-artifact@v7.0.2':
